@@ -27,6 +27,7 @@ public class ThreadContextImpl implements ThreadContext {
 	//
 	// Wrappers
 	
+	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
 	public <T> CompletableFuture<T> withCurrentContext(CompletableFuture<T> future){
 		return withContext(context.captureContext(), future);
 	}
@@ -35,6 +36,7 @@ public class ThreadContextImpl implements ThreadContext {
 		return new CompletableFutureWrapper<>(this, state, future);
 	}
 
+	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
 	public <T> CompletionStage<T> withCurrentContext(CompletionStage<T> future){
 		return withContext(context.captureContext(), future);
 	}
