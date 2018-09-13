@@ -7,15 +7,20 @@ import java.util.Map;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
 
+import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
+
 public class CapturedContextState {
 
 	private List<ThreadContextSnapshot> threadContext = new LinkedList<>();
 	private SmallRyeConcurrencyManager context;
 	
-	CapturedContextState(SmallRyeConcurrencyManager context, List<ThreadContextProvider> providers, Map<String, String> props){
+	CapturedContextState(SmallRyeConcurrencyManager context, ThreadContextProviderPlan plan, Map<String, String> props){
 		this.context = context;
-		for (ThreadContextProvider provider : providers) {
+		for (ThreadContextProvider provider : plan.propagatedProviders) {
 			threadContext.add(provider.currentContext(props));
+		}
+		for (ThreadContextProvider provider : plan.clearedProviders) {
+			threadContext.add(provider.defaultContext(props));
 		}
 	}
 	

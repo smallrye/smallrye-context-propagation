@@ -19,10 +19,13 @@ import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 public class ThreadContextImpl implements ThreadContext {
 
 	private SmallRyeConcurrencyManager manager;
+	private String[] unchanged;
+	private String[] propagated;
 
 	public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged) {
 		this.manager = manager;
-		// FIXME: deal with propagated/unchanged
+		this.propagated = propagated;
+		this.unchanged = unchanged;
 	}
 
 	//
@@ -34,7 +37,7 @@ public class ThreadContextImpl implements ThreadContext {
 	}
 
 	<T> CompletableFuture<T> withCurrentContext(CompletableFuture<T> future, ManagedExecutor executor){
-		return withContext(manager.captureContext(), future, executor);
+		return withContext(manager.captureContext(propagated, unchanged), future, executor);
 	}
 
 	<T> CompletableFuture<T> withContext(CapturedContextState state, CompletableFuture<T> future, ManagedExecutor executor){
@@ -43,7 +46,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
 	public <T> CompletionStage<T> withCurrentContext(CompletionStage<T> future){
-		return withContext(manager.captureContext(), future);
+		return withContext(manager.captureContext(propagated, unchanged), future);
 	}
 
 	<T> CompletionStage<T> withContext(CapturedContextState state, CompletionStage<T> future){
@@ -52,7 +55,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, U> BiConsumer<T, U> withCurrentContext(BiConsumer<T, U> consumer) {
-		return withContext(manager.captureContext(), consumer);
+		return withContext(manager.captureContext(propagated, unchanged), consumer);
 	}
 
 	<T, U> BiConsumer<T, U> withContext(CapturedContextState state, BiConsumer<T, U> consumer) {
@@ -68,7 +71,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, U, R> BiFunction<T, U, R> withCurrentContext(BiFunction<T, U, R> function) {
-		return withContext(manager.captureContext(), function);
+		return withContext(manager.captureContext(propagated, unchanged), function);
 	}
 
 	<T, U, R> BiFunction<T, U, R> withContext(CapturedContextState state, BiFunction<T, U, R> function) {
@@ -84,7 +87,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <R> Callable<R> withCurrentContext(Callable<R> callable) {
-		return withContext(manager.captureContext(), callable);
+		return withContext(manager.captureContext(propagated, unchanged), callable);
 	}
 
 	<R> Callable<R> withContext(CapturedContextState state, Callable<R> callable) {
@@ -100,7 +103,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T> Consumer<T> withCurrentContext(Consumer<T> consumer) {
-		return withContext(manager.captureContext(), consumer);
+		return withContext(manager.captureContext(propagated, unchanged), consumer);
 	}
 	
 	<T> Consumer<T> withContext(CapturedContextState state, Consumer<T> consumer) {
@@ -116,7 +119,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, R> Function<T, R> withCurrentContext(Function<T, R> function) {
-		return withContext(manager.captureContext(), function);
+		return withContext(manager.captureContext(propagated, unchanged), function);
 	}
 
 	<T, R> Function<T, R> withContext(CapturedContextState state, Function<T, R> function) {
@@ -132,7 +135,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public Runnable withCurrentContext(Runnable runnable) {
-		return withContext(manager.captureContext(), runnable);
+		return withContext(manager.captureContext(propagated, unchanged), runnable);
 	}
 	
 	Runnable withContext(CapturedContextState state, Runnable runnable) {
@@ -148,7 +151,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <R> Supplier<R> withCurrentContext(Supplier<R> supplier) {
-		return withContext(manager.captureContext(), supplier);
+		return withContext(manager.captureContext(propagated, unchanged), supplier);
 	}
 
 	<R> Supplier<R> withContext(CapturedContextState state, Supplier<R> supplier) {

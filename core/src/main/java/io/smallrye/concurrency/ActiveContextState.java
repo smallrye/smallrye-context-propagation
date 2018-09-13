@@ -21,8 +21,9 @@ public class ActiveContextState {
 
 	public void endContext() {
 		SmallRyeConcurrencyProvider.setLocalManager(previousContext);
-		for (ThreadContextController activeThreadContext : activeContext) {
-			activeThreadContext.endContext();
+		// restore in reverse order
+		for (int i = activeContext.size() - 1 ; i >= 0 ; i--) {
+			activeContext.get(i).endContext();
 		}
 	}
 }
