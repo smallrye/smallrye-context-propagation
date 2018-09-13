@@ -23,7 +23,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
 
 	@Override
 	public CompletableFuture<T> toCompletableFuture() {
-		return context.withContext(state, f.toCompletableFuture());
+		// FIXME: propagate an executor too here?
+		return context.withContext(state, f.toCompletableFuture(), null);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import org.eclipse.microprofile.concurrent.ThreadContextBuilder;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProviderRegistration;
 
+import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 
 public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
@@ -26,8 +27,7 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
 	
 	@Override
 	public ManagedExecutorBuilder newManagedExecutorBuilder() {
-		// TODO implement
-		return null;
+		return new ManagedExecutorBuilderImpl(getManager());
 	}
 
 	@Override

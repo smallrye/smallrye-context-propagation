@@ -9,15 +9,15 @@ public class ThreadContextBuilderImpl implements ThreadContextBuilder {
 
 	private String[] propagated;
 	private String[] unchanged;
-	private SmallRyeConcurrencyManager context;
+	private SmallRyeConcurrencyManager manager;
 
-	public ThreadContextBuilderImpl(SmallRyeConcurrencyManager context) {
-		this.context = context;
+	public ThreadContextBuilderImpl(SmallRyeConcurrencyManager manager) {
+		this.manager = manager;
 	}
 
 	@Override
 	public ThreadContext build() {
-		return new ThreadContextImpl(context, propagated, unchanged);
+		return new ThreadContextImpl(manager, propagated, unchanged);
 	}
 
 	@Override

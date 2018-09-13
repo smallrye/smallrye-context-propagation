@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
 
 import io.smallrye.concurrency.ActiveContextState;
@@ -17,10 +18,10 @@ import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 
 public class ThreadContextImpl implements ThreadContext {
 
-	private SmallRyeConcurrencyManager context;
+	private SmallRyeConcurrencyManager manager;
 
-	public ThreadContextImpl(SmallRyeConcurrencyManager context, String[] propagated, String[] unchanged) {
-		this.context = context;
+	public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged) {
+		this.manager = manager;
 		// FIXME: deal with propagated/unchanged
 	}
 
@@ -29,16 +30,20 @@ public class ThreadContextImpl implements ThreadContext {
 	
 	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
 	public <T> CompletableFuture<T> withCurrentContext(CompletableFuture<T> future){
-		return withContext(context.captureContext(), future);
+		return withCurrentContext(future, null);
 	}
 
-	<T> CompletableFuture<T> withContext(CapturedContextState state, CompletableFuture<T> future){
-		return new CompletableFutureWrapper<>(this, state, future);
+	<T> CompletableFuture<T> withCurrentContext(CompletableFuture<T> future, ManagedExecutor executor){
+		return withContext(manager.captureContext(), future, executor);
+	}
+
+	<T> CompletableFuture<T> withContext(CapturedContextState state, CompletableFuture<T> future, ManagedExecutor executor){
+		return new CompletableFutureWrapper<>(this, state, future, executor);
 	}
 
 	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
 	public <T> CompletionStage<T> withCurrentContext(CompletionStage<T> future){
-		return withContext(context.captureContext(), future);
+		return withContext(manager.captureContext(), future);
 	}
 
 	<T> CompletionStage<T> withContext(CapturedContextState state, CompletionStage<T> future){
@@ -47,7 +52,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, U> BiConsumer<T, U> withCurrentContext(BiConsumer<T, U> consumer) {
-		return withContext(context.captureContext(), consumer);
+		return withContext(manager.captureContext(), consumer);
 	}
 
 	<T, U> BiConsumer<T, U> withContext(CapturedContextState state, BiConsumer<T, U> consumer) {
@@ -63,7 +68,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, U, R> BiFunction<T, U, R> withCurrentContext(BiFunction<T, U, R> function) {
-		return withContext(context.captureContext(), function);
+		return withContext(manager.captureContext(), function);
 	}
 
 	<T, U, R> BiFunction<T, U, R> withContext(CapturedContextState state, BiFunction<T, U, R> function) {
@@ -79,7 +84,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <R> Callable<R> withCurrentContext(Callable<R> callable) {
-		return withContext(context.captureContext(), callable);
+		return withContext(manager.captureContext(), callable);
 	}
 
 	<R> Callable<R> withContext(CapturedContextState state, Callable<R> callable) {
@@ -95,7 +100,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T> Consumer<T> withCurrentContext(Consumer<T> consumer) {
-		return withContext(context.captureContext(), consumer);
+		return withContext(manager.captureContext(), consumer);
 	}
 	
 	<T> Consumer<T> withContext(CapturedContextState state, Consumer<T> consumer) {
@@ -111,7 +116,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, R> Function<T, R> withCurrentContext(Function<T, R> function) {
-		return withContext(context.captureContext(), function);
+		return withContext(manager.captureContext(), function);
 	}
 
 	<T, R> Function<T, R> withContext(CapturedContextState state, Function<T, R> function) {
@@ -127,7 +132,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public Runnable withCurrentContext(Runnable runnable) {
-		return withContext(context.captureContext(), runnable);
+		return withContext(manager.captureContext(), runnable);
 	}
 	
 	Runnable withContext(CapturedContextState state, Runnable runnable) {
@@ -143,7 +148,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <R> Supplier<R> withCurrentContext(Supplier<R> supplier) {
-		return withContext(context.captureContext(), supplier);
+		return withContext(manager.captureContext(), supplier);
 	}
 
 	<R> Supplier<R> withContext(CapturedContextState state, Supplier<R> supplier) {
