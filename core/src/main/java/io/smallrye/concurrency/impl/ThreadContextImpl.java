@@ -3,6 +3,7 @@ package io.smallrye.concurrency.impl;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -51,6 +52,22 @@ public class ThreadContextImpl implements ThreadContext {
 
 	<T> CompletionStage<T> withContext(CapturedContextState state, CompletionStage<T> future){
 		return new CompletionStageWrapper<>(this, state, future);
+	}
+
+	@Override
+	public Executor withCurrentContext() {
+		return withContext(manager.captureContext(propagated, unchanged));
+	}
+
+	Executor withContext(CapturedContextState state) {
+		return (runnable) -> {
+			ActiveContextState activeState = state.begin();
+			try {
+				runnable.run();
+			}finally {
+				activeState.endContext();
+			}
+		};
 	}
 
 	@Override

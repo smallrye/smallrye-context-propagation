@@ -10,7 +10,7 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutorBuilder {
 	private SmallRyeConcurrencyManager manager;
 	private int maxAsync;
 	private int maxQueued;
-	private String[] context;
+	private String[] propagated;
 
 	public ManagedExecutorBuilderImpl(SmallRyeConcurrencyManager manager) {
 		this.manager = manager;
@@ -18,12 +18,12 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutorBuilder {
 
 	@Override
 	public ManagedExecutor build() {
-		return new ManagedExecutorImpl(maxAsync, maxQueued, new ThreadContextImpl(manager, context, null));
+		return new ManagedExecutorImpl(maxAsync, maxQueued, new ThreadContextImpl(manager, propagated, null));
 	}
 
 	@Override
-	public ManagedExecutorBuilder context(String... types) {
-		this.context = types;
+	public ManagedExecutorBuilder propagated(String... types) {
+		this.propagated = types;
 		return this;
 	}
 

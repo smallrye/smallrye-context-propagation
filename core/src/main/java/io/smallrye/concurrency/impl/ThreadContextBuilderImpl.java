@@ -21,7 +21,7 @@ public class ThreadContextBuilderImpl implements ThreadContextBuilder {
 	}
 
 	@Override
-	public ThreadContextBuilder propagate(String... types) {
+	public ThreadContextBuilder propagated(String... types) {
 		propagated = types;
 		return this;
 	}
