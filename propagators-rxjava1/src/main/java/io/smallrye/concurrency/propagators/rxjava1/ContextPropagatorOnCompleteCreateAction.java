@@ -1,8 +1,9 @@
 package io.smallrye.concurrency.propagators.rxjava1;
 
-import io.smallrye.concurrency.ActiveContextState;
-import io.smallrye.concurrency.CapturedContextState;
-import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
+import java.util.concurrent.Executor;
+
+import org.eclipse.microprofile.concurrent.ThreadContext;
+
 import rx.Completable.OnSubscribe;
 import rx.CompletableSubscriber;
 import rx.Subscription;
@@ -10,71 +11,57 @@ import rx.functions.Func1;
 
 public class ContextPropagatorOnCompleteCreateAction implements Func1<OnSubscribe, OnSubscribe> {
 
+	private ThreadContext threadContext;
+
+	public ContextPropagatorOnCompleteCreateAction(ThreadContext threadContext) {
+		this.threadContext = threadContext;
+	}
+
 	@Override
 	public OnSubscribe call(OnSubscribe t) {
-		return new ContextCapturerCompletable(t);
+		return new ContextCapturerCompletable(t, threadContext.withCurrentContext());
 	}
 
 	final static class ContextCapturerCompletable implements OnSubscribe {
 
 	    final OnSubscribe source;
 
-		private CapturedContextState capturedContext;
+		private Executor contextExecutor;
 
-	    public ContextCapturerCompletable(OnSubscribe source) {
+	    public ContextCapturerCompletable(OnSubscribe source, Executor contextExecutor) {
 	        this.source = source;
-	        capturedContext = SmallRyeConcurrencyProvider.captureContext();
+	        this.contextExecutor = contextExecutor;
 	    }
 
 	    @Override
 	    public void call(CompletableSubscriber t) {
-        	ActiveContextState activeContext = capturedContext.begin();
-			try {
-	    		source.call(new OnAssemblyCompletableSubscriber(t, capturedContext));
-			}finally {
-				activeContext.endContext();
-			}
+	    	contextExecutor.execute(() -> source.call(new OnAssemblyCompletableSubscriber(t, contextExecutor)));
 	    }
 
 	    static final class OnAssemblyCompletableSubscriber implements CompletableSubscriber {
 
 	        final CompletableSubscriber actual;
-			private final CapturedContextState capturedContext;
+			private Executor contextExecutor;
 
 
-	        public OnAssemblyCompletableSubscriber(CompletableSubscriber actual, CapturedContextState capturedContext) {
+	        public OnAssemblyCompletableSubscriber(CompletableSubscriber actual, Executor contextExecutor) {
 	            this.actual = actual;
-	            this.capturedContext = capturedContext;
+		        this.contextExecutor = contextExecutor;
 	        }
 
 	        @Override
 	        public void onError(Throwable e) {
-	        	ActiveContextState activeContext = capturedContext.begin();
-				try {
-					actual.onError(e);
-				}finally {
-					activeContext.endContext();
-				}
+	        	contextExecutor.execute(() -> actual.onError(e));
 	        }
 
 	        @Override
 	        public void onCompleted() {
-	        	ActiveContextState activeContext = capturedContext.begin();
-				try {
-					actual.onCompleted();
-				}finally {
-					activeContext.endContext();
-				}
+	        	contextExecutor.execute(() -> actual.onCompleted());
 	        }
 
 			@Override
 			public void onSubscribe(Subscription d) {
-				ActiveContextState activeContext = capturedContext.begin();
-				try {
-					actual.onSubscribe(d);
-				}finally {
-					activeContext.endContext();
-				}
+				contextExecutor.execute(() -> actual.onSubscribe(d));
 			}
 	    }
 	}

@@ -35,10 +35,6 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
 		return new ThreadContextBuilderImpl(getManager());
 	}
 	
-	public static CapturedContextState captureContext() {
-		return getManager().captureContext();
-	}
-
 	public static SmallRyeConcurrencyManager getManager() {
 		SmallRyeConcurrencyManager ret = localManager.get();
 		if(ret != null)

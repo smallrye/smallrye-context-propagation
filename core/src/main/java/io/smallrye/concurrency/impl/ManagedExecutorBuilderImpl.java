@@ -14,11 +14,12 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutorBuilder {
 
 	public ManagedExecutorBuilderImpl(SmallRyeConcurrencyManager manager) {
 		this.manager = manager;
+		propagated = manager.getAllProviderTypes();
 	}
 
 	@Override
 	public ManagedExecutor build() {
-		return new ManagedExecutorImpl(maxAsync, maxQueued, new ThreadContextImpl(manager, propagated, null));
+		return new ManagedExecutorImpl(maxAsync, maxQueued, new ThreadContextImpl(manager, propagated, SmallRyeConcurrencyManager.NO_STRING));
 	}
 
 	@Override

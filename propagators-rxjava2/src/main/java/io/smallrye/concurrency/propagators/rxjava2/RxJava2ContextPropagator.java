@@ -1,5 +1,7 @@
 package io.smallrye.concurrency.propagators.rxjava2;
 
+import org.eclipse.microprofile.concurrent.ThreadContext;
+
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Maybe;
@@ -16,18 +18,18 @@ import io.smallrye.concurrency.spi.ThreadContextPropagator;
  */
 public class RxJava2ContextPropagator implements ThreadContextPropagator {
 
-	public void setup() {
-		RxJavaPlugins.setOnSingleSubscribe(new ContextPropagatorOnSingleCreateAction());
-		RxJavaPlugins.setOnCompletableSubscribe(new ContextPropagatorOnCompletableCreateAction());
-		RxJavaPlugins.setOnFlowableSubscribe(new ContextPropagatorOnFlowableCreateAction());
-		RxJavaPlugins.setOnMaybeSubscribe(new ContextPropagatorOnMaybeCreateAction());
-		RxJavaPlugins.setOnObservableSubscribe(new ContextPropagatorOnObservableCreateAction());
+	public void setup(ThreadContext threadContext) {
+		RxJavaPlugins.setOnSingleSubscribe(new ContextPropagatorOnSingleCreateAction(threadContext));
+		RxJavaPlugins.setOnCompletableSubscribe(new ContextPropagatorOnCompletableCreateAction(threadContext));
+		RxJavaPlugins.setOnFlowableSubscribe(new ContextPropagatorOnFlowableCreateAction(threadContext));
+		RxJavaPlugins.setOnMaybeSubscribe(new ContextPropagatorOnMaybeCreateAction(threadContext));
+		RxJavaPlugins.setOnObservableSubscribe(new ContextPropagatorOnObservableCreateAction(threadContext));
 		
-		RxJavaPlugins.setOnSingleAssembly(new ContextPropagatorOnSingleAssemblyAction());
-		RxJavaPlugins.setOnCompletableAssembly(new ContextPropagatorOnCompletableAssemblyAction());
-		RxJavaPlugins.setOnFlowableAssembly(new ContextPropagatorOnFlowableAssemblyAction());
-		RxJavaPlugins.setOnMaybeAssembly(new ContextPropagatorOnMaybeAssemblyAction());
-		RxJavaPlugins.setOnObservableAssembly(new ContextPropagatorOnObservableAssemblyAction());
+		RxJavaPlugins.setOnSingleAssembly(new ContextPropagatorOnSingleAssemblyAction(threadContext));
+		RxJavaPlugins.setOnCompletableAssembly(new ContextPropagatorOnCompletableAssemblyAction(threadContext));
+		RxJavaPlugins.setOnFlowableAssembly(new ContextPropagatorOnFlowableAssemblyAction(threadContext));
+		RxJavaPlugins.setOnMaybeAssembly(new ContextPropagatorOnMaybeAssemblyAction(threadContext));
+		RxJavaPlugins.setOnObservableAssembly(new ContextPropagatorOnObservableAssemblyAction(threadContext));
 	}
 
 }

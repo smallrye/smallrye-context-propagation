@@ -1,5 +1,7 @@
 package io.smallrye.concurrency.propagators.rxjava1;
 
+import org.eclipse.microprofile.concurrent.ThreadContext;
+
 import io.smallrye.concurrency.spi.ThreadContextPropagator;
 import rx.Completable;
 import rx.Observable;
@@ -14,10 +16,10 @@ import rx.plugins.RxJavaHooks;
  */
 public class RxJava1ContextPropagator implements ThreadContextPropagator {
 
-	public void setup() {
-		RxJavaHooks.setOnSingleCreate(new ContextPropagatorOnSingleCreateAction());
-		RxJavaHooks.setOnObservableCreate(new ContextPropagatorOnObservableCreateAction());
-		RxJavaHooks.setOnCompletableCreate(new ContextPropagatorOnCompleteCreateAction());
+	public void setup(ThreadContext threadContext) {
+		RxJavaHooks.setOnSingleCreate(new ContextPropagatorOnSingleCreateAction(threadContext));
+		RxJavaHooks.setOnObservableCreate(new ContextPropagatorOnObservableCreateAction(threadContext));
+		RxJavaHooks.setOnCompletableCreate(new ContextPropagatorOnCompleteCreateAction(threadContext));
 	}
 
 }

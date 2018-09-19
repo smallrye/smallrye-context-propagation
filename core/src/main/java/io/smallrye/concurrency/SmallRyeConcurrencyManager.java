@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 
+import io.smallrye.concurrency.impl.ThreadContextImpl;
 import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
 import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
@@ -77,7 +78,7 @@ public class SmallRyeConcurrencyManager {
 		}
 	}
 
-	private static final String[] NO_STRING = new String[0];
+	public static final String[] NO_STRING = new String[0];
 	
 	private List<ThreadContextProvider> providers;
 	private List<ThreadContextPropagator> propagators;
@@ -95,11 +96,16 @@ public class SmallRyeConcurrencyManager {
 		// FIXME: check for duplicate types
 		// FIXME: check for cycles
 		allProviderTypes = providersByType.keySet().toArray(new String[providers.size()]);
+		ThreadContextImpl allThreadContext = new ThreadContextImpl(this, allProviderTypes, NO_STRING);
 		propagators = new ArrayList<ThreadContextPropagator>();
 		for (ThreadContextPropagator propagator : ServiceLoader.load(ThreadContextPropagator.class)) {
 			propagators.add(propagator);
-			propagator.setup();
+			propagator.setup(allThreadContext);
 		}
+	}
+	
+	public String[] getAllProviderTypes() {
+		return allProviderTypes;
 	}
 	
 	public CapturedContextState captureContext() {

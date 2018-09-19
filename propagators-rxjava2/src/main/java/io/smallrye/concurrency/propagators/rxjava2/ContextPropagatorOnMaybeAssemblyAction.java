@@ -1,37 +1,41 @@
 package io.smallrye.concurrency.propagators.rxjava2;
 
+import java.util.concurrent.Executor;
+
+import org.eclipse.microprofile.concurrent.ThreadContext;
+
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
 import io.reactivex.functions.Function;
-import io.smallrye.concurrency.ActiveContextState;
-import io.smallrye.concurrency.CapturedContextState;
-import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
 
+@SuppressWarnings("rawtypes")
 public class ContextPropagatorOnMaybeAssemblyAction implements Function<Maybe, Maybe> {
 
+	private ThreadContext threadContext;
+
+	public ContextPropagatorOnMaybeAssemblyAction(ThreadContext threadContext) {
+		this.threadContext = threadContext;
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public Maybe apply(Maybe t) throws Exception {
-		return new ContextPropagatorMaybe(t);
+		return new ContextPropagatorMaybe(t, threadContext.withCurrentContext());
 	}
 
 	public class ContextPropagatorMaybe<T> extends Maybe<T> {
 
 		private Maybe<T> source;
-		private CapturedContextState capturedContext;
+		private final Executor contextExecutor;
 
-		public ContextPropagatorMaybe(Maybe<T> t) {
+		public ContextPropagatorMaybe(Maybe<T> t, Executor contextExecutor) {
 			this.source = t;
-			this.capturedContext = SmallRyeConcurrencyProvider.captureContext();
+			this.contextExecutor = contextExecutor;
 		}
 
 		@Override
 		protected void subscribeActual(MaybeObserver<? super T> observer) {
-			ActiveContextState activeContext = capturedContext.begin();
-			try {
-				source.subscribe(observer);
-			}finally {
-				activeContext.endContext();
-			}
+			contextExecutor.execute(() -> source.subscribe(observer));
 		}
 
 	}

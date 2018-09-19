@@ -1,59 +1,51 @@
 package io.smallrye.concurrency.propagators.rxjava2;
 
+import java.util.concurrent.Executor;
+
+import org.eclipse.microprofile.concurrent.ThreadContext;
+
 import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
-import io.smallrye.concurrency.ActiveContextState;
-import io.smallrye.concurrency.CapturedContextState;
-import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
 
 public class ContextPropagatorOnCompletableCreateAction
 		implements BiFunction<Completable, CompletableObserver, CompletableObserver> {
 
+	private ThreadContext threadContext;
+
+	public ContextPropagatorOnCompletableCreateAction(ThreadContext threadContext) {
+		this.threadContext = threadContext;
+	}
+
 	@Override
 	public CompletableObserver apply(Completable completable, CompletableObserver observer) throws Exception {
-		return new ContextCapturerCompletable(completable, observer);
+		return new ContextCapturerCompletable(completable, observer, threadContext.withCurrentContext());
 	}
 
 	final static class ContextCapturerCompletable implements CompletableObserver {
 
 	    private final CompletableObserver source;
-		private final CapturedContextState capturedContext;
+		private final Executor contextExecutor;
 
-	    public ContextCapturerCompletable(Completable s, CompletableObserver o) {
+	    public ContextCapturerCompletable(Completable s, CompletableObserver o, Executor contextExecutor) {
 	    	this.source = o;
-	        this.capturedContext = SmallRyeConcurrencyProvider.captureContext();
+			this.contextExecutor = contextExecutor;
 		}
 
 		@Override
 		public void onError(Throwable t) {
-        	ActiveContextState activeContext = capturedContext.begin();
-			try {
-	    		source.onError(t);
-			}finally {
-				activeContext.endContext();
-			}
+			contextExecutor.execute(() -> source.onError(t));
 		}
 
 		@Override
 		public void onSubscribe(Disposable d) {
-        	ActiveContextState activeContext = capturedContext.begin();
-			try {
-	    		source.onSubscribe(d);
-			}finally {
-				activeContext.endContext();
-			}
+			contextExecutor.execute(() -> source.onSubscribe(d));
 		}
 
 		@Override
 		public void onComplete() {
-        	ActiveContextState activeContext = capturedContext.begin();
-			try {
-	    		source.onComplete();
-			}finally {
-				activeContext.endContext();
-			}
+			contextExecutor.execute(() -> source.onComplete());
 		}
 	}
 

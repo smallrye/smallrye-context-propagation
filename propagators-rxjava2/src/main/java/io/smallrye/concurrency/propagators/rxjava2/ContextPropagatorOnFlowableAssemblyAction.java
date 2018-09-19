@@ -1,38 +1,41 @@
 package io.smallrye.concurrency.propagators.rxjava2;
 
+import java.util.concurrent.Executor;
+
+import org.eclipse.microprofile.concurrent.ThreadContext;
 import org.reactivestreams.Subscriber;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;
-import io.smallrye.concurrency.ActiveContextState;
-import io.smallrye.concurrency.CapturedContextState;
-import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
 
+@SuppressWarnings("rawtypes")
 public class ContextPropagatorOnFlowableAssemblyAction implements Function<Flowable, Flowable> {
 
+	private ThreadContext threadContext;
+
+	public ContextPropagatorOnFlowableAssemblyAction(ThreadContext threadContext) {
+		this.threadContext = threadContext;
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public Flowable apply(Flowable t) throws Exception {
-		return new ContextPropagatorFlowable(t);
+		return new ContextPropagatorFlowable(t, threadContext.withCurrentContext());
 	}
 
 	public class ContextPropagatorFlowable<T> extends Flowable<T> {
 
 		private Flowable<T> source;
-		private CapturedContextState capturedContext;
+		private final Executor contextExecutor;
 
-		public ContextPropagatorFlowable(Flowable<T> t) {
+		public ContextPropagatorFlowable(Flowable<T> t, Executor contextExecutor) {
 			this.source = t;
-			this.capturedContext = SmallRyeConcurrencyProvider.captureContext();
+			this.contextExecutor = contextExecutor;
 		}
 
 		@Override
 		protected void subscribeActual(Subscriber<? super T> observer) {
-			ActiveContextState activeContext = capturedContext.begin();
-			try {
-				source.subscribe(observer);
-			}finally {
-				activeContext.endContext();
-			}
+			contextExecutor.execute(() -> source.subscribe(observer));
 		}
 
 	}
