@@ -20,7 +20,7 @@ public class ContextPropagatorOnFlowableAssemblyAction implements Function<Flowa
 	@SuppressWarnings("unchecked")
 	@Override
 	public Flowable apply(Flowable t) throws Exception {
-		return new ContextPropagatorFlowable(t, threadContext.withCurrentContext());
+		return new ContextPropagatorFlowable(t, threadContext.currentContextExecutor());
 	}
 
 	public class ContextPropagatorFlowable<T> extends Flowable<T> {

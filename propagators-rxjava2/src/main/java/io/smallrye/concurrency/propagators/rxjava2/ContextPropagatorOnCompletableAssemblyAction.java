@@ -18,7 +18,7 @@ public class ContextPropagatorOnCompletableAssemblyAction implements Function<Co
 
 	@Override
 	public Completable apply(Completable t) throws Exception {
-		return new ContextPropagatorCompletable(t, threadContext.withCurrentContext());
+		return new ContextPropagatorCompletable(t, threadContext.currentContextExecutor());
 	}
 
 	public class ContextPropagatorCompletable extends Completable {

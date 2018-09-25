@@ -85,7 +85,7 @@ public class ManualPropagationMultipleRequestTest {
 		Throwable[] ret = new Throwable[2];
 
 		newRequest("req 1");
-		CompletableFuture<Void> cf1 = threadContext.withCurrentContext(new CompletableFuture<>());
+		CompletableFuture<Void> cf1 = threadContext.withContextCapture(new CompletableFuture<>());
 		cf1.handleAsync((v, t) -> {
 			try {
 				ret[0] = t;
@@ -99,7 +99,7 @@ public class ManualPropagationMultipleRequestTest {
 		}, executor);
 		
 		newRequest("req 2");
-		CompletableFuture<Void> cf2 = threadContext.withCurrentContext(new CompletableFuture<>());
+		CompletableFuture<Void> cf2 = threadContext.withContextCapture(new CompletableFuture<>());
 		cf2.handleAsync((v, t) -> {
 			try {
 				ret[1] = t;

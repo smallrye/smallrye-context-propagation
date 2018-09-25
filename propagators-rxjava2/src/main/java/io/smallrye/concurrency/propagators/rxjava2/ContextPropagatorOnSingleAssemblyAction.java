@@ -20,7 +20,7 @@ public class ContextPropagatorOnSingleAssemblyAction implements Function<Single,
 	@SuppressWarnings("unchecked")
 	@Override
 	public Single apply(Single t) throws Exception {
-		return new ContextPropagatorSingle(t, threadContext.withCurrentContext());
+		return new ContextPropagatorSingle(t, threadContext.currentContextExecutor());
 	}
 
 	public class ContextPropagatorSingle<T> extends Single<T> {

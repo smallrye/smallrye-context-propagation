@@ -22,7 +22,7 @@ public class ContextPropagatorOnFlowableCreateAction
 	@SuppressWarnings("unchecked")
 	@Override
 	public Subscriber apply(Flowable flowable, Subscriber observer) throws Exception {
-		return new ContextCapturerFlowable<>(flowable, observer, threadContext.withCurrentContext());
+		return new ContextCapturerFlowable<>(flowable, observer, threadContext.currentContextExecutor());
 	}
 
 	public class ContextCapturerFlowable<T> implements Subscriber<T> {

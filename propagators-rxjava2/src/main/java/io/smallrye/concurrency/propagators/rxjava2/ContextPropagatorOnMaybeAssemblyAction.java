@@ -20,7 +20,7 @@ public class ContextPropagatorOnMaybeAssemblyAction implements Function<Maybe, M
 	@SuppressWarnings("unchecked")
 	@Override
 	public Maybe apply(Maybe t) throws Exception {
-		return new ContextPropagatorMaybe(t, threadContext.withCurrentContext());
+		return new ContextPropagatorMaybe(t, threadContext.currentContextExecutor());
 	}
 
 	public class ContextPropagatorMaybe<T> extends Maybe<T> {

@@ -20,7 +20,7 @@ public class ContextPropagatorOnCompletableCreateAction
 
 	@Override
 	public CompletableObserver apply(Completable completable, CompletableObserver observer) throws Exception {
-		return new ContextCapturerCompletable(completable, observer, threadContext.withCurrentContext());
+		return new ContextCapturerCompletable(completable, observer, threadContext.currentContextExecutor());
 	}
 
 	final static class ContextCapturerCompletable implements CompletableObserver {

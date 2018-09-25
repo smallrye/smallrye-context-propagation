@@ -22,7 +22,7 @@ public class ContextPropagatorOnObservableCreateAction
 	@SuppressWarnings("unchecked")
 	@Override
 	public Observer apply(Observable observable, Observer observer) throws Exception {
-		return new ContextCapturerObservable(observable, observer, threadContext.withCurrentContext());
+		return new ContextCapturerObservable(observable, observer, threadContext.currentContextExecutor());
 	}
 
 	public class ContextCapturerObservable<T> implements Observer<T> {

@@ -21,7 +21,7 @@ public class ContextPropagatorOnSingleCreateAction implements Func1<OnSubscribe,
 	@SuppressWarnings("unchecked")
 	@Override
 	public OnSubscribe call(OnSubscribe t) {
-		return new ContextCapturerSingle(t, threadContext.withCurrentContext());
+		return new ContextCapturerSingle(t, threadContext.currentContextExecutor());
 	}
 	
 	final static class ContextCapturerSingle<T> implements Single.OnSubscribe<T> {

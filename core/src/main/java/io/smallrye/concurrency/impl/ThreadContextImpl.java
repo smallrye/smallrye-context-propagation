@@ -32,30 +32,22 @@ public class ThreadContextImpl implements ThreadContext {
 	//
 	// Wrappers
 	
-	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
-	public <T> CompletableFuture<T> withCurrentContext(CompletableFuture<T> future){
-		return withCurrentContext(future, null);
+	@Override
+	public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future){
+		return withContextCapture(future, null);
 	}
 
-	<T> CompletableFuture<T> withCurrentContext(CompletableFuture<T> future, ManagedExecutor executor){
-		return withContext(manager.captureContext(propagated, unchanged), future, executor);
-	}
-
-	<T> CompletableFuture<T> withContext(CapturedContextState state, CompletableFuture<T> future, ManagedExecutor executor){
-		return new CompletableFutureWrapper<>(this, state, future, executor);
-	}
-
-	// FIXME: move in ThreadContext https://github.com/eclipse/microprofile-concurrency/issues/9
-	public <T> CompletionStage<T> withCurrentContext(CompletionStage<T> future){
-		return withContext(manager.captureContext(propagated, unchanged), future);
-	}
-
-	<T> CompletionStage<T> withContext(CapturedContextState state, CompletionStage<T> future){
-		return new CompletionStageWrapper<>(this, state, future);
+	<T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, ManagedExecutor executor){
+		return new CompletableFutureWrapper<>(this, future, executor);
 	}
 
 	@Override
-	public Executor withCurrentContext() {
+	public <T> CompletionStage<T> withContextCapture(CompletionStage<T> future){
+		return new CompletionStageWrapper<>(this, future);
+	}
+
+	@Override
+	public Executor currentContextExecutor() {
 		return withContext(manager.captureContext(propagated, unchanged));
 	}
 

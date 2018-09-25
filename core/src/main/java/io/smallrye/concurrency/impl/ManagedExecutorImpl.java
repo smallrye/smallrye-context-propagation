@@ -110,7 +110,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 
 	@Override
 	public <U> CompletableFuture<U> completedFuture(U value) {
-		return threadContext.withCurrentContext(CompletableFuture.completedFuture(value));
+		return threadContext.withContextCapture(CompletableFuture.completedFuture(value));
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	public <U> CompletableFuture<U> failedFuture(Throwable ex) {
 		CompletableFuture<U> ret = new CompletableFuture<>();
 		ret.completeExceptionally(ex);
-		return threadContext.withCurrentContext(ret);
+		return threadContext.withContextCapture(ret);
 	}
 
 	@Override
@@ -134,14 +134,14 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	public CompletableFuture<Void> runAsync(Runnable runnable) {
 		// I don't need to wrap runnable because this executor will be used to submit the task immediately with
 		// a Runnable that will capture the context before calling my Runnable.run
-		return threadContext.withCurrentContext(CompletableFuture.runAsync(runnable, this), this);
+		return threadContext.withContextCapture(CompletableFuture.runAsync(runnable, this), this);
 	}
 
 	@Override
 	public <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier) {
 		// I don't need to wrap supplier because this executor will be used to submit the task immediately with
 		// a Runnable that will capture the context before calling my Supplier.run
-		return threadContext.withCurrentContext(CompletableFuture.supplyAsync(threadContext.withCurrentContext(supplier), this), this);
+		return threadContext.withContextCapture(CompletableFuture.supplyAsync(threadContext.withCurrentContext(supplier), this), this);
 	}
 
 }

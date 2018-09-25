@@ -20,7 +20,7 @@ public class ContextPropagatorOnObservableAssemblyAction implements Function<Obs
 	@SuppressWarnings("unchecked")
 	@Override
 	public Observable apply(Observable t) throws Exception {
-		return new ContextPropagatorObservable(t, threadContext.withCurrentContext());
+		return new ContextPropagatorObservable(t, threadContext.currentContextExecutor());
 	}
 
 	public class ContextPropagatorObservable<T> extends Observable<T> {

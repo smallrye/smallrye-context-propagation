@@ -21,7 +21,7 @@ public class ContextPropagatorOnObservableCreateAction implements Func1<OnSubscr
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public OnSubscribe call(OnSubscribe t) {
-		return new ContextCapturerObservable(t, threadContext.withCurrentContext());
+		return new ContextCapturerObservable(t, threadContext.currentContextExecutor());
 	}
 	
 	final static class ContextCapturerObservable<T> implements Observable.OnSubscribe<T> {

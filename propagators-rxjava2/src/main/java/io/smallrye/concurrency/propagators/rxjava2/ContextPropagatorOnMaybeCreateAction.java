@@ -22,7 +22,7 @@ public class ContextPropagatorOnMaybeCreateAction
 	@SuppressWarnings("unchecked")
 	@Override
 	public MaybeObserver apply(Maybe maybe, MaybeObserver observer) throws Exception {
-		return new ContextCapturerMaybe<>(maybe, observer, threadContext.withCurrentContext());
+		return new ContextCapturerMaybe<>(maybe, observer, threadContext.currentContextExecutor());
 	}
 
 	public class ContextCapturerMaybe<T> implements MaybeObserver<T> {

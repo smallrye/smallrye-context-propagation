@@ -21,7 +21,7 @@ public class ContextPropagatorOnSingleCreateAction implements BiFunction<Single,
 	@SuppressWarnings("unchecked")
 	@Override
 	public SingleObserver apply(Single s, SingleObserver o) throws Exception {
-		return new ContextCapturerSingle(s, o, threadContext.withCurrentContext());
+		return new ContextCapturerSingle(s, o, threadContext.currentContextExecutor());
 	}
 
 	final static class ContextCapturerSingle<T> implements SingleObserver<T> {

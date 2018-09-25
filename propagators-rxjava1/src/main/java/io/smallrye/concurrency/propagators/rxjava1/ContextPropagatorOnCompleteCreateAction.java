@@ -19,7 +19,7 @@ public class ContextPropagatorOnCompleteCreateAction implements Func1<OnSubscrib
 
 	@Override
 	public OnSubscribe call(OnSubscribe t) {
-		return new ContextCapturerCompletable(t, threadContext.withCurrentContext());
+		return new ContextCapturerCompletable(t, threadContext.currentContextExecutor());
 	}
 
 	final static class ContextCapturerCompletable implements OnSubscribe {
