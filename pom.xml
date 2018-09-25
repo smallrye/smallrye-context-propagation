@@ -18,6 +18,15 @@
     <url>https://github.com/smallrye/smallrye-concurrency</url>
     <description>A pluggable library for context propagation in reactive libraries</description>
 
+    <repositories>
+        <repository>
+            <id>eclipse-snapshots</id>
+            <url>https://repo.eclipse.org/content/repositories/microprofile-snapshots</url>
+            <releases><enabled>false</enabled></releases>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+    </repositories>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
