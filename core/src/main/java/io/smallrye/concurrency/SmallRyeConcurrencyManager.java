@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -85,17 +86,29 @@ public class SmallRyeConcurrencyManager {
 	private Map<String, ThreadContextProvider> providersByType;
 
 	private String[] allProviderTypes;
-
+	
 	public SmallRyeConcurrencyManager() {
-		providers = new ArrayList<ThreadContextProvider>();
+		this(toList(ServiceLoader.load(ThreadContextProvider.class)));
+	}
+	
+	private static <T> List<T> toList(Iterable<T> iterable) {
+		List<T> ret = new LinkedList<>();
+		for (T t : iterable) {
+			ret.add(t);
+		}
+		return ret;
+	}
+
+	// for tests
+	SmallRyeConcurrencyManager(List<ThreadContextProvider> providers) {
+		this.providers = new ArrayList<ThreadContextProvider>(providers);
 		providersByType = new HashMap<>();
-		for (ThreadContextProvider provider : ServiceLoader.load(ThreadContextProvider.class)) {
-			providers.add(provider);
+		for (ThreadContextProvider provider : providers) {
 			providersByType.put(provider.getThreadContextType(), provider);
 		}
 		// FIXME: check for duplicate types
 		// FIXME: check for cycles
-		allProviderTypes = providersByType.keySet().toArray(new String[providers.size()]);
+		allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
 		ThreadContextImpl allThreadContext = new ThreadContextImpl(this, allProviderTypes, NO_STRING);
 		propagators = new ArrayList<ThreadContextPropagator>();
 		for (ThreadContextPropagator propagator : ServiceLoader.load(ThreadContextPropagator.class)) {
@@ -110,7 +123,7 @@ public class SmallRyeConcurrencyManager {
 	
 	public CapturedContextState captureContext() {
 		Map<String, String> props = Collections.emptyMap();
-		return new CapturedContextState(this, getProviders(allProviderTypes, NO_STRING), props);
+		return new CapturedContextState(this, getProviders(), props);
 	}
 
 	public CapturedContextState captureContext(String[] propagated, String[] unchanged) {
@@ -118,7 +131,13 @@ public class SmallRyeConcurrencyManager {
 		return new CapturedContextState(this, getProviders(propagated, unchanged), props);
 	}
 
-	private ThreadContextProviderPlan getProviders(String[] propagated, String[] unchanged) {
+	// package-protected for tests
+	ThreadContextProviderPlan getProviders() {
+		return getProviders(allProviderTypes, NO_STRING);
+	}
+	
+	// package-protected for tests
+	ThreadContextProviderPlan getProviders(String[] propagated, String[] unchanged) {
 		// FIXME: pretty sure there's an ALL in there to handle
 		Graph propagatedGraph = new Graph();
 		for (String type : propagated) {
