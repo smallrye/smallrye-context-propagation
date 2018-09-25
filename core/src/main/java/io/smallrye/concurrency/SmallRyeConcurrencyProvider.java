@@ -13,7 +13,8 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
 	private static ConcurrencyProviderRegistration registration;
 
 	public static void register() {
-		registration = ConcurrencyProvider.register(new SmallRyeConcurrencyProvider());
+		if(registration == null)
+			registration = ConcurrencyProvider.register(new SmallRyeConcurrencyProvider());
 	}
 	
 	public static void unregister() {
@@ -49,5 +50,9 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
 		else
 			localManager.set(manager);
 		return previousManager;
+	}
+	
+	public static void clearLocalManager() {
+		localManager.remove();
 	}
 }
