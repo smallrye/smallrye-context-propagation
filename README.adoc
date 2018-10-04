@@ -5,7 +5,6 @@ image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", l
 
 = SmallRye Concurrency
 
-
 === Links
 
 * http://github.com/smallrye/smallrye-concurrency/[Project Homepage]
