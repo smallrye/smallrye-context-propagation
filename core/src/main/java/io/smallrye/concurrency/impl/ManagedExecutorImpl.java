@@ -141,7 +141,13 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	public <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier) {
 		// I don't need to wrap supplier because this executor will be used to submit the task immediately with
 		// a Runnable that will capture the context before calling my Supplier.run
-		return threadContext.withContextCapture(CompletableFuture.supplyAsync(threadContext.withCurrentContext(supplier), this), this);
+		return threadContext.withContextCapture(CompletableFuture.supplyAsync(supplier, this), this);
+	}
+
+	@Override
+	public <U> CompletableFuture<U> newIncompleteFuture() {
+		CompletableFuture<U> ret = new CompletableFuture<>();
+		return threadContext.withContextCapture(ret, this);
 	}
 
 }
