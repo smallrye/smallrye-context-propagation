@@ -75,6 +75,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.eclipse.microprofile.concurrency</groupId>
+                <artifactId>microprofile-concurrency-tck</artifactId>
+                <version>${version.microprofile.concurrency}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>io.reactivex.rxjava2</groupId>
                 <artifactId>rxjava</artifactId>
                 <version>2.1.12</version>
@@ -160,5 +166,6 @@
         <module>propagators-rxjava1</module>
         <module>propagators-rxjava2</module>
         <module>tests</module>
+        <module>tck</module>
     </modules>
 </project>
