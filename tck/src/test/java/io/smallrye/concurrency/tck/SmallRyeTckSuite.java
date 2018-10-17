@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.microprofile.concurrency.tck.TckSuite;
 
