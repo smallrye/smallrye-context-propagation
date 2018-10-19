@@ -4,19 +4,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.Set;
 
+import org.eclipse.microprofile.concurrent.ManagedExecutorBuilder;
+import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.concurrent.ThreadContextBuilder;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 
-import io.smallrye.concurrency.impl.ThreadContextImpl;
+import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
+import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
 import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
-public class SmallRyeConcurrencyManager {
+public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	
 	private class Graph {
 		Set<Node> roots = new HashSet<>();
@@ -87,20 +90,7 @@ public class SmallRyeConcurrencyManager {
 
 	private String[] allProviderTypes;
 	
-	public SmallRyeConcurrencyManager() {
-		this(toList(ServiceLoader.load(ThreadContextProvider.class)));
-	}
-	
-	private static <T> List<T> toList(Iterable<T> iterable) {
-		List<T> ret = new LinkedList<>();
-		for (T t : iterable) {
-			ret.add(t);
-		}
-		return ret;
-	}
-
-	// for tests
-	SmallRyeConcurrencyManager(List<ThreadContextProvider> providers) {
+	SmallRyeConcurrencyManager(List<ThreadContextProvider> providers, List<ThreadContextPropagator> propagators) {
 		this.providers = new ArrayList<ThreadContextProvider>(providers);
 		providersByType = new HashMap<>();
 		for (ThreadContextProvider provider : providers) {
@@ -109,11 +99,9 @@ public class SmallRyeConcurrencyManager {
 		// FIXME: check for duplicate types
 		// FIXME: check for cycles
 		allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
-		ThreadContextImpl allThreadContext = new ThreadContextImpl(this, allProviderTypes, NO_STRING);
-		propagators = new ArrayList<ThreadContextPropagator>();
-		for (ThreadContextPropagator propagator : ServiceLoader.load(ThreadContextPropagator.class)) {
-			propagators.add(propagator);
-			propagator.setup(allThreadContext);
+		this.propagators = new ArrayList<ThreadContextPropagator>(propagators);
+		for (ThreadContextPropagator propagator : propagators) {
+			propagator.setup(this);
 		}
 	}
 	
@@ -138,16 +126,27 @@ public class SmallRyeConcurrencyManager {
 	
 	// package-protected for tests
 	ThreadContextProviderPlan getProviders(String[] propagated, String[] unchanged) {
-		// FIXME: pretty sure there's an ALL in there to handle
 		Graph propagatedGraph = new Graph();
 		for (String type : propagated) {
-			propagatedGraph.addRoot(providersByType.get(type));
+			if(ThreadContext.ALL.equals(type)) {
+				for (String allType : allProviderTypes) {
+					propagatedGraph.addRoot(providersByType.get(allType));
+				}
+			} else {
+				propagatedGraph.addRoot(providersByType.get(type));
+			}
 		}
 		List<ThreadContextProvider> propagatedProviders = propagatedGraph.depthFirst();
 
 		Graph unchangedGraph = new Graph();
 		for (String type : unchanged) {
-			unchangedGraph.addRoot(providersByType.get(type));
+			if(ThreadContext.ALL.equals(type)) {
+				for (String allType : allProviderTypes) {
+					unchangedGraph.addRoot(providersByType.get(allType));
+				}
+			} else {
+				unchangedGraph.addRoot(providersByType.get(type));
+			}
 		}
 		List<ThreadContextProvider> unchangedProviders = unchangedGraph.depthFirst();
 		
@@ -163,5 +162,20 @@ public class SmallRyeConcurrencyManager {
 		
 		// FIXME: error if clearedProviders appear in propagated or unchanged
 		return new ThreadContextProviderPlan(propagatedProviders, clearedProviders);
+	}
+
+	@Override
+	public ManagedExecutorBuilder newManagedExecutorBuilder() {
+		return new ManagedExecutorBuilderImpl(this);
+	}
+
+	@Override
+	public ThreadContextBuilder newThreadContextBuilder() {
+		return new ThreadContextBuilderImpl(this);
+	}
+
+	// For tests
+	public List<ThreadContextPropagator> getPropagators() {
+		return propagators;
 	}
 }

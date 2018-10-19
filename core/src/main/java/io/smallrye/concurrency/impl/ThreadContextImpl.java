@@ -1,5 +1,6 @@
 package io.smallrye.concurrency.impl;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -27,6 +28,16 @@ public class ThreadContextImpl implements ThreadContext {
 		this.manager = manager;
 		this.propagated = propagated;
 		this.unchanged = unchanged;
+	}
+
+	// For Tests
+	
+	public String[] getPropagated() {
+		return Arrays.copyOf(propagated, propagated.length);
+	}
+
+	public String[] getUnchanged() {
+		return Arrays.copyOf(unchanged, unchanged.length);
 	}
 
 	//

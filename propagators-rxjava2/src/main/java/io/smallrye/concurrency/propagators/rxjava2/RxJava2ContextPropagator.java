@@ -1,6 +1,7 @@
 package io.smallrye.concurrency.propagators.rxjava2;
 
 import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -18,7 +19,8 @@ import io.smallrye.concurrency.spi.ThreadContextPropagator;
  */
 public class RxJava2ContextPropagator implements ThreadContextPropagator {
 
-	public void setup(ThreadContext threadContext) {
+	public void setup(ConcurrencyManager manager) {
+		ThreadContext threadContext = manager.newThreadContextBuilder().propagated(ThreadContext.ALL).build();
 		RxJavaPlugins.setOnSingleSubscribe(new ContextPropagatorOnSingleCreateAction(threadContext));
 		RxJavaPlugins.setOnCompletableSubscribe(new ContextPropagatorOnCompletableCreateAction(threadContext));
 		RxJavaPlugins.setOnFlowableSubscribe(new ContextPropagatorOnFlowableCreateAction(threadContext));

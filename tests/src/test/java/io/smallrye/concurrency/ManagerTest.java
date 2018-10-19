@@ -30,7 +30,7 @@ public class ManagerTest {
 	
 	@Test
 	public void testContext() {
-		SmallRyeConcurrencyManager manager = new SmallRyeConcurrencyManager(Arrays.asList(A, B));
+		SmallRyeConcurrencyManager manager = new SmallRyeConcurrencyManager(Arrays.asList(A, B), Collections.emptyList());
 
 		// all providers
 		ThreadContextProviderPlan providers = manager.getProviders();
@@ -68,7 +68,7 @@ public class ManagerTest {
 
 	@Test
 	public void testContextProviderPlan() {
-		SmallRyeConcurrencyManager manager = new SmallRyeConcurrencyManager(Arrays.asList(A, B, DEPENDS_ON_A));
+		SmallRyeConcurrencyManager manager = new SmallRyeConcurrencyManager(Arrays.asList(A, B, DEPENDS_ON_A), Collections.emptyList());
 
 		// all providers
 		ThreadContextProviderPlan providers = manager.getProviders();
@@ -97,8 +97,8 @@ public class ManagerTest {
 
 	@Test
 	public void testContextExecutionOrder() {
-		SmallRyeConcurrencyManager managerWithoutB = new SmallRyeConcurrencyManager(Arrays.asList(DEPENDS_ON_A, A));
-		SmallRyeConcurrencyManager managerWithB = new SmallRyeConcurrencyManager(Arrays.asList(DEPENDS_ON_A, A, B));
+		SmallRyeConcurrencyManager managerWithoutB = new SmallRyeConcurrencyManager(Arrays.asList(DEPENDS_ON_A, A), Collections.emptyList());
+		SmallRyeConcurrencyManager managerWithB = new SmallRyeConcurrencyManager(Arrays.asList(DEPENDS_ON_A, A, B), Collections.emptyList());
 		
 		// all providers
 		ThreadContextImpl context = new ThreadContextImpl(managerWithoutB, managerWithoutB.getAllProviderTypes(), SmallRyeConcurrencyManager.NO_STRING);

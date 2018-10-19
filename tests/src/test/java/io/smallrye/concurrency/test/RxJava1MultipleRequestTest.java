@@ -4,7 +4,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,17 +15,11 @@ import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 public class RxJava1MultipleRequestTest {
-	
 
 	@BeforeClass
 	public static void init() {
 		// initialise
-		SmallRyeConcurrencyProvider.register();
-	}
-
-	@AfterClass
-	public static void teardown() {
-		SmallRyeConcurrencyProvider.unregister();
+		SmallRyeConcurrencyProvider.getManager();
 	}
 
 	public void newRequest(String reqId) {

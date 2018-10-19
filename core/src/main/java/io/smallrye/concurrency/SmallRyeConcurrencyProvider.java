@@ -1,58 +1,89 @@
 package io.smallrye.concurrency;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutorBuilder;
-import org.eclipse.microprofile.concurrent.ThreadContextBuilder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerBuilder;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProviderRegistration;
-
-import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
-import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 
 public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
 
 	private static ConcurrencyProviderRegistration registration;
 
+	/**
+	 * @deprecated Should be removed in favour of SPI
+	 */
+	@Deprecated
 	public static void register() {
 		if(registration == null)
 			registration = ConcurrencyProvider.register(new SmallRyeConcurrencyProvider());
 	}
 	
+	/**
+	 * @deprecated Should be removed in favour of SPI
+	 */
+	@Deprecated
 	public static void unregister() {
 		registration.unregister();
 		registration = null;
 	}
 
-	private static SmallRyeConcurrencyManager defaultManager = new SmallRyeConcurrencyManager();
-	
-	private static ThreadLocal<SmallRyeConcurrencyManager> localManager = new ThreadLocal<SmallRyeConcurrencyManager>();
-	
+    private Map<ClassLoader,ConcurrencyManager> concurrencyManagersForClassLoader = new HashMap<>();
+
 	@Override
-	public ManagedExecutorBuilder newManagedExecutorBuilder() {
-		return new ManagedExecutorBuilderImpl(getManager());
+	public ConcurrencyManager getConcurrencyManager() {
+		return getConcurrencyManager(Thread.currentThread().getContextClassLoader());
 	}
 
 	@Override
-	public ThreadContextBuilder newThreadContextBuilder() {
-		return new ThreadContextBuilderImpl(getManager());
-	}
-	
-	public static SmallRyeConcurrencyManager getManager() {
-		SmallRyeConcurrencyManager ret = localManager.get();
-		if(ret != null)
-			return ret;
-		return defaultManager;
+	public ConcurrencyManager getConcurrencyManager(ClassLoader classLoader) {
+		ConcurrencyManager config = concurrencyManagersForClassLoader.get(classLoader);
+        if (config == null) {
+            synchronized (this) {
+                config = concurrencyManagersForClassLoader.get(classLoader);
+                if (config == null) {
+                    config = getConcurrencyManagerBuilder()
+                    		.forClassLoader(classLoader)
+                            .addDiscoveredThreadContextProviders()
+                            .addDiscoveredThreadContextPropagators()
+                            .build();
+                    registerConcurrencyManager(config, classLoader);
+                }
+            }
+        }
+        return config;
 	}
 
-	public static SmallRyeConcurrencyManager setLocalManager(SmallRyeConcurrencyManager manager) {
-		SmallRyeConcurrencyManager previousManager = localManager.get();
-		if(manager == null)
-			localManager.remove();
-		else
-			localManager.set(manager);
-		return previousManager;
+	@Override
+	public SmallRyeConcurrencyManagerBuilder getConcurrencyManagerBuilder() {
+		return new SmallRyeConcurrencyManagerBuilder();
 	}
-	
-	public static void clearLocalManager() {
-		localManager.remove();
+
+	@Override
+	public void registerConcurrencyManager(ConcurrencyManager manager, ClassLoader classLoader) {
+        synchronized (this) {
+            concurrencyManagersForClassLoader.put(classLoader, manager);
+        }
+	}
+
+	@Override
+	public void releaseConcurrencyManager(ConcurrencyManager manager) {
+        synchronized (this) {
+            Iterator<Map.Entry<ClassLoader, ConcurrencyManager>> iterator = concurrencyManagersForClassLoader.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<ClassLoader, ConcurrencyManager> entry = iterator.next();
+                if (entry.getValue() == manager) {
+                    iterator.remove();
+                    return;
+                }
+            }
+        }
+	}
+
+	static public SmallRyeConcurrencyManager getManager() {
+		return (SmallRyeConcurrencyManager) ConcurrencyProvider.instance().getConcurrencyManager();
 	}
 }

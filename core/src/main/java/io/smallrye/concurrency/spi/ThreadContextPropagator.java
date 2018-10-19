@@ -1,7 +1,7 @@
 package io.smallrye.concurrency.spi;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
 
 public interface ThreadContextPropagator {
-	public void setup(ThreadContext threadContext);
+	public void setup(ConcurrencyManager manager);
 }
