@@ -43,7 +43,7 @@ public class SmallRyeConcurrencyArchiveProcessor implements ApplicationArchivePr
             // we need to create new archives and add them as dependencies, they have to be instance of ArchiveAsset in order to pass
             // this check https://github.com/arquillian/arquillian-container-weld/blob/2.0.0.Final/impl/src/main/java/org/jboss/arquillian/container/weld/embedded/Utils.java#L73
             for (int i = 0; i < dependencies.length; i++) {
-                JavaArchive newJar = ShrinkWrap.createFromZipFile(JavaArchive.class, dependencies[0]);
+                JavaArchive newJar = ShrinkWrap.createFromZipFile(JavaArchive.class, dependencies[i]);
                 archive.addAsLibrary(newJar);
             }
         }
