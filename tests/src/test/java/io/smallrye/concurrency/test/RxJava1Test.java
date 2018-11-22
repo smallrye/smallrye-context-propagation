@@ -3,7 +3,6 @@ package io.smallrye.concurrency.test;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -21,14 +20,9 @@ public class RxJava1Test {
 	@BeforeClass
 	public static void init() {
 		// initialise
-		SmallRyeConcurrencyProvider.register();
+		SmallRyeConcurrencyProvider.getManager();
 	}
 	
-	@AfterClass
-	public static void teardown() {
-		SmallRyeConcurrencyProvider.unregister();
-	}
-
 	@Before
 	public void before() {
 		MyContext.init();

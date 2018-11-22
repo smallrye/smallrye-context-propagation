@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,15 +20,10 @@ public class ManualPropagationMultipleRequestTest {
 
 	@BeforeClass
 	public static void init() {
-		SmallRyeConcurrencyProvider.register();
+		SmallRyeConcurrencyProvider.getManager();
 		threadContext = (ThreadContextImpl) ConcurrencyProvider.instance().newThreadContextBuilder().build();
 	}
 
-	@AfterClass
-	public static void teardown() {
-		SmallRyeConcurrencyProvider.unregister();
-	}
-	
 	public void newRequest(String reqId) {
 		// seed
 		MyContext.init();
@@ -53,13 +47,13 @@ public class ManualPropagationMultipleRequestTest {
 
 	private void testRunnable(ExecutorService executor) throws Throwable {
 		newRequest("req 1");
-		Future<?> task1 = executor.submit(threadContext.withCurrentContext(() -> {
+		Future<?> task1 = executor.submit(threadContext.contextualRunnable(() -> {
 			checkContextCaptured("req 1");
 			endOfRequest();
 		}));
 		
 		newRequest("req 2");
-		Future<?> task2 = executor.submit(threadContext.withCurrentContext(() -> {
+		Future<?> task2 = executor.submit(threadContext.contextualRunnable(() -> {
 			checkContextCaptured("req 2");
 			endOfRequest();
 		}));

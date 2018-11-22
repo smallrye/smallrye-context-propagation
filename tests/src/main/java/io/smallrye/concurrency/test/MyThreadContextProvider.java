@@ -1,8 +1,6 @@
 package io.smallrye.concurrency.test;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
@@ -22,7 +20,7 @@ public class MyThreadContextProvider implements ThreadContextProvider {
 	}
 
 	@Override
-	public ThreadContextSnapshot defaultContext(Map<String, String> props) {
+	public ThreadContextSnapshot clearedContext(Map<String, String> props) {
 		return () -> {
 			MyContext movedContext = MyContext.get();
 			MyContext.clear();
@@ -33,11 +31,6 @@ public class MyThreadContextProvider implements ThreadContextProvider {
 					MyContext.set(movedContext);
 			};
 		};
-	}
-
-	@Override
-	public Set<String> getPrerequisites() {
-		return Collections.emptySet();
 	}
 
 	@Override
