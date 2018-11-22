@@ -11,12 +11,12 @@ import java.util.Set;
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 
 import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
-import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
 public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	
@@ -26,12 +26,12 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	public static final String[] TRANSACTION_ARRAY = new String[] { ThreadContext.TRANSACTION };
 	
 	private List<ThreadContextProvider> providers;
-	private List<ThreadContextPropagator> propagators;
+	private List<ConcurrencyManagerExtension> extensions;
 	private Map<String, ThreadContextProvider> providersByType;
 
 	private String[] allProviderTypes;
 	
-	SmallRyeConcurrencyManager(List<ThreadContextProvider> providers, List<ThreadContextPropagator> propagators) {
+	SmallRyeConcurrencyManager(List<ThreadContextProvider> providers, List<ConcurrencyManagerExtension> extensions) {
 		this.providers = new ArrayList<ThreadContextProvider>(providers);
 		providersByType = new HashMap<>();
 		for (ThreadContextProvider provider : providers) {
@@ -40,9 +40,9 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		// FIXME: check for duplicate types
 		// FIXME: check for cycles
 		allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
-		this.propagators = new ArrayList<ThreadContextPropagator>(propagators);
-		for (ThreadContextPropagator propagator : propagators) {
-			propagator.setup(this);
+		this.extensions = new ArrayList<ConcurrencyManagerExtension>(extensions);
+		for (ConcurrencyManagerExtension extension : extensions) {
+			extension.setup(this);
 		}
 	}
 	
@@ -143,7 +143,7 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	}
 
 	// For tests
-	public List<ThreadContextPropagator> getPropagators() {
-		return propagators;
+	public List<ConcurrencyManagerExtension> getExtensions() {
+		return extensions;
 	}
 }

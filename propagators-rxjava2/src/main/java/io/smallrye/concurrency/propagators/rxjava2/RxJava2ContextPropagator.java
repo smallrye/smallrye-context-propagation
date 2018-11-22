@@ -2,6 +2,7 @@ package io.smallrye.concurrency.propagators.rxjava2;
 
 import org.eclipse.microprofile.concurrent.ThreadContext;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -9,7 +10,6 @@ import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.plugins.RxJavaPlugins;
-import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
 /**
  * Reactive Context propagator for RxJava 1. Supports propagating context to all {@link Single},
@@ -17,7 +17,7 @@ import io.smallrye.concurrency.spi.ThreadContextPropagator;
  *
  * @author Stéphane Épardaud
  */
-public class RxJava2ContextPropagator implements ThreadContextPropagator {
+public class RxJava2ContextPropagator implements ConcurrencyManagerExtension {
 
 	public void setup(ConcurrencyManager manager) {
 		ThreadContext threadContext = manager.newThreadContextBuilder().build();

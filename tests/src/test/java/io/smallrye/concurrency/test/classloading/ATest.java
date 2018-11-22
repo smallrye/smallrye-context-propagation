@@ -3,14 +3,13 @@ package io.smallrye.concurrency.test.classloading;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
 import org.junit.Assert;
 
 import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
-import io.smallrye.concurrency.impl.ThreadContextImpl;
 import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
-import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
 public class ATest implements BiConsumer<ClassLoader,ClassLoader> {
     @Override
@@ -28,7 +27,7 @@ public class ATest implements BiConsumer<ClassLoader,ClassLoader> {
         Assert.assertTrue(plan.unchangedProviders.isEmpty());
         Assert.assertTrue(plan.clearedProviders.isEmpty());
         
-        List<ThreadContextPropagator> propagators = SmallRyeConcurrencyProvider.getManager().getPropagators();
+        List<ConcurrencyManagerExtension> propagators = SmallRyeConcurrencyProvider.getManager().getExtensions();
         Assert.assertEquals(1, propagators.size());
         Assert.assertTrue(propagators.get(0).getClass() == MultiClassloadingTest.AThreadContextPropagator.class);
     }

@@ -5,17 +5,16 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerBuilder;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
-
-import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
 public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManagerBuilder {
 
 	private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 	private boolean addDiscoveredThreadContextProviders;
-	private boolean addDiscoveredThreadContextPropagators;
+	private boolean addDiscoveredConcurrencyManagerExtensions;
     private List<ThreadContextProvider> contextProviders = new ArrayList<>();
-    private List<ThreadContextPropagator> contextPropagators = new ArrayList<>();
+    private List<ConcurrencyManagerExtension> concurrencyManagerExtensions = new ArrayList<>();
 
 	@Override
 	public SmallRyeConcurrencyManagerBuilder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -40,25 +39,27 @@ public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManagerBuil
         return discoveredThreadContextProviders;
     }
 
-	public SmallRyeConcurrencyManagerBuilder withThreadContextPropagators(ThreadContextPropagator... propagators) {
-		for (ThreadContextPropagator contextPropagator : propagators) {
-			contextPropagators.add(contextPropagator);
+    @Override
+	public SmallRyeConcurrencyManagerBuilder withConcurrencyManagerExtensions(ConcurrencyManagerExtension... propagators) {
+		for (ConcurrencyManagerExtension contextPropagator : propagators) {
+			concurrencyManagerExtensions.add(contextPropagator);
 		}
 		return this;
 	}
 
-	public SmallRyeConcurrencyManagerBuilder addDiscoveredThreadContextPropagators() {
-		addDiscoveredThreadContextPropagators = true;
+    @Override
+	public SmallRyeConcurrencyManagerBuilder addDiscoveredConcurrencyManagerExtensions() {
+		addDiscoveredConcurrencyManagerExtensions = true;
 		return this;
 	}
 
-    private List<ThreadContextPropagator> discoverThreadContextPropagators() {
-        List<ThreadContextPropagator> discoveredThreadContextPropagators = new ArrayList<>();
-        ServiceLoader<ThreadContextPropagator> configSourceLoader = ServiceLoader.load(ThreadContextPropagator.class, classLoader);
+    private List<ConcurrencyManagerExtension> discoverConcurrencyManagerExtensions() {
+        List<ConcurrencyManagerExtension> discoveredConcurrencyManagerExtensions = new ArrayList<>();
+        ServiceLoader<ConcurrencyManagerExtension> configSourceLoader = ServiceLoader.load(ConcurrencyManagerExtension.class, classLoader);
         configSourceLoader.forEach(configSource -> {
-            discoveredThreadContextPropagators.add(configSource);
+            discoveredConcurrencyManagerExtensions.add(configSource);
         });
-        return discoveredThreadContextPropagators;
+        return discoveredConcurrencyManagerExtensions;
     }
 
 	@Override
@@ -71,10 +72,10 @@ public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManagerBuil
 	public SmallRyeConcurrencyManager build() {
 		if(addDiscoveredThreadContextProviders)
 			contextProviders.addAll(discoverThreadContextProviders());
-		if(addDiscoveredThreadContextPropagators)
-			contextPropagators.addAll(discoverThreadContextPropagators());
+		if(addDiscoveredConcurrencyManagerExtensions)
+			concurrencyManagerExtensions.addAll(discoverConcurrencyManagerExtensions());
 		
-		return new SmallRyeConcurrencyManager(contextProviders, contextPropagators);
+		return new SmallRyeConcurrencyManager(contextProviders, concurrencyManagerExtensions);
 	}
 
 }

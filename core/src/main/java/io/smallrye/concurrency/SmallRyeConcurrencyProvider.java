@@ -48,7 +48,7 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
                     config = getConcurrencyManagerBuilder()
                     		.forClassLoader(classLoader)
                             .addDiscoveredThreadContextProviders()
-                            .addDiscoveredThreadContextPropagators()
+                            .addDiscoveredConcurrencyManagerExtensions()
                             .build();
                     registerConcurrencyManager(config, classLoader);
                 }
