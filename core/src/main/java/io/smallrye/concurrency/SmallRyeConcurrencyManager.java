@@ -52,21 +52,21 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	
 	public CapturedContextState captureContext() {
 		Map<String, String> props = Collections.emptyMap();
-		return new CapturedContextState(this, getProviders(), props);
+		return new CapturedContextState(this, getProviderPlan(), props);
 	}
 
 	public CapturedContextState captureContext(String[] propagated, String[] unchanged, String[] cleared) {
 		Map<String, String> props = Collections.emptyMap();
-		return new CapturedContextState(this, getProviders(propagated, unchanged, cleared), props);
+		return new CapturedContextState(this, getProviderPlan(propagated, unchanged, cleared), props);
 	}
 
-	// package-protected for tests
-	ThreadContextProviderPlan getProviders() {
-		return getProviders(allProviderTypes, NO_STRING, NO_STRING);
+	// for tests
+	public ThreadContextProviderPlan getProviderPlan() {
+		return getProviderPlan(allProviderTypes, NO_STRING, NO_STRING);
 	}
 	
 	// package-protected for tests
-	ThreadContextProviderPlan getProviders(String[] propagated, String[] unchanged, String[] cleared) {
+	ThreadContextProviderPlan getProviderPlan(String[] propagated, String[] unchanged, String[] cleared) {
 		Set<String> propagatedSet = new HashSet<>();
 		Collections.addAll(propagatedSet, propagated);
 		

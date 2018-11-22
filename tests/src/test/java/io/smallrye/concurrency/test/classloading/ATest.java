@@ -6,8 +6,10 @@ import java.util.function.BiConsumer;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
 import org.junit.Assert;
 
+import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
 import io.smallrye.concurrency.impl.ThreadContextImpl;
+import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
 import io.smallrye.concurrency.spi.ThreadContextPropagator;
 
 public class ATest implements BiConsumer<ClassLoader,ClassLoader> {
@@ -19,9 +21,12 @@ public class ATest implements BiConsumer<ClassLoader,ClassLoader> {
     	System.err.println("A CM: "+concurrencyProvider.getConcurrencyManager());
     	Assert.assertEquals(parentClassLoader, concurrencyProvider.getClass().getClassLoader());
     	
-        ThreadContextImpl threadContext = (ThreadContextImpl) concurrencyProvider.newThreadContextBuilder().build();
-        Assert.assertArrayEquals(new String[] {"A"}, threadContext.getPropagated());
-        Assert.assertArrayEquals(new String[] {}, threadContext.getUnchanged());
+    	SmallRyeConcurrencyManager concurrencyManager = (SmallRyeConcurrencyManager) concurrencyProvider.getConcurrencyManager();
+    	ThreadContextProviderPlan plan = concurrencyManager.getProviderPlan();
+        Assert.assertEquals(1, plan.propagatedProviders.size());
+        Assert.assertEquals("A", plan.propagatedProviders.iterator().next().getThreadContextType());
+        Assert.assertTrue(plan.unchangedProviders.isEmpty());
+        Assert.assertTrue(plan.clearedProviders.isEmpty());
         
         List<ThreadContextPropagator> propagators = SmallRyeConcurrencyProvider.getManager().getPropagators();
         Assert.assertEquals(1, propagators.size());
