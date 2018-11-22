@@ -47,13 +47,13 @@ public class ManualPropagationMultipleRequestTest {
 
 	private void testRunnable(ExecutorService executor) throws Throwable {
 		newRequest("req 1");
-		Future<?> task1 = executor.submit(threadContext.withCurrentContext(() -> {
+		Future<?> task1 = executor.submit(threadContext.contextualRunnable(() -> {
 			checkContextCaptured("req 1");
 			endOfRequest();
 		}));
 		
 		newRequest("req 2");
-		Future<?> task2 = executor.submit(threadContext.withCurrentContext(() -> {
+		Future<?> task2 = executor.submit(threadContext.contextualRunnable(() -> {
 			checkContextCaptured("req 2");
 			endOfRequest();
 		}));

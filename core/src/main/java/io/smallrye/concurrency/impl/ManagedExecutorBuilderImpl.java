@@ -15,7 +15,8 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
 
 	public ManagedExecutorBuilderImpl(SmallRyeConcurrencyManager manager) {
 		this.manager = manager;
-		propagated = manager.getAllProviderTypes();
+		propagated = SmallRyeConcurrencyManager.ALL_REMAINING_ARRAY;
+		cleared = SmallRyeConcurrencyManager.TRANSACTION_ARRAY;
 	}
 
 	@Override

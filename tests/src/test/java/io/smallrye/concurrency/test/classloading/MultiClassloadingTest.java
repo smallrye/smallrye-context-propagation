@@ -18,9 +18,7 @@
  */
 package io.smallrye.concurrency.test.classloading;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.eclipse.microprofile.concurrent.ThreadContext;
@@ -69,14 +67,9 @@ public class MultiClassloadingTest {
 		}
 
 		@Override
-		public ThreadContextSnapshot defaultContext(Map<String, String> props) {
+		public ThreadContextSnapshot clearedContext(Map<String, String> props) {
 			// TODO Auto-generated method stub
 			return null;
-		}
-
-		@Override
-		public Set<String> getPrerequisites() {
-			return Collections.emptySet();
 		}
 
 		@Override
@@ -95,14 +88,9 @@ public class MultiClassloadingTest {
 		}
 
 		@Override
-		public ThreadContextSnapshot defaultContext(Map<String, String> props) {
+		public ThreadContextSnapshot clearedContext(Map<String, String> props) {
 			// TODO Auto-generated method stub
 			return null;
-		}
-
-		@Override
-		public Set<String> getPrerequisites() {
-			return Collections.emptySet();
 		}
 
 		@Override

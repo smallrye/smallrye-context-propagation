@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
@@ -22,6 +21,9 @@ import io.smallrye.concurrency.spi.ThreadContextPropagator;
 public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	
 	public static final String[] NO_STRING = new String[0];
+
+	public static final String[] ALL_REMAINING_ARRAY = new String[] { ThreadContext.ALL_REMAINING };
+	public static final String[] TRANSACTION_ARRAY = new String[] { ThreadContext.TRANSACTION };
 	
 	private List<ThreadContextProvider> providers;
 	private List<ThreadContextPropagator> propagators;
@@ -103,9 +105,31 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 			unchangedSet.removeAll(clearedSet);
 		}
 
-		return new ThreadContextProviderPlan(propagatedSet.stream().map(name -> providersByType.get(name)).collect(Collectors.toSet()), 
-				unchangedSet.stream().map(name -> providersByType.get(name)).collect(Collectors.toSet()), 
-				clearedSet.stream().map(name -> providersByType.get(name)).collect(Collectors.toSet()));
+		// check for existence
+		Set<ThreadContextProvider> propagatedProviders = new HashSet<>();
+		for(String type : propagatedSet) {
+			ThreadContextProvider provider = providersByType.get(type);
+			if(provider == null)
+				throw new IllegalArgumentException("Missing propagated provider type: "+type);
+			propagatedProviders.add(provider);
+		}
+
+		// ignore missing for cleared/unchanged
+		Set<ThreadContextProvider> unchangedProviders = new HashSet<>();
+		for(String type : unchangedSet) {
+			ThreadContextProvider provider = providersByType.get(type);
+			if(provider != null)
+				unchangedProviders.add(provider);
+		}
+
+		Set<ThreadContextProvider> clearedProviders = new HashSet<>();
+		for(String type : clearedSet) {
+			ThreadContextProvider provider = providersByType.get(type);
+			if(provider != null)
+				clearedProviders.add(provider);
+		}
+
+		return new ThreadContextProviderPlan(propagatedProviders, unchangedProviders, clearedProviders);
 	}
 
 	@Override
