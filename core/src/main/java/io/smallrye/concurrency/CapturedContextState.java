@@ -20,7 +20,7 @@ public class CapturedContextState {
 			threadContext.add(provider.currentContext(props));
 		}
 		for (ThreadContextProvider provider : plan.clearedProviders) {
-			threadContext.add(provider.defaultContext(props));
+			threadContext.add(provider.clearedContext(props));
 		}
 	}
 	

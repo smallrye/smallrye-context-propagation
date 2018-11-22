@@ -20,7 +20,7 @@ import io.smallrye.concurrency.spi.ThreadContextPropagator;
 public class RxJava2ContextPropagator implements ThreadContextPropagator {
 
 	public void setup(ConcurrencyManager manager) {
-		ThreadContext threadContext = manager.newThreadContextBuilder().propagated(ThreadContext.ALL).build();
+		ThreadContext threadContext = manager.newThreadContextBuilder().build();
 		RxJavaPlugins.setOnSingleSubscribe(new ContextPropagatorOnSingleCreateAction(threadContext));
 		RxJavaPlugins.setOnCompletableSubscribe(new ContextPropagatorOnCompletableCreateAction(threadContext));
 		RxJavaPlugins.setOnFlowableSubscribe(new ContextPropagatorOnFlowableCreateAction(threadContext));

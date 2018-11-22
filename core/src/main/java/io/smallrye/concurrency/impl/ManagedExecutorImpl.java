@@ -52,24 +52,24 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		return super.submit(threadContext.withCurrentContext(task));
+		return super.submit(threadContext.contextualCallable(task));
 	}
 
 	@Override
 	public <T> Future<T> submit(Runnable task, T result) {
-		return super.submit(threadContext.withCurrentContext(task), result);
+		return super.submit(threadContext.contextualRunnable(task), result);
 	}
 
 	@Override
 	public Future<?> submit(Runnable task) {
-		return super.submit(threadContext.withCurrentContext(task));
+		return super.submit(threadContext.contextualRunnable(task));
 	}
 
 	@Override
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
 		List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
 		for (Callable<T> task : tasks) {
-			wrappedTasks.add(threadContext.withCurrentContext(task));
+			wrappedTasks.add(threadContext.contextualCallable(task));
 		}
 		return super.invokeAll(wrappedTasks);
 	}
@@ -79,7 +79,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 			throws InterruptedException {
 		List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
 		for (Callable<T> task : tasks) {
-			wrappedTasks.add(threadContext.withCurrentContext(task));
+			wrappedTasks.add(threadContext.contextualCallable(task));
 		}
 		return super.invokeAll(wrappedTasks, timeout, unit);
 	}
@@ -88,7 +88,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
 		List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
 		for (Callable<T> task : tasks) {
-			wrappedTasks.add(threadContext.withCurrentContext(task));
+			wrappedTasks.add(threadContext.contextualCallable(task));
 		}
 		return super.invokeAny(wrappedTasks);
 	}
@@ -98,14 +98,14 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 			throws InterruptedException, ExecutionException, TimeoutException {
 		List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
 		for (Callable<T> task : tasks) {
-			wrappedTasks.add(threadContext.withCurrentContext(task));
+			wrappedTasks.add(threadContext.contextualCallable(task));
 		}
 		return super.invokeAny(wrappedTasks, timeout, unit);
 	}
 
 	@Override
 	public void execute(Runnable command) {
-		super.execute(threadContext.withCurrentContext(command));
+		super.execute(threadContext.contextualRunnable(command));
 	}
 
 	@Override

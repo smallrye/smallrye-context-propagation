@@ -18,7 +18,7 @@ import rx.plugins.RxJavaHooks;
 public class RxJava1ContextPropagator implements ThreadContextPropagator {
 
 	public void setup(ConcurrencyManager manager) {
-		ThreadContext threadContext = manager.newThreadContextBuilder().propagated(ThreadContext.ALL).build();
+		ThreadContext threadContext = manager.newThreadContextBuilder().build();
 		RxJavaHooks.setOnSingleCreate(new ContextPropagatorOnSingleCreateAction(threadContext));
 		RxJavaHooks.setOnObservableCreate(new ContextPropagatorOnObservableCreateAction(threadContext));
 		RxJavaHooks.setOnCompletableCreate(new ContextPropagatorOnCompleteCreateAction(threadContext));

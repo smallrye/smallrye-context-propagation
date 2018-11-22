@@ -1,17 +1,20 @@
 package io.smallrye.concurrency.impl;
 
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 
 public class ThreadContextProviderPlan {
 
-	public final List<ThreadContextProvider> clearedProviders;
-	public final List<ThreadContextProvider> propagatedProviders;
+	public final Set<ThreadContextProvider> propagatedProviders;
+	public final Set<ThreadContextProvider> unchangedProviders;
+	public final Set<ThreadContextProvider> clearedProviders;
 
-	public ThreadContextProviderPlan(List<ThreadContextProvider> propagatedProviders,
-			List<ThreadContextProvider> clearedProviders) {
-		this.propagatedProviders = propagatedProviders;
-		this.clearedProviders = clearedProviders;
+	public ThreadContextProviderPlan(Set<ThreadContextProvider> propagatedSet, 
+			Set<ThreadContextProvider> unchangedSet, 
+			Set<ThreadContextProvider> clearedSet) {
+		this.propagatedProviders = propagatedSet;
+		this.unchangedProviders = unchangedSet;
+		this.clearedProviders = clearedSet;
 	}
 }
