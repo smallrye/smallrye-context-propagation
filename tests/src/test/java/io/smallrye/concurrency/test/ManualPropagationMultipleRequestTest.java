@@ -21,7 +21,7 @@ public class ManualPropagationMultipleRequestTest {
 	@BeforeClass
 	public static void init() {
 		SmallRyeConcurrencyProvider.getManager();
-		threadContext = (ThreadContextImpl) ConcurrencyProvider.instance().newThreadContextBuilder().build();
+		threadContext = (ThreadContextImpl) ConcurrencyProvider.instance().getConcurrencyManager().newThreadContextBuilder().build();
 	}
 
 	public void newRequest(String reqId) {
