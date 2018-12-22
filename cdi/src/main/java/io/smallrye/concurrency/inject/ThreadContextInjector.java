@@ -22,7 +22,7 @@ public class ThreadContextInjector {
         String[] unchanged;
         String[] cleared;
         if (config != null) {
-            propagated = config.value();
+            propagated = config.propagated();
             unchanged = config.unchanged();
             cleared = config.cleared();
         } else {

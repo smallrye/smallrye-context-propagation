@@ -3,12 +3,12 @@ package io.smallrye.concurrency.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -21,33 +21,37 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	private ThreadContextImpl threadContext;
 
 	public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
-		super(0, maxAsync, 0l, null, new LinkedBlockingQueue<>(maxQueued));
+		super(maxAsync, maxAsync, 5000l, TimeUnit.MILLISECONDS,
+				new ArrayBlockingQueue<>(maxQueued, true), new ThreadPoolExecutor.AbortPolicy());
+		// we set core thread == max threads but allow for core thread timeout
+		// this prevents delaying spawning of new thread to when the queue is full
+		this.allowCoreThreadTimeOut(true);
 		this.threadContext = threadContext;
 	}
 
 	@Override
 	public void shutdown() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+		super.shutdown();
 	}
 
 	@Override
 	public List<Runnable> shutdownNow() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+		return super.shutdownNow();
 	}
 
 	@Override
 	public boolean isShutdown() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+		return super.isShutdown();
 	}
 
 	@Override
 	public boolean isTerminated() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+		return super.isTerminated();
 	}
 
 	@Override
 	public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-		throw new IllegalStateException("Lifecyle management disallowed");
+		return super.awaitTermination(timeout, unit);
 	}
 
 	@Override
@@ -110,7 +114,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 
 	@Override
 	public <U> CompletableFuture<U> completedFuture(U value) {
-		return threadContext.withContextCapture(CompletableFuture.completedFuture(value));
+		return threadContext.withContextCapture(CompletableFuture.completedFuture(value), this);
 	}
 
 	@Override

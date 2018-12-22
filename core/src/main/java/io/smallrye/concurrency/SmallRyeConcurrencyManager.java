@@ -1,12 +1,7 @@
 package io.smallrye.concurrency;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
@@ -110,6 +105,7 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		for(String type : propagatedSet) {
 			ThreadContextProvider provider = providersByType.get(type);
 			if(provider == null)
+				// TODO this may be redundant as spec requires to perform this check on Builder.build() call anyway
 				throw new IllegalArgumentException("Missing propagated provider type: "+type);
 			propagatedProviders.add(provider);
 		}
@@ -129,6 +125,18 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 				clearedProviders.add(provider);
 		}
 
+		// lastly, add all unmentioned contexts to cleared list
+		Set<String> unmentionedContexts = this.getAllThreadContextProviderNames();
+		unmentionedContexts.removeAll(unchangedSet);
+		unmentionedContexts.removeAll(propagatedSet);
+		unmentionedContexts.removeAll(clearedSet);
+		for (String type : unmentionedContexts) {
+			ThreadContextProvider provider = providersByType.get(type);
+			if (provider != null) {
+				clearedProviders.add(provider);
+			}
+		}
+
 		return new ThreadContextProviderPlan(propagatedProviders, unchangedProviders, clearedProviders);
 	}
 
@@ -140,6 +148,17 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 	@Override
 	public ThreadContext.Builder newThreadContextBuilder() {
 		return new ThreadContextBuilderImpl(this);
+	}
+
+	public Set<String> getAllThreadContextProviderNames() {
+		Set<String> result = providers.stream().map(tcp -> tcp.getThreadContextType()).collect(Collectors.toSet());
+		// FIXME following contexts are to be default part of implementation and should always be known
+		// remove once implemented
+		result.add(ThreadContext.CDI);
+		result.add(ThreadContext.SECURITY);
+		result.add(ThreadContext.TRANSACTION);
+		result.add(ThreadContext.APPLICATION);
+		return result;
 	}
 
 	// For tests

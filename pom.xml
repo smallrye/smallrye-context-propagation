@@ -59,6 +59,10 @@
 			<name>Stéphane Épardaud</name>
 			<email>stef@epardaud.fr</email>
 		</developer>
+        <developer>
+			<name>Matěj Novotný</name>
+			<email>manovotn@redhat.com</email>
+		</developer>
 	</developers>
 
 	<dependencyManagement>

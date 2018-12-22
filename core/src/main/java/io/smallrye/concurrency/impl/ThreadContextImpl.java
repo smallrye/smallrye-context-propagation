@@ -1,6 +1,7 @@
 package io.smallrye.concurrency.impl;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -17,6 +18,7 @@ import org.eclipse.microprofile.concurrent.ThreadContext;
 import io.smallrye.concurrency.ActiveContextState;
 import io.smallrye.concurrency.CapturedContextState;
 import io.smallrye.concurrency.SmallRyeConcurrencyManager;
+import org.eclipse.microprofile.concurrent.ThreadContextConfig;
 
 public class ThreadContextImpl implements ThreadContext {
 
@@ -27,9 +29,13 @@ public class ThreadContextImpl implements ThreadContext {
 
 	public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged, String[] cleared) {
 		this.manager = manager;
-		this.propagated = propagated;
-		this.cleared = cleared;
-		this.unchanged = unchanged;
+		this.propagated = propagated.length > 0 ? propagated : ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated();
+		this.cleared = cleared.length > 0 ? cleared : ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared();
+		this.unchanged = unchanged.length > 0 ? unchanged : ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged();
+		// verify that all contexts exist
+		verifyContextsExist(propagated, manager);
+		verifyContextsExist(cleared, manager);
+		verifyContextsExist(unchanged, manager);
 	}
 
 	// For Tests
@@ -191,4 +197,14 @@ public class ThreadContextImpl implements ThreadContext {
 		};
 	}
 
+	private void verifyContextsExist(String[] contexts, SmallRyeConcurrencyManager manager) {
+		if (contexts.length > 0) {
+			Set<String> known = manager.getAllThreadContextProviderNames();
+			for (String s : contexts) {
+				if (!known.contains(s) && !s.equals(ThreadContext.ALL_REMAINING)) {
+					throw new IllegalStateException("Unknown ThreadContext found - " + s);
+				}
+			}
+		}
+	}
 }
