@@ -3,7 +3,6 @@ package io.smallrye.concurrency.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -22,12 +21,14 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	private ThreadContextImpl threadContext;
 
 	public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
-		super(0, maxAsync == -1 ? Integer.MAX_VALUE : maxAsync, 5000l, TimeUnit.MILLISECONDS,
+		super(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync, 
+		        maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync, 
+		                5000l, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued), 
 				new ThreadPoolExecutor.AbortPolicy());
 		// we set core thread == max threads but allow for core thread timeout
 		// this prevents delaying spawning of new thread to when the queue is full
-//		this.allowCoreThreadTimeOut(true);
+		this.allowCoreThreadTimeOut(true);
 		this.threadContext = threadContext;
 	}
 
