@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -65,21 +66,23 @@ public class ManualPropagationMultipleRequestTest {
 
 	@Test
 	public void testCompletionStageOnSingleWorkerThread() throws Throwable {
-		testCompletionStage(Executors.newFixedThreadPool(1));
+	    ManagedExecutor executor = ConcurrencyProvider.instance().getConcurrencyManager().newManagedExecutorBuilder().maxAsync(1).build();
+		testCompletionStage(executor);
 	}
 
 	@Test
 	public void testCompletionStageOnTwoWorkerThread() throws Throwable {
-		testCompletionStage(Executors.newFixedThreadPool(2));
+        ManagedExecutor executor = ConcurrencyProvider.instance().getConcurrencyManager().newManagedExecutorBuilder().maxAsync(2).build();
+		testCompletionStage(executor);
 	}
 
-	private void testCompletionStage(ExecutorService executor) throws Throwable {
+	private void testCompletionStage(ManagedExecutor executor) throws Throwable {
 		CountDownLatch latch = new CountDownLatch(2);
 
 		Throwable[] ret = new Throwable[2];
 
 		newRequest("req 1");
-		CompletableFuture<Void> cf1 = threadContext.withContextCapture(new CompletableFuture<>());
+		CompletableFuture<Void> cf1 = executor.newIncompleteFuture();
 		cf1.handleAsync((v, t) -> {
 			try {
 				ret[0] = t;
@@ -90,10 +93,10 @@ public class ManualPropagationMultipleRequestTest {
 			}
 			latch.countDown();
 			return null;
-		}, executor);
+		});
 		
 		newRequest("req 2");
-		CompletableFuture<Void> cf2 = threadContext.withContextCapture(new CompletableFuture<>());
+		CompletableFuture<Void> cf2 = executor.newIncompleteFuture();
 		cf2.handleAsync((v, t) -> {
 			try {
 				ret[1] = t;
@@ -104,7 +107,7 @@ public class ManualPropagationMultipleRequestTest {
 			}
 			latch.countDown();
 			return null;
-		}, executor);
+		});
 
 		cf1.complete(null);
 		cf2.complete(null);
