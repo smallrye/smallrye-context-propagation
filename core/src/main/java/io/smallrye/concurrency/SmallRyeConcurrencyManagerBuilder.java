@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerBuilder;
+import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
 import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 
-public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManagerBuilder {
+public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManager.Builder {
 
 	private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 	private boolean addDiscoveredThreadContextProviders;
