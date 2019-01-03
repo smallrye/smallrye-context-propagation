@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.concurrent.ThreadContextConfig;
 
 import io.smallrye.concurrency.ActiveContextState;
 import io.smallrye.concurrency.CapturedContextState;
@@ -24,6 +25,9 @@ public class ThreadContextImpl implements ThreadContext {
 
 	public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged, String[] cleared) {
 		this.manager = manager;
+        propagated = propagated.length > 0 ? propagated : ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated();
+        cleared = cleared.length > 0 ? cleared : ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared();
+        unchanged = unchanged.length > 0 ? unchanged : ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged();
 		this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
 	}
 
@@ -171,5 +175,4 @@ public class ThreadContextImpl implements ThreadContext {
 			}
 		};
 	}
-
 }
