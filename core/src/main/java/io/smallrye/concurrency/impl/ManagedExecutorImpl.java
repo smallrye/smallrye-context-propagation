@@ -29,27 +29,37 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 
 	@Override
 	public void shutdown() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+	    // FIXME: spec?
+//		throw new IllegalStateException("Lifecyle management disallowed");
+	    super.shutdown();
 	}
 
 	@Override
 	public List<Runnable> shutdownNow() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+        // FIXME: spec?
+//		throw new IllegalStateException("Lifecyle management disallowed");
+	    return super.shutdownNow();
 	}
 
 	@Override
 	public boolean isShutdown() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+        // FIXME: spec?
+//		throw new IllegalStateException("Lifecyle management disallowed");
+	    return super.isShutdown();
 	}
 
 	@Override
 	public boolean isTerminated() {
-		throw new IllegalStateException("Lifecyle management disallowed");
+        // FIXME: spec?
+//		throw new IllegalStateException("Lifecyle management disallowed");
+	    return super.isTerminated();
 	}
 
 	@Override
 	public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-		throw new IllegalStateException("Lifecyle management disallowed");
+        // FIXME: spec?
+//		throw new IllegalStateException("Lifecyle management disallowed");
+	    return super.awaitTermination(timeout, unit);
 	}
 
 	@Override

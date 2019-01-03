@@ -32,12 +32,16 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
 
 	@Override
 	public ManagedExecutor.Builder maxAsync(int max) {
+	    if(max < -1)
+	        throw new IllegalArgumentException("Invalid value for maxAsync: "+max+" (must be -1 or >= 0)");
 		this.maxAsync = max;
 		return this;
 	}
 
 	@Override
 	public ManagedExecutor.Builder maxQueued(int max) {
+        if(max <= 0 && max != -1)
+            throw new IllegalArgumentException("Invalid value for maxQueued: "+max+" (must be -1 or > 0)");
 		this.maxQueued = max;
 		return this;
 	}
