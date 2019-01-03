@@ -1,7 +1,12 @@
 package io.smallrye.concurrency;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
@@ -73,18 +78,13 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		}
 
 		// expand ALL_REMAINING
+		boolean hadAllRemaining = false;
 		if(propagatedSet.contains(ThreadContext.ALL_REMAINING)) {
 			propagatedSet.remove(ThreadContext.ALL_REMAINING);
 			Collections.addAll(propagatedSet, allProviderTypes);
 			propagatedSet.removeAll(clearedSet);
 			propagatedSet.removeAll(unchangedSet);
-		}
-
-		if(clearedSet.contains(ThreadContext.ALL_REMAINING)) {
-			clearedSet.remove(ThreadContext.ALL_REMAINING);
-			Collections.addAll(clearedSet, allProviderTypes);
-			clearedSet.removeAll(propagatedSet);
-			clearedSet.removeAll(unchangedSet);
+			hadAllRemaining = true;
 		}
 
 		if(unchangedSet.contains(ThreadContext.ALL_REMAINING)) {
@@ -92,6 +92,15 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 			Collections.addAll(unchangedSet, allProviderTypes);
 			unchangedSet.removeAll(propagatedSet);
 			unchangedSet.removeAll(clearedSet);
+			hadAllRemaining = true;
+		}
+
+		// cleared implicitly defaults to ALL_REMAINING if nobody else is using it
+		if(clearedSet.contains(ThreadContext.ALL_REMAINING) || !hadAllRemaining) {
+		    clearedSet.remove(ThreadContext.ALL_REMAINING);
+		    Collections.addAll(clearedSet, allProviderTypes);
+		    clearedSet.removeAll(propagatedSet);
+		    clearedSet.removeAll(unchangedSet);
 		}
 
 		// check for existence
@@ -117,19 +126,6 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 			if(provider != null)
 				clearedProviders.add(provider);
 		}
-
-		// STEF: I think this is against the spec which says it defaults to TRANSACTION only
-//		// lastly, add all unmentioned contexts to cleared list
-//		Set<String> unmentionedContexts = this.getAllThreadContextProviderNames();
-//		unmentionedContexts.removeAll(unchangedSet);
-//		unmentionedContexts.removeAll(propagatedSet);
-//		unmentionedContexts.removeAll(clearedSet);
-//		for (String type : unmentionedContexts) {
-//			ThreadContextProvider provider = providersByType.get(type);
-//			if (provider != null) {
-//				clearedProviders.add(provider);
-//			}
-//		}
 
 		return new ThreadContextProviderPlan(propagatedProviders, unchangedProviders, clearedProviders);
 	}
