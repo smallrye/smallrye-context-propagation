@@ -8,8 +8,8 @@ import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
 
 	private SmallRyeConcurrencyManager manager;
-	private int maxAsync;
-	private int maxQueued;
+	private int maxAsync = -1;
+	private int maxQueued = -1;
 	private String[] propagated;
 	private String[] cleared;
 

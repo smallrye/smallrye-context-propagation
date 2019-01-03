@@ -21,7 +21,9 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	private ThreadContextImpl threadContext;
 
 	public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
-		super(0, maxAsync, 0l, null, new LinkedBlockingQueue<>(maxQueued));
+		super(0, maxAsync == -1 ? Integer.MAX_VALUE : maxAsync, 
+		        0l, TimeUnit.SECONDS, 
+		        new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued));
 		this.threadContext = threadContext;
 	}
 

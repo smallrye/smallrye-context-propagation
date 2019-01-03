@@ -1,6 +1,5 @@
 package io.smallrye.concurrency.impl;
 
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -21,29 +20,11 @@ import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 public class ThreadContextImpl implements ThreadContext {
 
 	private SmallRyeConcurrencyManager manager;
-	private String[] cleared;
-	private String[] propagated;
-	private String[] unchanged;
+    private ThreadContextProviderPlan plan;
 
 	public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged, String[] cleared) {
 		this.manager = manager;
-		this.propagated = propagated;
-		this.cleared = cleared;
-		this.unchanged = unchanged;
-	}
-
-	// For Tests
-	
-	public String[] getPropagated() {
-		return Arrays.copyOf(propagated, propagated.length);
-	}
-
-	public String[] getCleared() {
-		return Arrays.copyOf(cleared, cleared.length);
-	}
-
-	public String[] getUnchanged() {
-		return Arrays.copyOf(unchanged, unchanged.length);
+		this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
 	}
 
 	//
@@ -65,7 +46,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public Executor currentContextExecutor() {
-		return withContext(manager.captureContext(propagated, unchanged, cleared));
+		return withContext(manager.captureContext(plan));
 	}
 
 	Executor withContext(CapturedContextState state) {
@@ -81,7 +62,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, U> BiConsumer<T, U> contextualConsumer(BiConsumer<T, U> consumer) {
-		return contextualConsumer(manager.captureContext(propagated, unchanged, cleared), consumer);
+		return contextualConsumer(manager.captureContext(plan), consumer);
 	}
 
 	<T, U> BiConsumer<T, U> contextualConsumer(CapturedContextState state, BiConsumer<T, U> consumer) {
@@ -97,7 +78,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, U, R> BiFunction<T, U, R> contextualFunction(BiFunction<T, U, R> function) {
-		return contextualFunction(manager.captureContext(propagated, unchanged, cleared), function);
+		return contextualFunction(manager.captureContext(plan), function);
 	}
 
 	<T, U, R> BiFunction<T, U, R> contextualFunction(CapturedContextState state, BiFunction<T, U, R> function) {
@@ -113,7 +94,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <R> Callable<R> contextualCallable(Callable<R> callable) {
-		return contextualCallable(manager.captureContext(propagated, unchanged, cleared), callable);
+		return contextualCallable(manager.captureContext(plan), callable);
 	}
 
 	<R> Callable<R> contextualCallable(CapturedContextState state, Callable<R> callable) {
@@ -129,7 +110,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T> Consumer<T> contextualConsumer(Consumer<T> consumer) {
-		return contextualConsumer(manager.captureContext(propagated, unchanged, cleared), consumer);
+		return contextualConsumer(manager.captureContext(plan), consumer);
 	}
 	
 	<T> Consumer<T> contextualConsumer(CapturedContextState state, Consumer<T> consumer) {
@@ -145,7 +126,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <T, R> Function<T, R> contextualFunction(Function<T, R> function) {
-		return contextualFunction(manager.captureContext(propagated, unchanged, cleared), function);
+		return contextualFunction(manager.captureContext(plan), function);
 	}
 
 	<T, R> Function<T, R> contextualFunction(CapturedContextState state, Function<T, R> function) {
@@ -161,7 +142,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public Runnable contextualRunnable(Runnable runnable) {
-		return contextualRunnable(manager.captureContext(propagated, unchanged, cleared), runnable);
+		return contextualRunnable(manager.captureContext(plan), runnable);
 	}
 	
 	Runnable contextualRunnable(CapturedContextState state, Runnable runnable) {
@@ -177,7 +158,7 @@ public class ThreadContextImpl implements ThreadContext {
 
 	@Override
 	public <R> Supplier<R> contextualSupplier(Supplier<R> supplier) {
-		return contextualSupplier(manager.captureContext(propagated, unchanged, cleared), supplier);
+		return contextualSupplier(manager.captureContext(plan), supplier);
 	}
 
 	<R> Supplier<R> contextualSupplier(CapturedContextState state, Supplier<R> supplier) {

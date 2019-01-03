@@ -50,14 +50,9 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		return allProviderTypes;
 	}
 	
-	public CapturedContextState captureContext() {
-		Map<String, String> props = Collections.emptyMap();
-		return new CapturedContextState(this, getProviderPlan(), props);
-	}
-
-	public CapturedContextState captureContext(String[] propagated, String[] unchanged, String[] cleared) {
-		Map<String, String> props = Collections.emptyMap();
-		return new CapturedContextState(this, getProviderPlan(propagated, unchanged, cleared), props);
+	public CapturedContextState captureContext(ThreadContextProviderPlan plan) {
+	    Map<String, String> props = Collections.emptyMap();
+	    return new CapturedContextState(this, plan, props);
 	}
 
 	// for tests
@@ -65,8 +60,7 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		return getProviderPlan(allProviderTypes, NO_STRING, NO_STRING);
 	}
 	
-	// package-protected for tests
-	ThreadContextProviderPlan getProviderPlan(String[] propagated, String[] unchanged, String[] cleared) {
+	public ThreadContextProviderPlan getProviderPlan(String[] propagated, String[] unchanged, String[] cleared) {
 		Set<String> propagatedSet = new HashSet<>();
 		Collections.addAll(propagatedSet, propagated);
 		
@@ -80,7 +74,7 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		if(propagatedSet.removeAll(unchangedSet) || propagatedSet.removeAll(clearedSet)
 				|| clearedSet.removeAll(propagatedSet) || clearedSet.removeAll(unchangedSet)
 				|| unchangedSet.removeAll(propagatedSet) || unchangedSet.removeAll(clearedSet)) {
-			throw new IllegalArgumentException("Cannot use ALL_REMAINING in more than one of propagated, cleared, unchanged");
+			throw new IllegalStateException("Cannot use ALL_REMAINING in more than one of propagated, cleared, unchanged");
 		}
 
 		// expand ALL_REMAINING
@@ -110,7 +104,7 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		for(String type : propagatedSet) {
 			ThreadContextProvider provider = providersByType.get(type);
 			if(provider == null)
-				throw new IllegalArgumentException("Missing propagated provider type: "+type);
+				throw new IllegalStateException("Missing propagated provider type: "+type);
 			propagatedProviders.add(provider);
 		}
 
