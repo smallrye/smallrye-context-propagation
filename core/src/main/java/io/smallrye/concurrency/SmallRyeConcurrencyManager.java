@@ -144,17 +144,6 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 		return new ThreadContextBuilderImpl(this);
 	}
 
-	public Set<String> getAllThreadContextProviderNames() {
-		Set<String> result = providers.stream().map(tcp -> tcp.getThreadContextType()).collect(Collectors.toSet());
-		// FIXME following contexts are to be default part of implementation and should always be known
-		// remove once implemented
-		result.add(ThreadContext.CDI);
-		result.add(ThreadContext.SECURITY);
-		result.add(ThreadContext.TRANSACTION);
-		result.add(ThreadContext.APPLICATION);
-		return result;
-	}
-
 	// For tests
 	public List<ConcurrencyManagerExtension> getExtensions() {
 		return extensions;
