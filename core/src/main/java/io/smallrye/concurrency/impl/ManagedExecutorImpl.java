@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -22,11 +23,11 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 
 	public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
 		super(0, maxAsync == -1 ? Integer.MAX_VALUE : maxAsync, 5000l, TimeUnit.MILLISECONDS,
-				new ArrayBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued, true), 
+				new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued), 
 				new ThreadPoolExecutor.AbortPolicy());
 		// we set core thread == max threads but allow for core thread timeout
 		// this prevents delaying spawning of new thread to when the queue is full
-		this.allowCoreThreadTimeOut(true);
+//		this.allowCoreThreadTimeOut(true);
 		this.threadContext = threadContext;
 	}
 
