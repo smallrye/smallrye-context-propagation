@@ -29,5 +29,15 @@
             <artifactId>cdi-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-spi</artifactId>
+            <version>${version.weld.api}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-api</artifactId>
+            <version>${version.weld.api}</version>
+        </dependency>
     </dependencies>
 </project>
