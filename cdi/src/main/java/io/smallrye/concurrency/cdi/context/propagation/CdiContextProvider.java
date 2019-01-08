@@ -21,19 +21,18 @@ import java.util.Map;
 
 public class CdiContextProvider implements ThreadContextProvider {
 
+    // NO-OP ThreadContextSnapshot to avoid unnecessary lambda creation in clearedContext() invocations
+    private static ThreadContextSnapshot NOOP_SNAPSHOT = () -> () -> {};
+
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> map) {
-        // Verify CDI is available
-        CDI<Object> cdi;
-        try {
-            cdi = CDI.current();
-        } catch (IllegalStateException e) {
-            // no CDI provider found, return null as per docs to state that propagation is not supported
+        if (!isCdiAvailable()) {
+            //return null as per docs to state that propagation of this context is not supported
             return null;
         }
 
         // grab WeldManager
-        WeldManager weldManager = cdi.select(WeldManager.class).get();
+        WeldManager weldManager = CDI.current().select(WeldManager.class).get();
 
         // Firstly, we need to capture beans currently active in CDI contexts
         Map<Class<? extends Annotation>, Collection<ContextualInstance<?>>> scopeToContextualInstances = new HashMap<>();
@@ -104,22 +103,34 @@ public class CdiContextProvider implements ThreadContextProvider {
 
     @Override
     public ThreadContextSnapshot clearedContext(Map<String, String> map) {
-        // Verify CDI is available
-        CDI<Object> cdi;
-        try {
-            cdi = CDI.current();
-        } catch (IllegalStateException e) {
-            // no CDI provider found, return null as per docs to state that propagation is not supported
+        if (!isCdiAvailable()) {
+            //return null as per docs to state that propagation of this context is not supported
             return null;
         }
 
         // by default Application and Singleton scopes propagate anyway
         // Request, Session and Conversation are not active in any new thread, so no operation should be taken here
-        return () -> () -> {};
+        return NOOP_SNAPSHOT;
     }
 
     @Override
     public String getThreadContextType() {
         return ThreadContext.CDI;
+    }
+
+    /**
+     * Checks if CDI is available within the application by using {@code CDI.current()}.
+     * If an exception is thrown, it is suppressed and false is returns, otherwise true is returned.
+     *
+     * @return true if CDI can be used, false otherwise
+     */
+    private boolean isCdiAvailable() {
+        try {
+            CDI.current();
+        } catch (IllegalStateException e) {
+            // no CDI provider found, CDI isn't available
+            return false;
+        }
+        return true;
     }
 }
