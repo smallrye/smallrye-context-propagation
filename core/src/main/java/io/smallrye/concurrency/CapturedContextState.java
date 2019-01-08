@@ -17,10 +17,16 @@ public class CapturedContextState {
 	CapturedContextState(SmallRyeConcurrencyManager context, ThreadContextProviderPlan plan, Map<String, String> props){
 		this.context = context;
 		for (ThreadContextProvider provider : plan.propagatedProviders) {
-			threadContext.add(provider.currentContext(props));
+			ThreadContextSnapshot snapshot = provider.currentContext(props);
+			if (snapshot != null) {
+				threadContext.add(snapshot);
+			}
 		}
 		for (ThreadContextProvider provider : plan.clearedProviders) {
-			threadContext.add(provider.clearedContext(props));
+			ThreadContextSnapshot snapshot = provider.clearedContext(props);
+			if (snapshot != null) {
+				threadContext.add(snapshot);
+			}
 		}
 	}
 	
