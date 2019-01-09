@@ -13,6 +13,7 @@ import org.jboss.weld.context.bound.BoundSessionContext;
 import org.jboss.weld.context.bound.MutableBoundRequest;
 import org.jboss.weld.manager.api.WeldManager;
 
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -126,11 +127,11 @@ public class CdiContextProvider implements ThreadContextProvider {
      */
     private boolean isCdiAvailable() {
         try {
-            CDI.current();
-        } catch (IllegalStateException e) {
+            Instance<WeldManager> instance = CDI.current().select(WeldManager.class);
+            return instance != null && instance.get() != null;
+        } catch (IllegalStateException | NullPointerException e) {
             // no CDI provider found, CDI isn't available
             return false;
         }
-        return true;
     }
 }
