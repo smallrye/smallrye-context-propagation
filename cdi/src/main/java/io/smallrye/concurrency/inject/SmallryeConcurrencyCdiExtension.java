@@ -111,6 +111,10 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
             .filter((name) -> (threadContextMap.containsKey(name)))
             .collect(Collectors.toSet()));
 
+        // we also need to remove all that we found a user producer for
+        unconfiguredExecutorIPs.removeAll(userDefinedMEProducers);
+        unconfiguredContextIPs.removeAll(userDefinedTCProducers);
+
         // remove information about ME and TC that user defined producers for
         for (String s: userDefinedMEProducers) {
             executorMap.remove(s);
