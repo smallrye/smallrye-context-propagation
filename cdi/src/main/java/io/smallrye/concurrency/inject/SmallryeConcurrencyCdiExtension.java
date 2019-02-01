@@ -239,20 +239,8 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
      */
     private <T extends Annotation> T extractAnnotationFromIP(InjectionPoint injectionPoint, Class<T> annotationClazz) {
         T annotation = null;
-        if (!injectionPoint.getQualifiers().isEmpty()) {
-            Member member = injectionPoint.getMember();
-            if (member instanceof Field) {
-                // injection into field
-                annotation = ((Field) member).getAnnotation(annotationClazz);
-            } else {
-                if (member instanceof Method) {
-                    //injection into method
-                    annotation = ((Method) member).getAnnotation(annotationClazz);
-                } else {
-                    // constructor injection
-                    annotation = ((Constructor<?>) member).getAnnotation(annotationClazz);
-                }
-            }
+        if (injectionPoint.getAnnotated().isAnnotationPresent(annotationClazz)) {
+            annotation = injectionPoint.getAnnotated().getAnnotation(annotationClazz);
         }
         return annotation;
     }
