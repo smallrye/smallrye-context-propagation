@@ -18,7 +18,7 @@ import org.eclipse.microprofile.concurrent.ManagedExecutor;
 
 public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedExecutor {
 
-    private ThreadContextImpl threadContext;
+    private final ThreadContextImpl threadContext;
 
     public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
         super(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync,
