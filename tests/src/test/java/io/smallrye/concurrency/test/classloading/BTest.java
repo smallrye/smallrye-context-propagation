@@ -11,17 +11,18 @@ import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
 import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
 
-public class BTest implements BiConsumer<ClassLoader,ClassLoader> {
+public class BTest implements BiConsumer<ClassLoader, ClassLoader> {
+
     @Override
-	public void accept(ClassLoader thisClassLoader, ClassLoader parentClassLoader) {
-    	Assert.assertEquals(thisClassLoader, BTest.class.getClassLoader());
-    	ConcurrencyProvider concurrencyProvider = ConcurrencyProvider.instance();
-    	System.err.println("B CP: "+concurrencyProvider);
-    	System.err.println("B CM: "+concurrencyProvider.getConcurrencyManager());
-    	Assert.assertEquals(parentClassLoader, concurrencyProvider.getClass().getClassLoader());
-    	
-    	SmallRyeConcurrencyManager concurrencyManager = (SmallRyeConcurrencyManager) concurrencyProvider.getConcurrencyManager();
-    	ThreadContextProviderPlan plan = concurrencyManager.getProviderPlan();
+    public void accept(ClassLoader thisClassLoader, ClassLoader parentClassLoader) {
+        Assert.assertEquals(thisClassLoader, BTest.class.getClassLoader());
+        ConcurrencyProvider concurrencyProvider = ConcurrencyProvider.instance();
+        System.err.println("B CP: " + concurrencyProvider);
+        System.err.println("B CM: " + concurrencyProvider.getConcurrencyManager());
+        Assert.assertEquals(parentClassLoader, concurrencyProvider.getClass().getClassLoader());
+
+        SmallRyeConcurrencyManager concurrencyManager = (SmallRyeConcurrencyManager) concurrencyProvider.getConcurrencyManager();
+        ThreadContextProviderPlan plan = concurrencyManager.getProviderPlan();
         Assert.assertEquals(1, plan.propagatedProviders.size());
         Assert.assertEquals("B", plan.propagatedProviders.iterator().next().getThreadContextType());
         Assert.assertTrue(plan.unchangedProviders.isEmpty());

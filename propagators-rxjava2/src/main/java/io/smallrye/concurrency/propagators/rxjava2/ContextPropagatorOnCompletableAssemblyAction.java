@@ -10,32 +10,33 @@ import io.reactivex.functions.Function;
 
 public class ContextPropagatorOnCompletableAssemblyAction implements Function<Completable, Completable> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnCompletableAssemblyAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnCompletableAssemblyAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@Override
-	public Completable apply(Completable t) throws Exception {
-		return new ContextPropagatorCompletable(t, threadContext.currentContextExecutor());
-	}
+    @Override
+    public Completable apply(Completable t) throws Exception {
+        return new ContextPropagatorCompletable(t, threadContext.currentContextExecutor());
+    }
 
-	public class ContextPropagatorCompletable extends Completable {
+    public class ContextPropagatorCompletable extends Completable {
 
-		private Completable source;
-		private Executor contextExecutor;
+        private Completable source;
 
-		public ContextPropagatorCompletable(Completable t, Executor contextExecutor) {
-			this.source = t;
-			this.contextExecutor = contextExecutor;
-		}
+        private Executor contextExecutor;
 
-		@Override
-		protected void subscribeActual(CompletableObserver observer) {
-			contextExecutor.execute(() -> source.subscribe(observer));
-		}
+        public ContextPropagatorCompletable(Completable t, Executor contextExecutor) {
+            this.source = t;
+            this.contextExecutor = contextExecutor;
+        }
 
-	}
+        @Override
+        protected void subscribeActual(CompletableObserver observer) {
+            contextExecutor.execute(() -> source.subscribe(observer));
+        }
+
+    }
 
 }

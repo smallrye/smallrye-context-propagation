@@ -11,59 +11,59 @@ import rx.functions.Func1;
 
 public class ContextPropagatorOnCompleteCreateAction implements Func1<OnSubscribe, OnSubscribe> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnCompleteCreateAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnCompleteCreateAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@Override
-	public OnSubscribe call(OnSubscribe t) {
-		return new ContextCapturerCompletable(t, threadContext.currentContextExecutor());
-	}
+    @Override
+    public OnSubscribe call(OnSubscribe t) {
+        return new ContextCapturerCompletable(t, threadContext.currentContextExecutor());
+    }
 
-	final static class ContextCapturerCompletable implements OnSubscribe {
+    final static class ContextCapturerCompletable implements OnSubscribe {
 
-	    final OnSubscribe source;
+        final OnSubscribe source;
 
-		private Executor contextExecutor;
+        private Executor contextExecutor;
 
-	    public ContextCapturerCompletable(OnSubscribe source, Executor contextExecutor) {
-	        this.source = source;
-	        this.contextExecutor = contextExecutor;
-	    }
+        public ContextCapturerCompletable(OnSubscribe source, Executor contextExecutor) {
+            this.source = source;
+            this.contextExecutor = contextExecutor;
+        }
 
-	    @Override
-	    public void call(CompletableSubscriber t) {
-	    	contextExecutor.execute(() -> source.call(new OnAssemblyCompletableSubscriber(t, contextExecutor)));
-	    }
+        @Override
+        public void call(CompletableSubscriber t) {
+            contextExecutor.execute(() -> source.call(new OnAssemblyCompletableSubscriber(t, contextExecutor)));
+        }
 
-	    static final class OnAssemblyCompletableSubscriber implements CompletableSubscriber {
+        static final class OnAssemblyCompletableSubscriber implements CompletableSubscriber {
 
-	        final CompletableSubscriber actual;
-			private Executor contextExecutor;
+            final CompletableSubscriber actual;
 
+            private Executor contextExecutor;
 
-	        public OnAssemblyCompletableSubscriber(CompletableSubscriber actual, Executor contextExecutor) {
-	            this.actual = actual;
-		        this.contextExecutor = contextExecutor;
-	        }
+            public OnAssemblyCompletableSubscriber(CompletableSubscriber actual, Executor contextExecutor) {
+                this.actual = actual;
+                this.contextExecutor = contextExecutor;
+            }
 
-	        @Override
-	        public void onError(Throwable e) {
-	        	contextExecutor.execute(() -> actual.onError(e));
-	        }
+            @Override
+            public void onError(Throwable e) {
+                contextExecutor.execute(() -> actual.onError(e));
+            }
 
-	        @Override
-	        public void onCompleted() {
-	        	contextExecutor.execute(() -> actual.onCompleted());
-	        }
+            @Override
+            public void onCompleted() {
+                contextExecutor.execute(() -> actual.onCompleted());
+            }
 
-			@Override
-			public void onSubscribe(Subscription d) {
-				contextExecutor.execute(() -> actual.onSubscribe(d));
-			}
-	    }
-	}
+            @Override
+            public void onSubscribe(Subscription d) {
+                contextExecutor.execute(() -> actual.onSubscribe(d));
+            }
+        }
+    }
 
 }

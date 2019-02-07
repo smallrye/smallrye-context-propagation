@@ -1,31 +1,32 @@
 package io.smallrye.concurrency.test;
 
 public class MyContext {
-	private static ThreadLocal<MyContext> context = new ThreadLocal<MyContext>();
-	
-	public static void init() {
-		context.set(new MyContext());
-	}
 
-	public static void clear() {
-		context.remove();
-	}
+    private static ThreadLocal<MyContext> context = new ThreadLocal<MyContext>();
 
-	public static MyContext get() {
-		return context.get();
-	}
-	
-	public static void set(MyContext newContext) {
-		context.set(newContext);
-	}
+    public static void init() {
+        context.set(new MyContext());
+    }
 
-	private String reqId;
+    public static void clear() {
+        context.remove();
+    }
 
-	public void set(String reqId) {
-		this.reqId = reqId;
-	}
-	
-	public String getReqId() {
-		return reqId;
-	}
+    public static MyContext get() {
+        return context.get();
+    }
+
+    public static void set(MyContext newContext) {
+        context.set(newContext);
+    }
+
+    private String reqId;
+
+    public void set(String reqId) {
+        this.reqId = reqId;
+    }
+
+    public String getReqId() {
+        return reqId;
+    }
 }

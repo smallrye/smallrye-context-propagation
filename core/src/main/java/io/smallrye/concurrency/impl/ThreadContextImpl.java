@@ -19,156 +19,157 @@ import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 
 public class ThreadContextImpl implements ThreadContext {
 
-	private SmallRyeConcurrencyManager manager;
+    private SmallRyeConcurrencyManager manager;
     private ThreadContextProviderPlan plan;
 
-	public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged, String[] cleared) {
-		this.manager = manager;
-		this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
-	}
+    public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged,
+            String[] cleared) {
+        this.manager = manager;
+        this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
+    }
 
-	//
-	// Wrappers
-	
-	@Override
-	public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future){
-		return withContextCapture(future, null);
-	}
+    //
+    // Wrappers
 
-	<T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, ManagedExecutor executor){
-		return new CompletableFutureWrapper<>(this, future, executor);
-	}
+    @Override
+    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future) {
+        return withContextCapture(future, null);
+    }
 
-	@Override
-	public <T> CompletionStage<T> withContextCapture(CompletionStage<T> future){
-		return new CompletionStageWrapper<>(this, future);
-	}
+    <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, ManagedExecutor executor) {
+        return new CompletableFutureWrapper<>(this, future, executor);
+    }
 
-	@Override
-	public Executor currentContextExecutor() {
-		return withContext(manager.captureContext(plan));
-	}
+    @Override
+    public <T> CompletionStage<T> withContextCapture(CompletionStage<T> future) {
+        return new CompletionStageWrapper<>(this, future);
+    }
 
-	Executor withContext(CapturedContextState state) {
-		return (runnable) -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				runnable.run();
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    @Override
+    public Executor currentContextExecutor() {
+        return withContext(manager.captureContext(plan));
+    }
 
-	@Override
-	public <T, U> BiConsumer<T, U> contextualConsumer(BiConsumer<T, U> consumer) {
-		return contextualConsumer(manager.captureContext(plan), consumer);
-	}
+    Executor withContext(CapturedContextState state) {
+        return (runnable) -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                runnable.run();
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 
-	<T, U> BiConsumer<T, U> contextualConsumer(CapturedContextState state, BiConsumer<T, U> consumer) {
-		return (t, u) -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				consumer.accept(t, u);
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    @Override
+    public <T, U> BiConsumer<T, U> contextualConsumer(BiConsumer<T, U> consumer) {
+        return contextualConsumer(manager.captureContext(plan), consumer);
+    }
 
-	@Override
-	public <T, U, R> BiFunction<T, U, R> contextualFunction(BiFunction<T, U, R> function) {
-		return contextualFunction(manager.captureContext(plan), function);
-	}
+    <T, U> BiConsumer<T, U> contextualConsumer(CapturedContextState state, BiConsumer<T, U> consumer) {
+        return (t, u) -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                consumer.accept(t, u);
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 
-	<T, U, R> BiFunction<T, U, R> contextualFunction(CapturedContextState state, BiFunction<T, U, R> function) {
-		return (t, u) -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				return function.apply(t, u);
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    @Override
+    public <T, U, R> BiFunction<T, U, R> contextualFunction(BiFunction<T, U, R> function) {
+        return contextualFunction(manager.captureContext(plan), function);
+    }
 
-	@Override
-	public <R> Callable<R> contextualCallable(Callable<R> callable) {
-		return contextualCallable(manager.captureContext(plan), callable);
-	}
+    <T, U, R> BiFunction<T, U, R> contextualFunction(CapturedContextState state, BiFunction<T, U, R> function) {
+        return (t, u) -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                return function.apply(t, u);
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 
-	<R> Callable<R> contextualCallable(CapturedContextState state, Callable<R> callable) {
-		return () -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				return callable.call();
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    @Override
+    public <R> Callable<R> contextualCallable(Callable<R> callable) {
+        return contextualCallable(manager.captureContext(plan), callable);
+    }
 
-	@Override
-	public <T> Consumer<T> contextualConsumer(Consumer<T> consumer) {
-		return contextualConsumer(manager.captureContext(plan), consumer);
-	}
-	
-	<T> Consumer<T> contextualConsumer(CapturedContextState state, Consumer<T> consumer) {
-		return t -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				consumer.accept(t);
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    <R> Callable<R> contextualCallable(CapturedContextState state, Callable<R> callable) {
+        return () -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                return callable.call();
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 
-	@Override
-	public <T, R> Function<T, R> contextualFunction(Function<T, R> function) {
-		return contextualFunction(manager.captureContext(plan), function);
-	}
+    @Override
+    public <T> Consumer<T> contextualConsumer(Consumer<T> consumer) {
+        return contextualConsumer(manager.captureContext(plan), consumer);
+    }
 
-	<T, R> Function<T, R> contextualFunction(CapturedContextState state, Function<T, R> function) {
-		return t -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				return function.apply(t);
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    <T> Consumer<T> contextualConsumer(CapturedContextState state, Consumer<T> consumer) {
+        return t -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                consumer.accept(t);
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 
-	@Override
-	public Runnable contextualRunnable(Runnable runnable) {
-		return contextualRunnable(manager.captureContext(plan), runnable);
-	}
-	
-	Runnable contextualRunnable(CapturedContextState state, Runnable runnable) {
-		return () -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				runnable.run();
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    @Override
+    public <T, R> Function<T, R> contextualFunction(Function<T, R> function) {
+        return contextualFunction(manager.captureContext(plan), function);
+    }
 
-	@Override
-	public <R> Supplier<R> contextualSupplier(Supplier<R> supplier) {
-		return contextualSupplier(manager.captureContext(plan), supplier);
-	}
+    <T, R> Function<T, R> contextualFunction(CapturedContextState state, Function<T, R> function) {
+        return t -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                return function.apply(t);
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 
-	<R> Supplier<R> contextualSupplier(CapturedContextState state, Supplier<R> supplier) {
-		return () -> {
-			ActiveContextState activeState = state.begin();
-			try {
-				return supplier.get();
-			}finally {
-				activeState.endContext();
-			}
-		};
-	}
+    @Override
+    public Runnable contextualRunnable(Runnable runnable) {
+        return contextualRunnable(manager.captureContext(plan), runnable);
+    }
+
+    Runnable contextualRunnable(CapturedContextState state, Runnable runnable) {
+        return () -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                runnable.run();
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
+
+    @Override
+    public <R> Supplier<R> contextualSupplier(Supplier<R> supplier) {
+        return contextualSupplier(manager.captureContext(plan), supplier);
+    }
+
+    <R> Supplier<R> contextualSupplier(CapturedContextState state, Supplier<R> supplier) {
+        return () -> {
+            ActiveContextState activeState = state.begin();
+            try {
+                return supplier.get();
+            } finally {
+                activeState.endContext();
+            }
+        };
+    }
 }

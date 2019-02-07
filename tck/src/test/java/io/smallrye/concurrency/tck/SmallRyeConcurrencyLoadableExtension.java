@@ -19,7 +19,8 @@ import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArch
 import org.jboss.arquillian.core.spi.LoadableExtension;
 
 /**
- * Arquillian loadable extension which makes sure {@link SmallRyeConcurrencyArchiveProcessor} is registered
+ * Arquillian loadable extension which makes sure
+ * {@link SmallRyeConcurrencyArchiveProcessor} is registered
  *
  * @author <a href="mailto:manovotn@redhat.com">Matej Novotny</a>
  */

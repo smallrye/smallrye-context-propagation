@@ -26,7 +26,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 
 /**
- * We need to add SmallRye implementation into each TCK test archive, that way all added producers and such will work.
+ * We need to add SmallRye implementation into each TCK test archive, that way
+ * all added producers and such will work.
  *
  * @author <a href="mailto:manovotn@redhat.com">Matej Novotny</a>
  */
@@ -40,15 +41,18 @@ public class SmallRyeConcurrencyArchiveProcessor implements ApplicationArchivePr
         // in case to WAR, we add it as a library, as would user in their app
         if (applicationArchive instanceof WebArchive) {
             WebArchive archive = (WebArchive) applicationArchive;
-            // we need to create new archives and add them as dependencies, they have to be instance of ArchiveAsset in order to pass
-            // this check https://github.com/arquillian/arquillian-container-weld/blob/2.0.0.Final/impl/src/main/java/org/jboss/arquillian/container/weld/embedded/Utils.java#L73
+            // we need to create new archives and add them as dependencies, they
+            // have to be instance of ArchiveAsset in order to pass
+            // this check
+            // https://github.com/arquillian/arquillian-container-weld/blob/2.0.0.Final/impl/src/main/java/org/jboss/arquillian/container/weld/embedded/Utils.java#L73
             for (int i = 0; i < dependencies.length; i++) {
                 JavaArchive newJar = ShrinkWrap.createFromZipFile(JavaArchive.class, dependencies[i]);
                 archive.addAsLibrary(newJar);
             }
         }
         if (applicationArchive instanceof JavaArchive) {
-            // TODO, add impl for JARs, we would need to add them as packages or classes
+            // TODO, add impl for JARs, we would need to add them as packages or
+            // classes
         }
     }
 

@@ -11,33 +11,34 @@ import io.reactivex.functions.Function;
 @SuppressWarnings("rawtypes")
 public class ContextPropagatorOnMaybeAssemblyAction implements Function<Maybe, Maybe> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnMaybeAssemblyAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnMaybeAssemblyAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Maybe apply(Maybe t) throws Exception {
-		return new ContextPropagatorMaybe(t, threadContext.currentContextExecutor());
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Maybe apply(Maybe t) throws Exception {
+        return new ContextPropagatorMaybe(t, threadContext.currentContextExecutor());
+    }
 
-	public class ContextPropagatorMaybe<T> extends Maybe<T> {
+    public class ContextPropagatorMaybe<T> extends Maybe<T> {
 
-		private Maybe<T> source;
-		private final Executor contextExecutor;
+        private Maybe<T> source;
 
-		public ContextPropagatorMaybe(Maybe<T> t, Executor contextExecutor) {
-			this.source = t;
-			this.contextExecutor = contextExecutor;
-		}
+        private final Executor contextExecutor;
 
-		@Override
-		protected void subscribeActual(MaybeObserver<? super T> observer) {
-			contextExecutor.execute(() -> source.subscribe(observer));
-		}
+        public ContextPropagatorMaybe(Maybe<T> t, Executor contextExecutor) {
+            this.source = t;
+            this.contextExecutor = contextExecutor;
+        }
 
-	}
+        @Override
+        protected void subscribeActual(MaybeObserver<? super T> observer) {
+            contextExecutor.execute(() -> source.subscribe(observer));
+        }
+
+    }
 
 }

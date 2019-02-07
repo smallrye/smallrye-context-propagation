@@ -1,6 +1,5 @@
 package io.smallrye.concurrency.test.cdi.context.propagation;
 
-
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
 import org.jboss.weld.environment.se.Weld;
@@ -20,7 +19,8 @@ public class CdiContextPropagatesTest {
 
     @BeforeClass
     public static void init() {
-        // with smallrye-conc-cdi on CP, the CDI thread context provider gets discovered
+        // with smallrye-conc-cdi on CP, the CDI thread context provider gets
+        // discovered
         weld = new Weld();
         weld.addBeanClasses(MyReqScopedBean.class);
     }
@@ -52,7 +52,8 @@ public class CdiContextPropagatesTest {
             // finally, end request context and shutdown Weld container
             controller.deactivate();
         }
-        // assert the state of the same bean was changed by another thread via executor
+        // assert the state of the same bean was changed by another thread via
+        // executor
         Assert.assertTrue(finalState == 2);
     }
 }

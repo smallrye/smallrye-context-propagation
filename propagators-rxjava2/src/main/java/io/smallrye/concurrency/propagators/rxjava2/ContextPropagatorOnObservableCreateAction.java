@@ -10,49 +10,49 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 
 @SuppressWarnings("rawtypes")
-public class ContextPropagatorOnObservableCreateAction
-		implements BiFunction<Observable, Observer, Observer> {
+public class ContextPropagatorOnObservableCreateAction implements BiFunction<Observable, Observer, Observer> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnObservableCreateAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnObservableCreateAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Observer apply(Observable observable, Observer observer) throws Exception {
-		return new ContextCapturerObservable(observable, observer, threadContext.currentContextExecutor());
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Observer apply(Observable observable, Observer observer) throws Exception {
+        return new ContextCapturerObservable(observable, observer, threadContext.currentContextExecutor());
+    }
 
-	public class ContextCapturerObservable<T> implements Observer<T> {
+    public class ContextCapturerObservable<T> implements Observer<T> {
 
-	    private final Observer<T> source;
-		private final Executor contextExecutor;
+        private final Observer<T> source;
 
-		public ContextCapturerObservable(Observable<T> observable, Observer<T> observer, Executor contextExecutor) {
-	    	this.source = observer;
-			this.contextExecutor = contextExecutor;
-		}
+        private final Executor contextExecutor;
 
-		@Override
-		public void onComplete() {
-			contextExecutor.execute(() -> source.onComplete());
-		}
+        public ContextCapturerObservable(Observable<T> observable, Observer<T> observer, Executor contextExecutor) {
+            this.source = observer;
+            this.contextExecutor = contextExecutor;
+        }
 
-		@Override
-		public void onError(Throwable t) {
-			contextExecutor.execute(() -> source.onError(t));
-		}
+        @Override
+        public void onComplete() {
+            contextExecutor.execute(() -> source.onComplete());
+        }
 
-		@Override
-		public void onNext(T v) {
-			contextExecutor.execute(() -> source.onNext(v));
-		}
+        @Override
+        public void onError(Throwable t) {
+            contextExecutor.execute(() -> source.onError(t));
+        }
 
-		@Override
-		public void onSubscribe(Disposable d) {
-			contextExecutor.execute(() -> source.onSubscribe(d));
-		}
-	}
+        @Override
+        public void onNext(T v) {
+            contextExecutor.execute(() -> source.onNext(v));
+        }
+
+        @Override
+        public void onSubscribe(Disposable d) {
+            contextExecutor.execute(() -> source.onSubscribe(d));
+        }
+    }
 }

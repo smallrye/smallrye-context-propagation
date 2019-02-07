@@ -11,33 +11,34 @@ import io.reactivex.functions.Function;
 @SuppressWarnings("rawtypes")
 public class ContextPropagatorOnFlowableAssemblyAction implements Function<Flowable, Flowable> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnFlowableAssemblyAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnFlowableAssemblyAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Flowable apply(Flowable t) throws Exception {
-		return new ContextPropagatorFlowable(t, threadContext.currentContextExecutor());
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Flowable apply(Flowable t) throws Exception {
+        return new ContextPropagatorFlowable(t, threadContext.currentContextExecutor());
+    }
 
-	public class ContextPropagatorFlowable<T> extends Flowable<T> {
+    public class ContextPropagatorFlowable<T> extends Flowable<T> {
 
-		private Flowable<T> source;
-		private final Executor contextExecutor;
+        private Flowable<T> source;
 
-		public ContextPropagatorFlowable(Flowable<T> t, Executor contextExecutor) {
-			this.source = t;
-			this.contextExecutor = contextExecutor;
-		}
+        private final Executor contextExecutor;
 
-		@Override
-		protected void subscribeActual(Subscriber<? super T> observer) {
-			contextExecutor.execute(() -> source.subscribe(observer));
-		}
+        public ContextPropagatorFlowable(Flowable<T> t, Executor contextExecutor) {
+            this.source = t;
+            this.contextExecutor = contextExecutor;
+        }
 
-	}
+        @Override
+        protected void subscribeActual(Subscriber<? super T> observer) {
+            contextExecutor.execute(() -> source.subscribe(observer));
+        }
+
+    }
 
 }

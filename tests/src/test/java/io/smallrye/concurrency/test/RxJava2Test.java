@@ -19,157 +19,147 @@ import io.smallrye.concurrency.SmallRyeConcurrencyProvider;
 
 public class RxJava2Test {
 
-	@BeforeClass
-	public static void init() {
-		// initialise
-		SmallRyeConcurrencyProvider.getManager();
-	}
+    @BeforeClass
+    public static void init() {
+        // initialise
+        SmallRyeConcurrencyProvider.getManager();
+    }
 
-	@Before
-	public void before() {
-		MyContext.init();
-		MyContext.get().set("test");
-	}
-	
-	@After
-	public void after() {
-		MyContext.clear();
-	}
-	
-	@Test
-	public void testCompletable() throws Throwable {
-		// check initial state
-		checkContextCaptured();
-		CountDownLatch latch = new CountDownLatch(1);
+    @Before
+    public void before() {
+        MyContext.init();
+        MyContext.get().set("test");
+    }
 
-		Throwable[] ret = new Throwable[1];
-		Completable.create(subscriber -> {
-			// check deferred state
-			checkContextCaptured();
-			
-			subscriber.onComplete();
-		})
-		.subscribeOn(Schedulers.newThread())
-		.subscribe(() -> {
-			latch.countDown();
-		}, error -> {
-			ret[0] = error;
-			latch.countDown();
-		});
+    @After
+    public void after() {
+        MyContext.clear();
+    }
 
-		latch.await();
-		if (ret[0] != null)
-			throw ret[0];
-	}
+    @Test
+    public void testCompletable() throws Throwable {
+        // check initial state
+        checkContextCaptured();
+        CountDownLatch latch = new CountDownLatch(1);
 
-	@Test
-	public void testSingle() throws Throwable {
-		// check initial state
-		checkContextCaptured();
-		CountDownLatch latch = new CountDownLatch(1);
+        Throwable[] ret = new Throwable[1];
+        Completable.create(subscriber -> {
+            // check deferred state
+            checkContextCaptured();
 
-		Throwable[] ret = new Throwable[1];
-		Single.create(subscriber -> {
-			// check deferred state
-			checkContextCaptured();
-			
-			subscriber.onSuccess("YES");
-		})
-		.subscribeOn(Schedulers.newThread())
-		.subscribe(success -> {
-			latch.countDown();
-		}, error -> {
-			ret[0] = error;
-			latch.countDown();
-		});
+            subscriber.onComplete();
+        }).subscribeOn(Schedulers.newThread()).subscribe(() -> {
+            latch.countDown();
+        }, error -> {
+            ret[0] = error;
+            latch.countDown();
+        });
 
-		latch.await();
-		if (ret[0] != null)
-			throw ret[0];
-	}
+        latch.await();
+        if (ret[0] != null)
+            throw ret[0];
+    }
 
-	@Test
-	public void testObservable() throws Throwable {
-		// check initial state
-		checkContextCaptured();
-		CountDownLatch latch = new CountDownLatch(1);
+    @Test
+    public void testSingle() throws Throwable {
+        // check initial state
+        checkContextCaptured();
+        CountDownLatch latch = new CountDownLatch(1);
 
-		Throwable[] ret = new Throwable[1];
-		Observable.create(emitter -> {
-			// check deferred state
-			checkContextCaptured();
-			
-			emitter.onNext("a");
-			emitter.onComplete();
-		})
-		.subscribeOn(Schedulers.newThread())
-		.subscribe(success -> {
-			latch.countDown();
-		}, error -> {
-			ret[0] = error;
-			latch.countDown();
-		});
+        Throwable[] ret = new Throwable[1];
+        Single.create(subscriber -> {
+            // check deferred state
+            checkContextCaptured();
 
-		latch.await();
-		if (ret[0] != null)
-			throw ret[0];
-	}
+            subscriber.onSuccess("YES");
+        }).subscribeOn(Schedulers.newThread()).subscribe(success -> {
+            latch.countDown();
+        }, error -> {
+            ret[0] = error;
+            latch.countDown();
+        });
 
-	@Test
-	public void testFlowable() throws Throwable {
-		// check initial state
-		checkContextCaptured();
-		CountDownLatch latch = new CountDownLatch(1);
+        latch.await();
+        if (ret[0] != null)
+            throw ret[0];
+    }
 
-		Throwable[] ret = new Throwable[1];
-		Flowable.create(emitter -> {
-			// check deferred state
-			checkContextCaptured();
-			
-			emitter.onNext("a");
-			emitter.onComplete();
-		}, BackpressureStrategy.BUFFER)
-		.subscribeOn(Schedulers.newThread())
-		.subscribe(success -> {
-			latch.countDown();
-		}, error -> {
-			ret[0] = error;
-			latch.countDown();
-		});
+    @Test
+    public void testObservable() throws Throwable {
+        // check initial state
+        checkContextCaptured();
+        CountDownLatch latch = new CountDownLatch(1);
 
-		latch.await();
-		if (ret[0] != null)
-			throw ret[0];
-	}
+        Throwable[] ret = new Throwable[1];
+        Observable.create(emitter -> {
+            // check deferred state
+            checkContextCaptured();
 
-	@Test
-	public void testMaybe() throws Throwable {
-		// check initial state
-		checkContextCaptured();
-		CountDownLatch latch = new CountDownLatch(1);
+            emitter.onNext("a");
+            emitter.onComplete();
+        }).subscribeOn(Schedulers.newThread()).subscribe(success -> {
+            latch.countDown();
+        }, error -> {
+            ret[0] = error;
+            latch.countDown();
+        });
 
-		Throwable[] ret = new Throwable[1];
-		Maybe.create(emitter -> {
-			// check deferred state
-			checkContextCaptured();
+        latch.await();
+        if (ret[0] != null)
+            throw ret[0];
+    }
 
-			emitter.onSuccess("a");
-			emitter.onComplete();
-		})
-		.subscribeOn(Schedulers.newThread())
-		.subscribe(success -> {
-			latch.countDown();
-		}, error -> {
-			ret[0] = error;
-			latch.countDown();
-		});
+    @Test
+    public void testFlowable() throws Throwable {
+        // check initial state
+        checkContextCaptured();
+        CountDownLatch latch = new CountDownLatch(1);
 
-		latch.await();
-		if (ret[0] != null)
-			throw ret[0];
-	}
+        Throwable[] ret = new Throwable[1];
+        Flowable.create(emitter -> {
+            // check deferred state
+            checkContextCaptured();
 
-	private void checkContextCaptured() {
-		Assert.assertEquals("test", MyContext.get().getReqId());
-	}
+            emitter.onNext("a");
+            emitter.onComplete();
+        }, BackpressureStrategy.BUFFER).subscribeOn(Schedulers.newThread()).subscribe(success -> {
+            latch.countDown();
+        }, error -> {
+            ret[0] = error;
+            latch.countDown();
+        });
+
+        latch.await();
+        if (ret[0] != null)
+            throw ret[0];
+    }
+
+    @Test
+    public void testMaybe() throws Throwable {
+        // check initial state
+        checkContextCaptured();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Throwable[] ret = new Throwable[1];
+        Maybe.create(emitter -> {
+            // check deferred state
+            checkContextCaptured();
+
+            emitter.onSuccess("a");
+            emitter.onComplete();
+        }).subscribeOn(Schedulers.newThread()).subscribe(success -> {
+            latch.countDown();
+        }, error -> {
+            ret[0] = error;
+            latch.countDown();
+        });
+
+        latch.await();
+        if (ret[0] != null)
+            throw ret[0];
+    }
+
+    private void checkContextCaptured() {
+        Assert.assertEquals("test", MyContext.get().getReqId());
+    }
 }

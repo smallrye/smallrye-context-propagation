@@ -11,33 +11,34 @@ import io.reactivex.functions.Function;
 @SuppressWarnings("rawtypes")
 public class ContextPropagatorOnObservableAssemblyAction implements Function<Observable, Observable> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnObservableAssemblyAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnObservableAssemblyAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Observable apply(Observable t) throws Exception {
-		return new ContextPropagatorObservable(t, threadContext.currentContextExecutor());
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public Observable apply(Observable t) throws Exception {
+        return new ContextPropagatorObservable(t, threadContext.currentContextExecutor());
+    }
 
-	public class ContextPropagatorObservable<T> extends Observable<T> {
+    public class ContextPropagatorObservable<T> extends Observable<T> {
 
-		private Observable<T> source;
-		private final Executor contextExecutor;
+        private Observable<T> source;
 
-		public ContextPropagatorObservable(Observable<T> t, Executor contextExecutor) {
-			this.source = t;
-			this.contextExecutor = contextExecutor;
-		}
+        private final Executor contextExecutor;
 
-		@Override
-		protected void subscribeActual(Observer<? super T> observer) {
-			contextExecutor.execute(() -> source.subscribe(observer));
-		}
+        public ContextPropagatorObservable(Observable<T> t, Executor contextExecutor) {
+            this.source = t;
+            this.contextExecutor = contextExecutor;
+        }
 
-	}
+        @Override
+        protected void subscribeActual(Observer<? super T> observer) {
+            contextExecutor.execute(() -> source.subscribe(observer));
+        }
+
+    }
 
 }

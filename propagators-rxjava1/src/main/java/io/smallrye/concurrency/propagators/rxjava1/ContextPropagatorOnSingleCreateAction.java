@@ -12,56 +12,56 @@ import rx.functions.Func1;
 @SuppressWarnings("rawtypes")
 public class ContextPropagatorOnSingleCreateAction implements Func1<OnSubscribe, OnSubscribe> {
 
-	private ThreadContext threadContext;
+    private ThreadContext threadContext;
 
-	public ContextPropagatorOnSingleCreateAction(ThreadContext threadContext) {
-		this.threadContext = threadContext;
-	}
+    public ContextPropagatorOnSingleCreateAction(ThreadContext threadContext) {
+        this.threadContext = threadContext;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public OnSubscribe call(OnSubscribe t) {
-		return new ContextCapturerSingle(t, threadContext.currentContextExecutor());
-	}
-	
-	final static class ContextCapturerSingle<T> implements Single.OnSubscribe<T> {
+    @SuppressWarnings("unchecked")
+    @Override
+    public OnSubscribe call(OnSubscribe t) {
+        return new ContextCapturerSingle(t, threadContext.currentContextExecutor());
+    }
 
-	    final Single.OnSubscribe<T> source;
+    final static class ContextCapturerSingle<T> implements Single.OnSubscribe<T> {
 
-		private Executor contextExecutor;
+        final Single.OnSubscribe<T> source;
 
-	    public ContextCapturerSingle(Single.OnSubscribe<T> source, Executor contextExecutor) {
-	        this.source = source;
-	        this.contextExecutor = contextExecutor;
-	    }
+        private Executor contextExecutor;
 
-	    @Override
-	    public void call(SingleSubscriber<? super T> t) {
-	    	contextExecutor.execute(() -> source.call(new OnAssemblySingleSubscriber<T>(t, contextExecutor)));
-	    }
+        public ContextCapturerSingle(Single.OnSubscribe<T> source, Executor contextExecutor) {
+            this.source = source;
+            this.contextExecutor = contextExecutor;
+        }
 
-	    static final class OnAssemblySingleSubscriber<T> extends SingleSubscriber<T> {
+        @Override
+        public void call(SingleSubscriber<? super T> t) {
+            contextExecutor.execute(() -> source.call(new OnAssemblySingleSubscriber<T>(t, contextExecutor)));
+        }
 
-	        final SingleSubscriber<? super T> actual;
-			private final Executor contextExecutor;
+        static final class OnAssemblySingleSubscriber<T> extends SingleSubscriber<T> {
 
+            final SingleSubscriber<? super T> actual;
 
-	        public OnAssemblySingleSubscriber(SingleSubscriber<? super T> actual, Executor contextExecutor) {
-	            this.actual = actual;
-		        this.contextExecutor = contextExecutor;
-	            actual.add(this);
-	        }
+            private final Executor contextExecutor;
 
-	        @Override
-	        public void onError(Throwable e) {
-	        	contextExecutor.execute(() -> actual.onError(e));
-	        }
+            public OnAssemblySingleSubscriber(SingleSubscriber<? super T> actual, Executor contextExecutor) {
+                this.actual = actual;
+                this.contextExecutor = contextExecutor;
+                actual.add(this);
+            }
 
-	        @Override
-	        public void onSuccess(T t) {
-	        	contextExecutor.execute(() -> actual.onSuccess(t));
-	        }
-	    }
-	}
+            @Override
+            public void onError(Throwable e) {
+                contextExecutor.execute(() -> actual.onError(e));
+            }
+
+            @Override
+            public void onSuccess(T t) {
+                contextExecutor.execute(() -> actual.onSuccess(t));
+            }
+        }
+    }
 
 }
