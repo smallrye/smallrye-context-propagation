@@ -129,7 +129,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 	public <U> CompletableFuture<U> failedFuture(Throwable ex) {
 		CompletableFuture<U> ret = new CompletableFuture<>();
 		ret.completeExceptionally(ex);
-		return threadContext.withContextCapture(ret);
+		return threadContext.withContextCapture(ret, this);
 	}
 
 	@Override
