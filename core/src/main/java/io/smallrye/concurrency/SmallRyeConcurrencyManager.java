@@ -107,6 +107,9 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
         // check for existence
         Set<ThreadContextProvider> propagatedProviders = new HashSet<>();
         for (String type : propagatedSet) {
+            if (type.isEmpty()) {
+                continue;
+            }
             ThreadContextProvider provider = providersByType.get(type);
             if (provider == null)
                 throw new IllegalStateException("Missing propagated provider type: " + type);
@@ -116,6 +119,9 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
         // ignore missing for cleared/unchanged
         Set<ThreadContextProvider> unchangedProviders = new HashSet<>();
         for (String type : unchangedSet) {
+            if (type.isEmpty()) {
+                continue;
+            }
             ThreadContextProvider provider = providersByType.get(type);
             if (provider != null)
                 unchangedProviders.add(provider);
@@ -123,6 +129,9 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
 
         Set<ThreadContextProvider> clearedProviders = new HashSet<>();
         for (String type : clearedSet) {
+            if (type.isEmpty()) {
+                continue;
+            }
             ThreadContextProvider provider = providersByType.get(type);
             if (provider != null)
                 clearedProviders.add(provider);
