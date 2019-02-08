@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.*;
 
@@ -55,6 +57,10 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
 
     public void processInjectionPointME(@Observes ProcessInjectionPoint<?, ManagedExecutor> pip) {
         InjectionPoint ip = pip.getInjectionPoint();
+        // user-defined IP with qualifiers other than @NamedInstance are not our concern, skip it
+        if (hasCustomQualifiers(ip)) {
+            return;
+        }
         // get the unique name from @NamedInstance if present
         String uniqueName = getUniqueName(ip);
         if (uniqueName == null) {
@@ -79,6 +85,10 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
 
     public void processInjectionPointTC(@Observes ProcessInjectionPoint<?, ThreadContext> pip) {
         InjectionPoint ip = pip.getInjectionPoint();
+        // user-defined IP with qualifiers other than @NamedInstance are not our concern, skip it
+        if (hasCustomQualifiers(ip)) {
+            return;
+        }
         // get the unique name from @NamedInstance if present
         String uniqueName = getUniqueName(ip);
         if (uniqueName == null) {
@@ -250,5 +260,12 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
             .map(ann -> (NamedInstance) ann) // not a repeateble annotation, finding first will suffice
             .findFirst();
         return (optionalQulifier.isPresent()) ? optionalQulifier.get().value() : null;
+    }
+
+    private boolean hasCustomQualifiers(InjectionPoint ip) {
+        // check whether there is any other qualifier then NamedInstance/Any/Default
+        return ip.getQualifiers().stream().anyMatch(ann -> !ann.annotationType().equals(NamedInstance.class)
+                && !ann.annotationType().equals(Default.class) && !ann.annotationType().equals(Any.class));
+
     }
 }
