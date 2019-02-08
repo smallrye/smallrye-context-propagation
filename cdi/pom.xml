@@ -39,5 +39,15 @@
             <artifactId>weld-api</artifactId>
             <version>${version.weld.api}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.config</groupId>
+            <artifactId>microprofile-config-api</artifactId>
+            <version>${version.microprofile.config}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye</groupId>
+            <artifactId>smallrye-config</artifactId>
+            <version>${version.smallrye.config}</version>
+        </dependency>
     </dependencies>
 </project>

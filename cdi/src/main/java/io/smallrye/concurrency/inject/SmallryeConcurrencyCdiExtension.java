@@ -15,8 +15,28 @@
  */
 package io.smallrye.concurrency.inject;
 
+import org.eclipse.microprofile.concurrent.ManagedExecutor;
+import org.eclipse.microprofile.concurrent.ManagedExecutorConfig;
+import org.eclipse.microprofile.concurrent.NamedInstance;
+import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.concurrent.ThreadContextConfig;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.ProcessInjectionPoint;
+import javax.enterprise.inject.spi.ProcessProducer;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -27,19 +47,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.*;
-
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.ManagedExecutorConfig;
-import org.eclipse.microprofile.concurrent.NamedInstance;
-import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.ThreadContextConfig;
-
 /**
  * CDI extension that takes care of injectable ThreadContext and ManagedExecutor instances.
  *
@@ -47,13 +54,20 @@ import org.eclipse.microprofile.concurrent.ThreadContextConfig;
  */
 public class SmallryeConcurrencyCdiExtension implements Extension {
 
-    private Map<String, ManagedExecutorConfig> executorMap = new HashMap<>();
-    private Set<String> unconfiguredExecutorIPs = new HashSet<>();
-    private Map<String, ThreadContextConfig> threadContextMap = new HashMap<>();
-    private Set<String> unconfiguredContextIPs = new HashSet<>();
+    private final String nameDelimiter = ".";
+    private final String maxAsync = nameDelimiter + "maxAsync";
+    private final String maxQueued = nameDelimiter + "maxQueued";
+    private final String cleared = nameDelimiter + "cleared";
+    private final String propagated = nameDelimiter + "propagated";
+    private final String unchanged = nameDelimiter + "unchanged";
 
-    private Set<String> userDefinedMEProducers = new HashSet<>();
-    private Set<String> userDefinedTCProducers = new HashSet<>();
+    private Map<InjectionPointName, ManagedExecutorConfig> executorMap = new HashMap<>();
+    private Set<InjectionPointName> unconfiguredExecutorIPs = new HashSet<>();
+    private Map<InjectionPointName, ThreadContextConfig> threadContextMap = new HashMap<>();
+    private Set<InjectionPointName> unconfiguredContextIPs = new HashSet<>();
+
+    private Set<InjectionPointName> userDefinedMEProducers = new HashSet<>();
+    private Set<InjectionPointName> userDefinedTCProducers = new HashSet<>();
 
     public void processInjectionPointME(@Observes ProcessInjectionPoint<?, ManagedExecutor> pip) {
         InjectionPoint ip = pip.getInjectionPoint();
@@ -63,20 +77,22 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
         }
         // get the unique name from @NamedInstance if present
         String uniqueName = getUniqueName(ip);
+        String mpConfigIpName = createUniqueName(ip);
         if (uniqueName == null) {
             // no explicit name, we infer an implicit one as declaringClassName and field/param name separated by comma
-            uniqueName = ip.getMember().getDeclaringClass().toString() + "." + ip.getMember().toString();
+            uniqueName = mpConfigIpName;
             // add @NamedInstance with the generated name
             pip.configureInjectionPoint().addQualifier(NamedInstance.Literal.of(uniqueName));
         }
+        InjectionPointName injectionPointName = new InjectionPointName(uniqueName, mpConfigIpName);
         // extract the config annotation
         ManagedExecutorConfig annotation = extractAnnotationFromIP(ip, ManagedExecutorConfig.class);
         ManagedExecutorConfig previousValue = null;
         if (annotation == null) {
             // no config exists, store into unconfigured for now
-            unconfiguredExecutorIPs.add(uniqueName);
+            unconfiguredExecutorIPs.add(injectionPointName);
         } else {
-            previousValue = executorMap.putIfAbsent(uniqueName, annotation);
+            previousValue = executorMap.putIfAbsent(injectionPointName, annotation);
         }
         if (previousValue != null) {
             // TODO handle clashes, probably store in some other map and then blow up with complete information across all IPs?
@@ -91,20 +107,22 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
         }
         // get the unique name from @NamedInstance if present
         String uniqueName = getUniqueName(ip);
+        String mpConfigIpName = createUniqueName(ip);
         if (uniqueName == null) {
             // no explicit name, we infer an implicit one as declaringClassName and field/param name separated by comma
-            uniqueName = ip.getMember().getDeclaringClass().toString() + "." + ip.getMember().toString();
+            uniqueName = mpConfigIpName;
             // add @NamedInstance with the generated name
             pip.configureInjectionPoint().addQualifier(NamedInstance.Literal.of(uniqueName));
         }
+        InjectionPointName injectionPointName = new InjectionPointName(uniqueName, mpConfigIpName);
         // extract the config annotation
         ThreadContextConfig annotation = extractAnnotationFromIP(ip, ThreadContextConfig.class);
         ThreadContextConfig previousValue = null;
         if (annotation == null) {
             // no config exists, store into unconfigured for now
-            unconfiguredContextIPs.add(uniqueName);
+            unconfiguredContextIPs.add(injectionPointName);
         } else {
-            previousValue = threadContextMap.putIfAbsent(uniqueName, annotation);
+            previousValue = threadContextMap.putIfAbsent(injectionPointName, annotation);
         }
         if (previousValue != null) {
             // TODO handle clashes, probably store in some other map and then blow up with complete information across all IPs?
@@ -114,94 +132,112 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
     public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd) {
         // check all unconfigured IPs, if we also found same name and configured ones, then drop these from the set
         unconfiguredExecutorIPs.removeAll(unconfiguredExecutorIPs.stream()
-            .filter((name) -> (executorMap.containsKey(name)))
-            .collect(Collectors.toSet()));
+                .filter((name) -> (executorMap.containsKey(name)))
+                .collect(Collectors.toSet()));
 
         unconfiguredContextIPs.removeAll(unconfiguredContextIPs.stream()
-            .filter((name) -> (threadContextMap.containsKey(name)))
-            .collect(Collectors.toSet()));
+                .filter((name) -> (threadContextMap.containsKey(name)))
+                .collect(Collectors.toSet()));
 
         // we also need to remove all that we found a user producer for
         unconfiguredExecutorIPs.removeAll(userDefinedMEProducers);
         unconfiguredContextIPs.removeAll(userDefinedTCProducers);
 
         // remove information about ME and TC that user defined producers for
-        for (String s: userDefinedMEProducers) {
+        for (InjectionPointName s : userDefinedMEProducers) {
             executorMap.remove(s);
         }
-        for (String s : userDefinedTCProducers) {
+        for (InjectionPointName s : userDefinedTCProducers) {
             threadContextMap.remove(s);
         }
 
+        // before adding beans, we need to make sure we have correct configuration, MP config allows to override it
+        Config mpConfig = ConfigProvider.getConfig();
+
         // add beans for configured ManagedExecutors
-        for (Map.Entry<String, ManagedExecutorConfig> entry : executorMap.entrySet()) {
+        for (Map.Entry<InjectionPointName, ManagedExecutorConfig> entry : executorMap.entrySet()) {
             ManagedExecutorConfig annotation = entry.getValue();
             abd.<ManagedExecutor>addBean()
-                .beanClass(ManagedExecutor.class)
-                .addTransitiveTypeClosure(ManagedExecutor.class)
-                .addQualifier(NamedInstance.Literal.of(entry.getKey()))
-                .scope(ApplicationScoped.class)
-                .disposeWith((ManagedExecutor t, Instance<Object> u) -> {
-                    // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
-                    t.shutdown();
-                })
-                .createWith(param -> ManagedExecutor.builder()
-                    .maxAsync(annotation.maxAsync())
-                    .maxQueued(annotation.maxQueued())
-                    .cleared(annotation.cleared())
-                    .propagated(annotation.propagated())
-                    .build());
+                    .beanClass(ManagedExecutor.class)
+                    .addTransitiveTypeClosure(ManagedExecutor.class)
+                    .addQualifier(NamedInstance.Literal.of(entry.getKey().getNamedInstanceName()))
+                    .scope(ApplicationScoped.class)
+                    .disposeWith((ManagedExecutor t, Instance<Object> u) -> {
+                        // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
+                        t.shutdown();
+                    })
+                    .createWith(param -> ManagedExecutor.builder()
+                            .maxAsync(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + maxAsync, Integer.class)
+                                    .orElse(annotation.maxAsync()))
+                            .maxQueued(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + maxQueued, Integer.class)
+                                    .orElse(annotation.maxQueued()))
+                            .cleared(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + cleared, String[].class)
+                                    .orElse(annotation.cleared()))
+                            .propagated(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + propagated, String[].class)
+                                    .orElse(annotation.propagated()))
+                            .build());
         }
         // add beans for unconfigured ManagedExecutors
-        for (String name : unconfiguredExecutorIPs) {
+        for (InjectionPointName ipName : unconfiguredExecutorIPs) {
             abd.<ManagedExecutor>addBean()
-                .beanClass(ManagedExecutor.class)
-                .addTransitiveTypeClosure(ManagedExecutor.class)
-                .addQualifier(NamedInstance.Literal.of(name))
-                .scope(ApplicationScoped.class)
-                .disposeWith((ManagedExecutor t, Instance<Object> u) -> {
-                    // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
-                    t.shutdown();
-                })
-                .createWith(param -> ManagedExecutor.builder()
-                    .maxAsync(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync())
-                    .maxQueued(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued())
-                    .cleared(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.cleared())
-                    .propagated(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.propagated())
-                    .build());
+                    .beanClass(ManagedExecutor.class)
+                    .addTransitiveTypeClosure(ManagedExecutor.class)
+                    .addQualifier(NamedInstance.Literal.of(ipName.getNamedInstanceName()))
+                    .scope(ApplicationScoped.class)
+                    .disposeWith((ManagedExecutor t, Instance<Object> u) -> {
+                        // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
+                        t.shutdown();
+                    })
+                    .createWith(param -> ManagedExecutor.builder()
+                            .maxAsync(mpConfig.getOptionalValue(ipName.getMpConfigName() + maxAsync, Integer.class)
+                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
+                            .maxQueued(mpConfig.getOptionalValue(ipName.getMpConfigName() + maxQueued, Integer.class)
+                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued()))
+                            .cleared(mpConfig.getOptionalValue(ipName.getMpConfigName() + cleared, String[].class)
+                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.cleared()))
+                            .propagated(mpConfig.getOptionalValue(ipName.getMpConfigName() + propagated, String[].class)
+                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.propagated()))
+                            .build());
         }
         // add beans for configured ThreadContext
-        for (Map.Entry<String, ThreadContextConfig> entry : threadContextMap.entrySet()) {
+        for (Map.Entry<InjectionPointName, ThreadContextConfig> entry : threadContextMap.entrySet()) {
             ThreadContextConfig annotation = entry.getValue();
             abd.<ThreadContext>addBean()
-                .beanClass(ThreadContext.class)
-                .addTransitiveTypeClosure(ThreadContext.class)
-                .addQualifier(NamedInstance.Literal.of(entry.getKey()))
-                .scope(ApplicationScoped.class)
-                .disposeWith((ThreadContext t, Instance<Object> u) -> {
-                    // no-op at this point
-                })
-                .createWith(param -> ThreadContext.builder()
-                    .cleared(annotation.cleared())
-                    .unchanged(annotation.unchanged())
-                    .propagated(annotation.propagated())
-                    .build());
+                    .beanClass(ThreadContext.class)
+                    .addTransitiveTypeClosure(ThreadContext.class)
+                    .addQualifier(NamedInstance.Literal.of(entry.getKey().getNamedInstanceName()))
+                    .scope(ApplicationScoped.class)
+                    .disposeWith((ThreadContext t, Instance<Object> u) -> {
+                        // no-op at this point
+                    })
+                    .createWith(param -> ThreadContext.builder()
+                            .cleared(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + cleared, String[].class)
+                                    .orElse(annotation.cleared()))
+                            .unchanged(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + unchanged, String[].class)
+                                    .orElse(annotation.unchanged()))
+                            .propagated(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + propagated, String[].class)
+                                    .orElse(annotation.propagated()))
+                            .build());
         }
+
         // add beans for unconfigured ThreadContext
-        for (String name : unconfiguredContextIPs) {
+        for (InjectionPointName ipName : unconfiguredContextIPs) {
             abd.<ThreadContext>addBean()
-                .beanClass(ThreadContext.class)
-                .addTransitiveTypeClosure(ThreadContext.class)
-                .addQualifier(NamedInstance.Literal.of(name))
-                .scope(ApplicationScoped.class)
-                .disposeWith((ThreadContext t, Instance<Object> u) -> {
-                    // no-op
-                })
-                .createWith(param -> ThreadContext.builder()
-                    .cleared(ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared())
-                    .unchanged(ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged())
-                    .propagated(ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated())
-                    .build());
+                    .beanClass(ThreadContext.class)
+                    .addTransitiveTypeClosure(ThreadContext.class)
+                    .addQualifier(NamedInstance.Literal.of(ipName.getNamedInstanceName()))
+                    .scope(ApplicationScoped.class)
+                    .disposeWith((ThreadContext t, Instance<Object> u) -> {
+                        // no-op
+                    })
+                    .createWith(param -> ThreadContext.builder()
+                            .cleared(mpConfig.getOptionalValue(ipName.getMpConfigName() + cleared, String[].class)
+                                    .orElse(ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))
+                            .unchanged(mpConfig.getOptionalValue(ipName.getMpConfigName() + unchanged, String[].class)
+                                    .orElse(ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged()))
+                            .propagated(mpConfig.getOptionalValue(ipName.getMpConfigName() + propagated, String[].class)
+                                    .orElse(ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated()))
+                            .build());
         }
     }
 
@@ -218,7 +254,7 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
             }
         }
         if (annotation != null) {
-            userDefinedTCProducers.add(annotation.value());
+            userDefinedTCProducers.add(new InjectionPointName(annotation.value()));
         }
     }
 
@@ -235,7 +271,7 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
             }
         }
         if (annotation != null) {
-            userDefinedMEProducers.add(annotation.value());
+            userDefinedMEProducers.add(new InjectionPointName(annotation.value()));
         }
     }
 
@@ -244,7 +280,8 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
      * further processing. Can return null which indicates no such annotation is present (default configuration or simply a
      * named instance).
      *
-     * @param ip
+     * @param injectionPoint  {@link InjectionPoint}
+     * @param annotationClazz class of the annotation we want to extract
      * @return extracted {@link ManagedExecutorConfig} or {@link ThreadContextConfig} annotation or null if it is not present
      */
     private <T extends Annotation> T extractAnnotationFromIP(InjectionPoint injectionPoint, Class<T> annotationClazz) {
@@ -257,9 +294,21 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
 
     private String getUniqueName(InjectionPoint ip) {
         Optional<NamedInstance> optionalQulifier = ip.getQualifiers().stream().filter(ann -> ann.annotationType().equals(NamedInstance.class))
-            .map(ann -> (NamedInstance) ann) // not a repeateble annotation, finding first will suffice
-            .findFirst();
+                .map(ann -> (NamedInstance) ann) // not a repeateble annotation, finding first will suffice
+                .findFirst();
         return (optionalQulifier.isPresent()) ? optionalQulifier.get().value() : null;
+    }
+
+    private String createUniqueName(InjectionPoint ip) {
+        StringBuilder builder = new StringBuilder(ip.getMember().getDeclaringClass().getName() //full class name
+                + nameDelimiter // delimited as per specification
+                + ip.getMember().getName()); //name of field/method
+        Annotated annotated = ip.getAnnotated();
+        if (annotated instanceof AnnotatedParameter) {
+            builder.append(nameDelimiter + (((AnnotatedParameter) annotated).getPosition() + 1)); // delimiter + parameter position
+        }
+        String result = builder.toString();
+        return result;
     }
 
     private boolean hasCustomQualifiers(InjectionPoint ip) {
@@ -267,5 +316,18 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
         return ip.getQualifiers().stream().anyMatch(ann -> !ann.annotationType().equals(NamedInstance.class)
                 && !ann.annotationType().equals(Default.class) && !ann.annotationType().equals(Any.class));
 
+    }
+
+    /**
+     * cleans all the metadata we gathered during bootstrap
+     */
+    public void cleanup(@Observes AfterDeploymentValidation adv) {
+        // clear() all the collections we operated on
+        this.unconfiguredContextIPs.clear();
+        this.unconfiguredExecutorIPs.clear();
+        this.userDefinedMEProducers.clear();
+        this.userDefinedTCProducers.clear();
+        this.executorMap.clear();
+        this.threadContextMap.clear();
     }
 }
