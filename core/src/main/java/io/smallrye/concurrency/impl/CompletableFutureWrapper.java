@@ -17,6 +17,10 @@ import org.eclipse.microprofile.concurrent.ManagedExecutor;
 final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     private final CompletableFuture<T> f;
     private final ThreadContextImpl context;
+    /**
+     * If this executor is not null, we're wrapping a CF. If it is null, we're a dependent stage of
+     * another CF, so we have different behaviour
+     */
     private final ManagedExecutor executor;
 
     CompletableFutureWrapper(ThreadContextImpl context, CompletableFuture<T> f, ManagedExecutor executor) {
@@ -41,66 +45,120 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public boolean complete(T value) {
+        // dependent stage
+        if(executor == null)
+            return super.complete(value);
+        // wrapper
         return f.complete(value);
     }
 
     @Override
     public boolean completeExceptionally(Throwable ex) {
+        // dependent stage
+        if(executor == null)
+            return super.completeExceptionally(ex);
+        // wrapper
         return f.completeExceptionally(ex);
     }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
+        // dependent stage
+        if(executor == null)
+            return super.cancel(mayInterruptIfRunning);
+        // wrapper
         return f.cancel(mayInterruptIfRunning);
     }
 
     @Override
     public boolean isCancelled() {
+        // dependent stage
+        if(executor == null)
+            return super.isCancelled();
+        // wrapper
         return f.isCancelled();
     }
 
     @Override
     public boolean isCompletedExceptionally() {
+        // dependent stage
+        if(executor == null)
+            return super.isCompletedExceptionally();
+        // wrapper
         return f.isCompletedExceptionally();
     }
 
     @Override
     public void obtrudeValue(T value) {
-        f.obtrudeValue(value);
+        // dependent stage
+        if(executor == null)
+            super.obtrudeValue(value);
+        else
+            // wrapper
+            f.obtrudeValue(value);
     }
 
     @Override
     public void obtrudeException(Throwable ex) {
-        f.obtrudeException(ex);
+        // dependent stage
+        if(executor == null)
+            super.obtrudeException(ex);
+        else
+            // wrapper
+            f.obtrudeException(ex);
     }
 
     @Override
     public int getNumberOfDependents() {
+        // dependent stage
+        if(executor == null)
+            return super.getNumberOfDependents();
+        // wrapper
         return f.getNumberOfDependents();
     }
 
     @Override
     public boolean isDone() {
+        // dependent stage
+        if(executor == null)
+            return super.isDone();
+        // wrapper
         return f.isDone();
     }
 
     @Override
     public T get() throws InterruptedException, ExecutionException {
+        // dependent stage
+        if(executor == null)
+            return super.get();
+        // wrapper
         return f.get();
     }
 
     @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        // dependent stage
+        if(executor == null)
+            return super.get(timeout, unit);
+        // wrapper
         return f.get(timeout, unit);
     }
 
     @Override
     public T join() {
+        // dependent stage
+        if(executor == null)
+            return super.join();
+        // wrapper
         return f.join();
     }
 
     @Override
     public T getNow(T valueIfAbsent) {
+        // dependent stage
+        if(executor == null)
+            return super.getNow(valueIfAbsent);
+        // wrapper
         return f.getNow(valueIfAbsent);
     }
 
