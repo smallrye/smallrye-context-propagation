@@ -43,6 +43,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,6 +61,9 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
     private final String cleared = nameDelimiter + "cleared";
     private final String propagated = nameDelimiter + "propagated";
     private final String unchanged = nameDelimiter + "unchanged";
+
+    // used when adding beans, we need to make sure we have correct configuration, MP config allows to override it
+    private final Config mpConfig = ConfigProvider.getConfig();
 
     private Map<InjectionPointName, ManagedExecutorConfig> executorMap = new HashMap<>();
     private Set<InjectionPointName> unconfiguredExecutorIPs = new HashSet<>();
@@ -151,9 +155,6 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
             threadContextMap.remove(s);
         }
 
-        // before adding beans, we need to make sure we have correct configuration, MP config allows to override it
-        Config mpConfig = ConfigProvider.getConfig();
-
         // add beans for configured ManagedExecutors
         for (Map.Entry<InjectionPointName, ManagedExecutorConfig> entry : executorMap.entrySet()) {
             ManagedExecutorConfig annotation = entry.getValue();
@@ -167,14 +168,14 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         t.shutdown();
                     })
                     .createWith(param -> ManagedExecutor.builder()
-                            .maxAsync(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + maxAsync, Integer.class)
-                                    .orElse(annotation.maxAsync()))
-                            .maxQueued(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + maxQueued, Integer.class)
-                                    .orElse(annotation.maxQueued()))
-                            .cleared(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + cleared, String[].class)
-                                    .orElse(annotation.cleared()))
-                            .propagated(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + propagated, String[].class)
-                                    .orElse(annotation.propagated()))
+                            .maxAsync(resolveConfiguration(entry.getKey().getMpConfigName() + maxAsync,
+                                    Integer.class, annotation.maxAsync()))
+                            .maxQueued(resolveConfiguration(entry.getKey().getMpConfigName() + maxQueued,
+                                    Integer.class, annotation.maxQueued()))
+                            .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + cleared,
+                                    String[].class, annotation.cleared()))
+                            .propagated(resolveConfiguration(entry.getKey().getMpConfigName() + propagated,
+                                    String[].class, annotation.propagated()))
                             .build());
         }
         // add beans for unconfigured ManagedExecutors
@@ -189,14 +190,14 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         t.shutdown();
                     })
                     .createWith(param -> ManagedExecutor.builder()
-                            .maxAsync(mpConfig.getOptionalValue(ipName.getMpConfigName() + maxAsync, Integer.class)
-                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
-                            .maxQueued(mpConfig.getOptionalValue(ipName.getMpConfigName() + maxQueued, Integer.class)
-                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued()))
-                            .cleared(mpConfig.getOptionalValue(ipName.getMpConfigName() + cleared, String[].class)
-                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.cleared()))
-                            .propagated(mpConfig.getOptionalValue(ipName.getMpConfigName() + propagated, String[].class)
-                                    .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.propagated()))
+                            .maxAsync(resolveConfiguration(ipName.getMpConfigName() + maxAsync,
+                                    Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
+                            .maxQueued(resolveConfiguration(ipName.getMpConfigName() + maxQueued,
+                                    Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued()))
+                            .cleared(resolveConfiguration(ipName.getMpConfigName() + cleared,
+                                    String[].class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.cleared()))
+                            .propagated(resolveConfiguration(ipName.getMpConfigName() + propagated,
+                                    String[].class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.propagated()))
                             .build());
         }
         // add beans for configured ThreadContext
@@ -211,12 +212,12 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         // no-op at this point
                     })
                     .createWith(param -> ThreadContext.builder()
-                            .cleared(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + cleared, String[].class)
-                                    .orElse(annotation.cleared()))
-                            .unchanged(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + unchanged, String[].class)
-                                    .orElse(annotation.unchanged()))
-                            .propagated(mpConfig.getOptionalValue(entry.getKey().getMpConfigName() + propagated, String[].class)
-                                    .orElse(annotation.propagated()))
+                            .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + cleared,
+                                    String[].class, annotation.cleared()))
+                            .unchanged(resolveConfiguration(entry.getKey().getMpConfigName() + unchanged,
+                                    String[].class, annotation.unchanged()))
+                            .propagated(resolveConfiguration(entry.getKey().getMpConfigName() + propagated,
+                                    String[].class, annotation.propagated()))
                             .build());
         }
 
@@ -231,12 +232,12 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         // no-op
                     })
                     .createWith(param -> ThreadContext.builder()
-                            .cleared(mpConfig.getOptionalValue(ipName.getMpConfigName() + cleared, String[].class)
-                                    .orElse(ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))
-                            .unchanged(mpConfig.getOptionalValue(ipName.getMpConfigName() + unchanged, String[].class)
-                                    .orElse(ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged()))
-                            .propagated(mpConfig.getOptionalValue(ipName.getMpConfigName() + propagated, String[].class)
-                                    .orElse(ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated()))
+                            .cleared(resolveConfiguration(ipName.getMpConfigName() + cleared,
+                                    String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))
+                            .unchanged(resolveConfiguration(ipName.getMpConfigName() + unchanged,
+                                    String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged()))
+                            .propagated(resolveConfiguration(ipName.getMpConfigName() + propagated,
+                                    String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated()))
                             .build());
         }
     }
@@ -315,7 +316,25 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
         // check whether there is any other qualifier then NamedInstance/Any/Default
         return ip.getQualifiers().stream().anyMatch(ann -> !ann.annotationType().equals(NamedInstance.class)
                 && !ann.annotationType().equals(Default.class) && !ann.annotationType().equals(Any.class));
+    }
 
+    /**
+     * Attempts to find MP Config for given String and return type, if not found, returns the default value
+     *
+     * @param mpConfigName String under which to search in MP Config
+     * @param originalValue value to return if no MP Config is found
+     * @return value found via MP Config if there is any, defaultValue otherwise
+     */
+    private <K> K resolveConfiguration(String mpConfigName, Class<K> expectedReturnType, K originalValue) {
+        // workaround for https://github.com/smallrye/smallrye-config/issues/83
+        // once resolved, we should be using getOptionalValue() as follows:
+        //return mpConfig.getOptionalValue(mpConfigName, expectedReturnType).orElse(defaultValue);
+        try {
+            return mpConfig.getValue(mpConfigName, expectedReturnType);
+        } catch (NoSuchElementException e) {
+            // ok, MP Conf does not override this property, let's use the original one
+            return originalValue;
+        }
     }
 
     /**
