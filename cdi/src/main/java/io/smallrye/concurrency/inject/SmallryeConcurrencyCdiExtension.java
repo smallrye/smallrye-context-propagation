@@ -55,12 +55,14 @@ import java.util.stream.Collectors;
  */
 public class SmallryeConcurrencyCdiExtension implements Extension {
 
-    private final String nameDelimiter = ".";
+    private final String nameDelimiter = "/";
     private final String maxAsync = nameDelimiter + "maxAsync";
     private final String maxQueued = nameDelimiter + "maxQueued";
     private final String cleared = nameDelimiter + "cleared";
     private final String propagated = nameDelimiter + "propagated";
     private final String unchanged = nameDelimiter + "unchanged";
+    private final String MEConfig = nameDelimiter + "ManagedExecutorConfig";
+    private final String TCConfig = nameDelimiter + "ThreadContextConfig";
 
     // used when adding beans, we need to make sure we have correct configuration, MP config allows to override it
     private final Config mpConfig = ConfigProvider.getConfig();
@@ -168,13 +170,13 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         t.shutdown();
                     })
                     .createWith(param -> ManagedExecutor.builder()
-                            .maxAsync(resolveConfiguration(entry.getKey().getMpConfigName() + maxAsync,
+                            .maxAsync(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, annotation.maxAsync()))
-                            .maxQueued(resolveConfiguration(entry.getKey().getMpConfigName() + maxQueued,
+                            .maxQueued(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + maxQueued,
                                     Integer.class, annotation.maxQueued()))
-                            .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + cleared,
+                            .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + cleared,
                                     String[].class, annotation.cleared()))
-                            .propagated(resolveConfiguration(entry.getKey().getMpConfigName() + propagated,
+                            .propagated(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + propagated,
                                     String[].class, annotation.propagated()))
                             .build());
         }
@@ -190,13 +192,13 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         t.shutdown();
                     })
                     .createWith(param -> ManagedExecutor.builder()
-                            .maxAsync(resolveConfiguration(ipName.getMpConfigName() + maxAsync,
+                            .maxAsync(resolveConfiguration(ipName.getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
-                            .maxQueued(resolveConfiguration(ipName.getMpConfigName() + maxQueued,
+                            .maxQueued(resolveConfiguration(ipName.getMpConfigName() + MEConfig + maxQueued,
                                     Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued()))
-                            .cleared(resolveConfiguration(ipName.getMpConfigName() + cleared,
+                            .cleared(resolveConfiguration(ipName.getMpConfigName() + MEConfig + cleared,
                                     String[].class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.cleared()))
-                            .propagated(resolveConfiguration(ipName.getMpConfigName() + propagated,
+                            .propagated(resolveConfiguration(ipName.getMpConfigName() + MEConfig + propagated,
                                     String[].class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.propagated()))
                             .build());
         }
@@ -212,11 +214,11 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         // no-op at this point
                     })
                     .createWith(param -> ThreadContext.builder()
-                            .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + cleared,
+                            .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + cleared,
                                     String[].class, annotation.cleared()))
-                            .unchanged(resolveConfiguration(entry.getKey().getMpConfigName() + unchanged,
+                            .unchanged(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + unchanged,
                                     String[].class, annotation.unchanged()))
-                            .propagated(resolveConfiguration(entry.getKey().getMpConfigName() + propagated,
+                            .propagated(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + propagated,
                                     String[].class, annotation.propagated()))
                             .build());
         }
@@ -232,11 +234,11 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         // no-op
                     })
                     .createWith(param -> ThreadContext.builder()
-                            .cleared(resolveConfiguration(ipName.getMpConfigName() + cleared,
+                            .cleared(resolveConfiguration(ipName.getMpConfigName() + TCConfig + cleared,
                                     String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))
-                            .unchanged(resolveConfiguration(ipName.getMpConfigName() + unchanged,
+                            .unchanged(resolveConfiguration(ipName.getMpConfigName() + TCConfig + unchanged,
                                     String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.unchanged()))
-                            .propagated(resolveConfiguration(ipName.getMpConfigName() + propagated,
+                            .propagated(resolveConfiguration(ipName.getMpConfigName() + TCConfig + propagated,
                                     String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.propagated()))
                             .build());
         }
