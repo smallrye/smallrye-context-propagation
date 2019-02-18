@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.container.CompletionCallback;
 
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
@@ -39,7 +38,6 @@ public class FullStackTest {
 
     private MyVertxJaxrsServer vertxJaxrsServer;
     private Weld weld;
-    private EntityManagerFactory entityManagerFactory;
 
     @Before
     public void before() {
@@ -75,30 +73,32 @@ public class FullStackTest {
                     super.invoke(req, response);
                     success = true;
                 } finally {
-                    // tear down CDI request context
+                    // tear down request contexts
                     if(req.getAsyncContext().isSuspended()) {
-                        cdiContext.deactivate();
-                        req.getAsyncContext().getAsyncResponse().register((CompletionCallback)(t) -> {
-                            System.err.println("END: "+t);
-                            if(t == null)
-                                entityManager.getTransaction().commit();
-                            else
-                                entityManager.getTransaction().rollback();
-                            cdiContext.invalidate();
-                            cdiContext.deactivate();
-                            cdiContext.dissociate(contextMap);
-                        });
-                    } else {
-                        System.err.println("END: "+success);
-                        if(success)
-                            entityManager.getTransaction().commit();
-                        else
-                            entityManager.getTransaction().rollback();
-                        cdiContext.invalidate();
+                        // make sure we remove the CDI context
                         cdiContext.deactivate();
                         cdiContext.dissociate(contextMap);
+                        // clear it later
+                        req.getAsyncContext().getAsyncResponse().register((CompletionCallback)(t) -> {
+                            terminateContext(cdiContext, contextMap, entityManager, t == null);
+                        });
+                    } else {
+                        // clear it now
+                        terminateContext(cdiContext, contextMap, entityManager, success);
                     }       
                 }
+            }
+
+            private void terminateContext(BoundRequestContext cdiContext, Map<String, Object> contextMap, EntityManager entityManager, boolean success) {
+                System.err.println("END: "+success);
+                if(success)
+                    entityManager.getTransaction().commit();
+                else
+                    entityManager.getTransaction().rollback();
+                cdiContext.invalidate();
+                cdiContext.deactivate();
+                cdiContext.dissociate(contextMap);
+                
             }
         });
         
@@ -113,7 +113,6 @@ public class FullStackTest {
     
     @After
     public void after() {
-        entityManagerFactory.close();
         weld.shutdown();
         vertxJaxrsServer.stop();
     }
