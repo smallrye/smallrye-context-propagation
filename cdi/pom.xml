@@ -39,6 +39,12 @@
             <artifactId>weld-api</artifactId>
             <version>${version.weld.api}</version>
         </dependency>
+        <!--Weld core dependency is a workaround for WELD-2566-->
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-core-impl</artifactId>
+            <version>${version.weld.core}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
             <artifactId>microprofile-config-api</artifactId>
