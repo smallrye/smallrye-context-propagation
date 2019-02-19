@@ -13,6 +13,7 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
     private int maxQueued;
     private String[] propagated;
     private String[] cleared;
+    private String injectionPointName = null;
 
     public ManagedExecutorBuilderImpl(SmallRyeConcurrencyManager manager) {
         this.manager = manager;
@@ -26,7 +27,7 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
     @Override
     public ManagedExecutor build() {
         return new ManagedExecutorImpl(maxAsync, maxQueued,
-                new ThreadContextImpl(manager, propagated, SmallRyeConcurrencyManager.NO_STRING, cleared));
+                new ThreadContextImpl(manager, propagated, SmallRyeConcurrencyManager.NO_STRING, cleared), injectionPointName);
     }
 
     @Override
@@ -56,6 +57,11 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
     @Override
     public Builder cleared(String... types) {
         this.cleared = types;
+        return this;
+    }
+
+    public ManagedExecutor.Builder injectionPointName(String name) {
+        this.injectionPointName = name;
         return this;
     }
 

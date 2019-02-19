@@ -15,6 +15,8 @@
  */
 package io.smallrye.concurrency.inject;
 
+import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
+import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ManagedExecutorConfig;
 import org.eclipse.microprofile.concurrent.NamedInstance;
@@ -169,7 +171,8 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
                         t.shutdown();
                     })
-                    .createWith(param -> ManagedExecutor.builder()
+                    .createWith(param -> ((ManagedExecutorBuilderImpl)ManagedExecutor.builder())
+                            .injectionPointName(entry.getKey().getMpConfigName())
                             .maxAsync(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, annotation.maxAsync()))
                             .maxQueued(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + maxQueued,
@@ -191,7 +194,8 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                         // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
                         t.shutdown();
                     })
-                    .createWith(param -> ManagedExecutor.builder()
+                    .createWith(param -> ((ManagedExecutorBuilderImpl)ManagedExecutor.builder())
+                            .injectionPointName(ipName.getMpConfigName())
                             .maxAsync(resolveConfiguration(ipName.getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
                             .maxQueued(resolveConfiguration(ipName.getMpConfigName() + MEConfig + maxQueued,
@@ -213,7 +217,8 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                     .disposeWith((ThreadContext t, Instance<Object> u) -> {
                         // no-op at this point
                     })
-                    .createWith(param -> ThreadContext.builder()
+                    .createWith(param -> ((ThreadContextBuilderImpl)ThreadContext.builder())
+                            .injectionPointName(entry.getKey().getMpConfigName())
                             .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + cleared,
                                     String[].class, annotation.cleared()))
                             .unchanged(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + unchanged,
@@ -233,7 +238,8 @@ public class SmallryeConcurrencyCdiExtension implements Extension {
                     .disposeWith((ThreadContext t, Instance<Object> u) -> {
                         // no-op
                     })
-                    .createWith(param -> ThreadContext.builder()
+                    .createWith(param -> ((ThreadContextBuilderImpl)ThreadContext.builder())
+                            .injectionPointName(ipName.getMpConfigName())
                             .cleared(resolveConfiguration(ipName.getMpConfigName() + TCConfig + cleared,
                                     String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))
                             .unchanged(resolveConfiguration(ipName.getMpConfigName() + TCConfig + unchanged,

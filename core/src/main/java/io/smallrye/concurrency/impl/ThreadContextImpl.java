@@ -159,18 +159,29 @@ public class ThreadContextImpl implements ThreadContext {
         }
     }
 
-    private SmallRyeConcurrencyManager manager;
-    private ThreadContextProviderPlan plan;
+    private final SmallRyeConcurrencyManager manager;
+    private final ThreadContextProviderPlan plan;
+    private final String injectionPointName;
 
     public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged,
             String[] cleared) {
+        this(manager, propagated, unchanged, cleared, null);
+    }
+
+    public ThreadContextImpl(SmallRyeConcurrencyManager manager, String[] propagated, String[] unchanged,
+                             String[] cleared, String injectionPointName) {
         this.manager = manager;
         this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
+        this.injectionPointName = injectionPointName;
     }
 
     private void checkPrecontextualized(Object action) {
         if(action instanceof Contextualized)
             throw new IllegalArgumentException("Action is already contextualized");
+    }
+
+    public ThreadContextProviderPlan getPlan() {
+        return plan;
     }
 
     //
@@ -316,5 +327,19 @@ public class ThreadContextImpl implements ThreadContext {
     <R> Supplier<R> contextualSupplier(CapturedContextState state, Supplier<R> supplier) {
         checkPrecontextualized(supplier);
         return new ContextualSupplier<R>(state, supplier);
+    }
+
+    @Override
+    public String toString() {
+        final String DELIMITER = ", ";
+        StringBuilder builder = new StringBuilder();
+        builder.append(ThreadContextImpl.class.getName()).append(DELIMITER);
+        builder.append("with cleared contexts: ").append(plan.clearedProviders).append(DELIMITER);
+        builder.append("with propagated contexts: ").append(plan.propagatedProviders).append(DELIMITER);
+        builder.append("with unchanged contexts: ").append(plan.unchangedProviders);
+        if (injectionPointName != null) {
+            builder.append(DELIMITER).append(" with injection point name: ").append(injectionPointName);
+        }
+        return builder.toString();
     }
 }
