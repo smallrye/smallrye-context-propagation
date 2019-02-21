@@ -19,8 +19,15 @@ import org.eclipse.microprofile.concurrent.ManagedExecutor;
 public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedExecutor {
 
     private final ThreadContextImpl threadContext;
+    private final int maxAsync;
+    private final int maxQueued;
+    private final String injectionPointName;
 
     public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
+        this(maxAsync, maxQueued, threadContext, null);
+    }
+
+    public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext, String injectionPointName) {
         super(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync,
                 maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync, 5000l, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued),
@@ -29,6 +36,9 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         // this prevents delaying spawning of new thread to when the queue is full
         this.allowCoreThreadTimeOut(true);
         this.threadContext = threadContext;
+        this.maxAsync = maxAsync;
+        this.maxQueued = maxQueued;
+        this.injectionPointName = injectionPointName;
     }
 
     @Override
@@ -156,6 +166,22 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
     public <U> CompletableFuture<U> newIncompleteFuture() {
         CompletableFuture<U> ret = new CompletableFuture<>();
         return threadContext.withContextCapture(ret, this);
+    }
+
+    @Override
+    public String toString() {
+        final String DELIMITER = ", ";
+        StringBuilder builder = new StringBuilder();
+        builder.append(ManagedExecutorImpl.class.getName()).append(DELIMITER);
+        builder.append("with maxAsync: ").append(maxAsync).append(DELIMITER);
+        builder.append("with maxQueued: ").append(maxQueued).append(DELIMITER);
+        builder.append("with cleared contexts: ").append(threadContext.getPlan().clearedProviders).append(DELIMITER);
+        builder.append("with propagated contexts: ").append(threadContext.getPlan().propagatedProviders).append(DELIMITER);
+        builder.append("with unchanged contexts: ").append(threadContext.getPlan().unchangedProviders);
+        if (injectionPointName != null) {
+            builder.append(DELIMITER).append(" with injection point name: ").append(injectionPointName);
+        }
+        return builder.toString();
     }
 
 }
