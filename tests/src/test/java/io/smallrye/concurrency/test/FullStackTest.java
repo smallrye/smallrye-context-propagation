@@ -7,6 +7,12 @@ import java.util.Map;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.persistence.EntityManager;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
 import javax.ws.rs.container.CompletionCallback;
 
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
@@ -23,6 +29,8 @@ import org.jboss.weld.environment.se.Weld;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.arjuna.ats.jta.logging.jtaLogger;
 
 import io.restassured.RestAssured;
 import io.vertx.core.Vertx;
@@ -66,8 +74,16 @@ public class FullStackTest {
                 cdiContext.activate();
                 
                 EntityManager entityManager = CDI.current().select(EntityManager.class).get();
-                System.err.println("BEGIN");
-                entityManager.getTransaction().begin();
+                TransactionManager transactionManager = CDI.current().select(TransactionManager.class).get();
+                Transaction transaction;
+                try {
+                    transactionManager.begin();
+                    transaction = transactionManager.getTransaction();
+                } catch (SystemException | NotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.err.println("BEGIN transaction "+transaction);
+                
                 boolean success = false;
                 try {
                     super.invoke(req, response);
@@ -78,28 +94,61 @@ public class FullStackTest {
                         // make sure we remove the CDI context
                         cdiContext.deactivate();
                         cdiContext.dissociate(contextMap);
+                        Transaction t2;
+                        try {
+                            t2 = transactionManager.suspend();
+                            System.err.println("SUSPEND "+t2);
+                        } catch (SystemException e) {
+                            throw new RuntimeException(e);
+                        }
                         // clear it later
                         req.getAsyncContext().getAsyncResponse().register((CompletionCallback)(t) -> {
-                            terminateContext(cdiContext, contextMap, entityManager, t == null);
+                            try {
+                                System.err.println("RESUME "+t2);
+                                Transaction currentTransaction = transactionManager.getTransaction();
+                                if(currentTransaction != t2) {
+                                    if(currentTransaction != null)
+                                        transactionManager.suspend();
+                                    transactionManager.resume(t2);
+                                }
+                            } catch (InvalidTransactionException | IllegalStateException | SystemException e) {
+                                e.printStackTrace();
+                            }
+                            terminateContext(cdiContext, contextMap, entityManager, transactionManager, t2, t == null);
                         });
                     } else {
                         // clear it now
-                        terminateContext(cdiContext, contextMap, entityManager, success);
+                        terminateContext(cdiContext, contextMap, entityManager, transactionManager, transaction, success);
                     }       
                 }
             }
 
-            private void terminateContext(BoundRequestContext cdiContext, Map<String, Object> contextMap, EntityManager entityManager, boolean success) {
-                System.err.println("END: "+success);
-                if(success)
-                    entityManager.getTransaction().commit();
-                else
-                    entityManager.getTransaction().rollback();
+            private void terminateContext(BoundRequestContext cdiContext, Map<String, Object> contextMap, EntityManager entityManager, 
+                                          TransactionManager tm, Transaction tx, boolean success) {
+                System.err.println("END: "+success+" "+tx);
+                try {
+                    endTransaction(tm, tx, success);
+                } catch (Exception e) {
+                    // let's not throw here
+                    e.printStackTrace();
+                }
                 cdiContext.invalidate();
                 cdiContext.deactivate();
                 cdiContext.dissociate(contextMap);
-                
             }
+            protected void endTransaction(TransactionManager tm, Transaction tx, boolean success) throws Exception {
+
+                if (tx != tm.getTransaction()) {
+                    throw new RuntimeException(jtaLogger.i18NLogger.get_wrong_tx_on_thread());
+                }
+
+                if (tx.getStatus() == Status.STATUS_MARKED_ROLLBACK || !success) {
+                    tm.rollback();
+                } else {
+                    tm.commit();
+                }
+            }
+
         });
         
         vertxJaxrsServer = new MyVertxJaxrsServer();

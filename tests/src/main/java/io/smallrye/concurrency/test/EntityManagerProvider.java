@@ -9,6 +9,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import com.arjuna.ats.jta.TransactionManager;
+
 @ApplicationScoped
 public class EntityManagerProvider {
     
@@ -30,4 +32,11 @@ public class EntityManagerProvider {
         System.err.println("Disposing EM");
         em.close();
     }
+    
+    @Produces
+    @ApplicationScoped
+    public javax.transaction.TransactionManager transactionManager() {
+        return TransactionManager.transactionManager();
+    }
+
 }
