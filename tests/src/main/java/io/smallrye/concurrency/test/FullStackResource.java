@@ -12,7 +12,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import io.smallrye.concurrency.test.jta.TransactionalBean;
 import org.eclipse.microprofile.concurrent.ThreadContext;
 
 import io.vertx.core.Vertx;
@@ -25,14 +24,11 @@ public class FullStackResource {
     MyBean myBean;
 
     @Inject
-    TransactionalBean myTransactionalBean;
-
-    @Inject
     EntityManager entityManager;
 
     @Inject
     ThreadContext threadContext;
-
+    
     @Path("text")
     @GET
     public String text() {
@@ -43,10 +39,8 @@ public class FullStackResource {
     @GET
     public String blockingTest(@Context UriInfo uriInfo) {
         markCdiContext();
-        markTransactionalContext();
 
         testCdiContext();
-        testTransactionalContext();
         testResteasyContext(uriInfo);
 
         testJpa1();
@@ -60,7 +54,6 @@ public class FullStackResource {
     @GET
     public CompletionStage<String> testAsync(@Context Vertx vertx, @Context UriInfo uriInfo) {
         markCdiContext();
-        markTransactionalContext();
         testJpa1();
 
         CompletableFuture<String> ret = makeHttpRequest(vertx);
@@ -68,7 +61,6 @@ public class FullStackResource {
 
             testJpa2();
             testCdiContext();
-            testTransactionalContext();
             testResteasyContext(uriInfo);
             
             return "OK";
@@ -81,7 +73,6 @@ public class FullStackResource {
     @GET
     public CompletionStage<String> testAsyncWorking(@Context Vertx vertx, @Context UriInfo uriInfo) {
         markCdiContext();
-        markTransactionalContext();
         testJpa1();
 
         CompletableFuture<String> ret = makeHttpRequest(vertx);
@@ -90,7 +81,6 @@ public class FullStackResource {
             
             testJpa2();
             testCdiContext();
-            testTransactionalContext();
             testResteasyContext(uriInfo);
 
             return "OK";
@@ -148,23 +138,6 @@ public class FullStackResource {
             throw new WebApplicationException("myBean lookup is null");
         if(myBean2.getId() != 42)
             throw new WebApplicationException("myBean lookup is not our own");
-    }
-
-    private void markTransactionalContext() {
-        if (myTransactionalBean == null)
-            throw new WebApplicationException("myBean is null");
-        // Mark our CDI request context bean
-        myTransactionalBean.incrementValue();
-    }
-
-    private void testTransactionalContext() {
-        if(myTransactionalBean.getValue() != 1)
-            throw new WebApplicationException("myTransactionalBean is not our own");
-        TransactionalBean myTransactionalBean2 = CDI.current().select(TransactionalBean.class).get();
-        if(myTransactionalBean2 == null)
-            throw new WebApplicationException("myTransactionalBean lookup is null");
-        if(myTransactionalBean2.getValue() != 1)
-            throw new WebApplicationException("myTransactionalBean lookup is not our own");
     }
 
     private CompletableFuture<String> makeHttpRequest(Vertx vertx) {

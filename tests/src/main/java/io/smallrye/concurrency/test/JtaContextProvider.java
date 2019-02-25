@@ -8,7 +8,6 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
 
@@ -99,7 +98,7 @@ public class JtaContextProvider implements ThreadContextProvider {
 
     @Override
     public String getThreadContextType() {
-        return ThreadContext.TRANSACTION;// "JtaContext";
+        return "JtaContext";
     }
 
 }
