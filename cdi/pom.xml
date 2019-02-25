@@ -30,6 +30,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>javax.transaction-api</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.weld</groupId>
             <artifactId>weld-spi</artifactId>
             <version>${version.weld.api}</version>

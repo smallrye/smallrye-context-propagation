@@ -15,6 +15,9 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.ws.rs.container.CompletionCallback;
 
+import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
+import com.arjuna.ats.jta.utils.JNDIManager;
+import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyContext;
@@ -26,6 +29,7 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.weld.context.bound.BoundRequestContext;
 import org.jboss.weld.environment.se.Weld;
+import org.jnp.server.NamingBeanImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,13 +41,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 
 public class FullStackTest {
-    
     private final class MyVertxJaxrsServer extends VertxJaxrsServer {
         public Vertx getVertx() {
             return vertx;
         }
     }
 
+    private NamingBeanImpl namingBean = new NamingBeanImpl();
     private MyVertxJaxrsServer vertxJaxrsServer;
     private Weld weld;
 
@@ -54,7 +58,13 @@ public class FullStackTest {
         weld = new Weld();
 //        weld.addExtension(new VertxExtension());
         weld.initialize();
-        
+
+        try {
+            JTATest.initJTATM();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         ResteasyCdiExtension cdiExtension = CDI.current().select(ResteasyCdiExtension.class).get();
         deployment.setActualResourceClasses(cdiExtension.getResources());
         deployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
@@ -150,7 +160,7 @@ public class FullStackTest {
             }
 
         });
-        
+
         vertxJaxrsServer = new MyVertxJaxrsServer();
         vertxJaxrsServer.setVertxOptions(new VertxOptions().setEventLoopPoolSize(1));
         vertxJaxrsServer.setDeployment(deployment);
@@ -164,6 +174,7 @@ public class FullStackTest {
     public void after() {
         weld.shutdown();
         vertxJaxrsServer.stop();
+        namingBean.stop();
     }
     
     @Test

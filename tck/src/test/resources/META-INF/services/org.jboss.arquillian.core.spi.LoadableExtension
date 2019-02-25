@@ -1,1 +1,2 @@
 io.smallrye.concurrency.tck.SmallRyeConcurrencyLoadableExtension
+io.smallrye.concurrency.tck.lifecycle.LifecycleExtension

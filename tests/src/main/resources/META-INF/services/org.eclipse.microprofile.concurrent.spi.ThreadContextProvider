@@ -1,3 +1,2 @@
 io.smallrye.concurrency.test.MyThreadContextProvider
 io.smallrye.concurrency.test.RESTEasyContextProvider
-io.smallrye.concurrency.test.JtaContextProvider

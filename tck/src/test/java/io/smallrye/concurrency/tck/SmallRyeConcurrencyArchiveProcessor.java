@@ -49,6 +49,7 @@ public class SmallRyeConcurrencyArchiveProcessor implements ApplicationArchivePr
                 JavaArchive newJar = ShrinkWrap.createFromZipFile(JavaArchive.class, dependencies[i]);
                 archive.addAsLibrary(newJar);
             }
+            archive.addAsResource("jndi.properties");
         }
         if (applicationArchive instanceof JavaArchive) {
             // TODO, add impl for JARs, we would need to add them as packages or

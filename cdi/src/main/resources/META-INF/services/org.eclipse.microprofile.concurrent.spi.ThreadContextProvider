@@ -1,1 +1,2 @@
 io.smallrye.concurrency.cdi.context.propagation.CdiContextProvider
+io.smallrye.concurrency.cdi.context.propagation.JtaContextProvider
