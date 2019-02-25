@@ -10,7 +10,6 @@
 		<version>1</version>
 	</parent>
 
-	<groupId>io.smallrye</groupId>
 	<artifactId>smallrye-concurrency-parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -25,6 +24,18 @@
 			<url>https://repo.eclipse.org/content/repositories/microprofile-snapshots</url>
 			<releases>
 				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<!-- jnp server -->
+		<repository>
+			<id>jboss-public-repository-group</id>
+			<name>JBoss Public Maven Repository Group</name>
+			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
