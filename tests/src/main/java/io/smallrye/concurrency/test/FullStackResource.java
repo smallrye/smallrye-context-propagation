@@ -14,6 +14,7 @@ import javax.ws.rs.core.UriInfo;
 
 import io.smallrye.concurrency.test.jta.TransactionalBean;
 import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.concurrent.ThreadContextConfig;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;
@@ -31,6 +32,7 @@ public class FullStackResource {
     EntityManager entityManager;
 
     @Inject
+    @ThreadContextConfig(propagated = ThreadContext.ALL_REMAINING, cleared = {})
     ThreadContext threadContext;
 
     @Path("text")

@@ -182,11 +182,6 @@ public class FullStackTest {
     public void fullStack() {
         RestAssured.when().get("/test").then().statusCode(200).body(is("OK"));
         RestAssured.when().get("/test/async").then().statusCode(500);
-    }
-
-    @Test
-    @Ignore
-    public void fullStackAsync() {
         RestAssured.when().get("/test/async-working").then().statusCode(200).body(is("OK"));
     }
 }
