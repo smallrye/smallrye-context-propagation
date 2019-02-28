@@ -7,8 +7,8 @@
         <artifactId>smallrye-concurrency-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-concurrency-cdi</artifactId>
-    <name>smallrye-concurrency-cdi</name>
+    <artifactId>smallrye-concurrency-jta</artifactId>
+    <name>smallrye-concurrency-jta</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -30,30 +30,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-spi</artifactId>
-            <version>${version.weld.api}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-api</artifactId>
-            <version>${version.weld.api}</version>
-        </dependency>
-        <!--Weld core dependency is a workaround for WELD-2566-->
-        <dependency>
-            <groupId>org.jboss.weld</groupId>
-            <artifactId>weld-core-impl</artifactId>
-            <version>${version.weld.core}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.microprofile.config</groupId>
-            <artifactId>microprofile-config-api</artifactId>
-            <version>${version.microprofile.config}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-config</artifactId>
-            <version>${version.smallrye.config}</version>
+            <groupId>javax.transaction</groupId>
+            <artifactId>javax.transaction-api</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 </project>

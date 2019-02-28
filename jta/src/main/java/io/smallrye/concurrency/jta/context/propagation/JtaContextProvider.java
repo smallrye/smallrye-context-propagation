@@ -1,4 +1,4 @@
-package io.smallrye.concurrency.cdi.context.propagation;
+package io.smallrye.concurrency.jta.context.propagation;
 
 import org.eclipse.microprofile.concurrent.ThreadContext;
 import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;

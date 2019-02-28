@@ -183,6 +183,7 @@
     <modules>
         <module>core</module>
         <module>cdi</module>
+        <module>jta</module>
         <module>propagators-rxjava1</module>
         <module>propagators-rxjava2</module>
         <module>tests</module>
