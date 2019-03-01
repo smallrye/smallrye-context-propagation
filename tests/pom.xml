@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <arquillian.version>1.4.0.Final</arquillian.version>
         <version.narayana>5.9.3.Final</version.narayana>
-        <version.jnpserver>5.0.3.GA</version.jnpserver>
+        <version.jnpserver>5.0.5.Final</version.jnpserver>
     </properties>
     
     <dependencyManagement>
