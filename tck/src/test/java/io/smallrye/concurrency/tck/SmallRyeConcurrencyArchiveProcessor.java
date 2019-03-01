@@ -17,10 +17,12 @@ package io.smallrye.concurrency.tck;
 
 import java.io.File;
 
+import io.smallrye.concurrency.tck.cdi.UserTransactionProducer;
 import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
@@ -50,6 +52,8 @@ public class SmallRyeConcurrencyArchiveProcessor implements ApplicationArchivePr
                 archive.addAsLibrary(newJar);
             }
             archive.addAsResource("jndi.properties");
+            archive.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+            archive.addClass(UserTransactionProducer.class);
         }
         if (applicationArchive instanceof JavaArchive) {
             // TODO, add impl for JARs, we would need to add them as packages or
