@@ -59,19 +59,19 @@ public class LifecycleExecuter {
 
    public void executeAfterDeploy(@Observes AfterDeploy event, TestClass testClass) throws Exception {
       registerJTA();
-      execute(testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.AfterDeploy.class));
+      execute("AfterDeploy", testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.AfterDeploy.class));
    }
    
    public void executeBeforeUnDeploy(@Observes BeforeUnDeploy event, TestClass testClass) throws Exception {
       unregisterJTA();
-      execute(testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.BeforeUnDeploy.class));
+      execute("BeforeUnDeploy", testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.BeforeUnDeploy.class));
    }
 
 /*   public void executeAfterUnDeploy(@Observes AfterUnDeploy event, TestClass testClass) {
       execute(testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.AfterUnDeploy.class));
    }*/
 
-   private void execute(Method[] methods)
+   private void execute(String msg, Method[] methods)
    {
       if(methods == null)
       {
@@ -85,7 +85,7 @@ public class LifecycleExecuter {
          }
          catch (Exception e) 
          {
-            throw new RuntimeException("Could not execute @BeforeDeploy method: " + method, e);
+            throw new RuntimeException(msg + ":  Could not execute method: " + method, e);
          }
       }
    }

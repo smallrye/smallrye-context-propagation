@@ -16,9 +16,11 @@ import org.junit.Test;
 
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
+import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
@@ -296,6 +298,40 @@ public class JTATest {
             } catch (SystemException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Test
+    public void testTransactionWithUT() throws Exception {
+        try {
+            ManagedExecutor executor = ManagedExecutor.builder()
+                    .maxAsync(2)
+                    .propagated(ThreadContext.TRANSACTION)
+                    .cleared(ThreadContext.ALL_REMAINING)
+                    .build();
+
+            try (WeldContainer container = weld.initialize()) {
+                // lookup the transaction manager and the test service
+                UserTransaction ut = container.select(UserTransaction.class).get();
+                TransactionalService service = container.select(TransactionalService.class).get();
+
+                ut.begin();
+                Assert.assertEquals(0, service.getValue());
+
+                CompletableFuture<Void> stage = executor.runAsync(service::required);
+                stage.join();
+
+                try {
+                    ut.rollback();
+                    Assert.assertEquals("transaction still active",
+                            ut.getStatus(), Status.STATUS_NO_TRANSACTION);
+                } catch (SystemException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 }
