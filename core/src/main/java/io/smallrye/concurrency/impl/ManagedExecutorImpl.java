@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,6 +23,15 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
     private final int maxAsync;
     private final int maxQueued;
     private final String injectionPointName;
+    
+    private class NoPropagationExecutor implements Executor {
+        @Override
+        public void execute(Runnable command) {
+            ManagedExecutorImpl.this.executeWithoutPropagation(command);
+        }
+    }
+    
+    private final Executor noPropagationExecutor = new NoPropagationExecutor();
 
     public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
         this(maxAsync, maxQueued, threadContext, null);
@@ -124,6 +134,10 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         super.execute(threadContext.contextualRunnableUnlessContextualized(command));
     }
 
+    private void executeWithoutPropagation(Runnable command){
+        super.execute(command);
+    }
+    
     @Override
     public <U> CompletableFuture<U> completedFuture(U value) {
         return threadContext.withContextCapture(CompletableFuture.completedFuture(value), this);
@@ -148,18 +162,20 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
 
     @Override
     public CompletableFuture<Void> runAsync(Runnable runnable) {
-        // I don't need to wrap runnable because this executor will be used to submit
-        // the task immediately with
-        // a Runnable that will capture the context before calling my Runnable.run
-        return threadContext.withContextCapture(CompletableFuture.runAsync(runnable, this), this);
+        // runAsync wraps the contextual function we give it in its own function and calls execute() on the executor
+        // we pass it, so to avoid double contextualisation we pass it a non-propagating executor
+        // if we contextualise the function it passes to execute(), then our begin/endContext calls will run outside
+        // of any thread synchronisation such as join() and it would be all sorts of wrong
+        return threadContext.withContextCapture(CompletableFuture.runAsync(threadContext.contextualRunnableUnlessContextualized(runnable), noPropagationExecutor), this);
     }
 
     @Override
     public <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier) {
-        // I don't need to wrap supplier because this executor will be used to submit
-        // the task immediately with
-        // a Runnable that will capture the context before calling my Supplier.run
-        return threadContext.withContextCapture(CompletableFuture.supplyAsync(supplier, this), this);
+        // runAsync wraps the contextual function we give it in its own function and calls execute() on the executor
+        // we pass it, so to avoid double contextualisation we pass it a non-propagating executor
+        // if we contextualise the function it passes to execute(), then our begin/endContext calls will run outside
+        // of any thread synchronisation such as join() and it would be all sorts of wrong
+        return threadContext.withContextCapture(CompletableFuture.supplyAsync(threadContext.contextualSupplierUnlessContextualized(supplier), noPropagationExecutor), this);
     }
 
     @Override
