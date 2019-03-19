@@ -15,13 +15,13 @@
  */
 package io.smallrye.concurrency.inject;
 
+import io.smallrye.concurrency.api.NamedInstance;
+import io.smallrye.concurrency.api.ManagedExecutorConfig;
+import io.smallrye.concurrency.api.ThreadContextConfig;
 import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.ManagedExecutorConfig;
-import org.eclipse.microprofile.concurrent.NamedInstance;
 import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.ThreadContextConfig;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -52,6 +52,8 @@ import java.util.stream.Collectors;
 
 /**
  * CDI extension that takes care of injectable ThreadContext and ManagedExecutor instances.
+ *
+ * Also takes into consideration MP Config which may be used to override injection point configuration.
  *
  * @author <a href="mailto:manovotn@redhat.com">Matej Novotny</a>
  */

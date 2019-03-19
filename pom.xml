@@ -188,5 +188,6 @@
         <module>propagators-rxjava2</module>
         <module>tests</module>
         <module>tck</module>
-    </modules>
+		<module>api</module>
+	</modules>
 </project>

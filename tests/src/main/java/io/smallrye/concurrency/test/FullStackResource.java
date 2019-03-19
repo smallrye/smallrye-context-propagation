@@ -12,9 +12,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
+import io.smallrye.concurrency.api.ThreadContextConfig;
 import io.smallrye.concurrency.test.jta.TransactionalBean;
 import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.ThreadContextConfig;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;
@@ -90,7 +90,7 @@ public class FullStackResource {
         CompletableFuture<String> ret2 = threadContext.withContextCapture(ret);
         CompletableFuture<String> ret3 = ret2.thenApply(body -> {
             
-            testJpa2();
+            //testJpa2();
             testCdiContext();
             testTransactionalContext();
             testResteasyContext(uriInfo);
