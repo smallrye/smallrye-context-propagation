@@ -27,6 +27,11 @@
             <artifactId>smallrye-concurrency-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.config</groupId>
+            <artifactId>microprofile-config-api</artifactId>
+            <version>${version.microprofile.config}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

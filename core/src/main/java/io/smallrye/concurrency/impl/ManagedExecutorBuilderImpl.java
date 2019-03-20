@@ -1,6 +1,5 @@
 package io.smallrye.concurrency.impl;
 
-import io.smallrye.concurrency.api.SmallRyeManagedExecutorConfig;
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ManagedExecutor.Builder;
 
@@ -18,10 +17,10 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
     public ManagedExecutorBuilderImpl(SmallRyeConcurrencyManager manager) {
         this.manager = manager;
         // initiate with default values
-        this.propagated = SmallRyeConcurrencyManager.ALL_REMAINING_ARRAY;
-        this.cleared = SmallRyeConcurrencyManager.TRANSACTION_ARRAY;
-        this.maxAsync = SmallRyeManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync();
-        this.maxQueued = SmallRyeManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued();
+        this.propagated = DefaultValues.INSTANCE.getExecutorPropagated();
+        this.cleared = DefaultValues.INSTANCE.getExecutorCleared();
+        this.maxAsync = DefaultValues.INSTANCE.getExecutorAsync();
+        this.maxQueued = DefaultValues.INSTANCE.getExecutorQueue();
     }
 
     @Override
