@@ -90,7 +90,7 @@ public class FullStackResource {
         CompletableFuture<String> ret2 = threadContext.withContextCapture(ret);
         CompletableFuture<String> ret3 = ret2.thenApply(body -> {
             
-            //testJpa2();
+            testJpa2();
             testCdiContext();
             testTransactionalContext();
             testResteasyContext(uriInfo);
