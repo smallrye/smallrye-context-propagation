@@ -38,10 +38,10 @@ import java.lang.annotation.Target;
  * <p>This annotation can be used in combination with the {@link ManagedExecutorConfig} or
  * {@link ThreadContextConfig} annotation to define a new instance. For example,</p>
  *
- * <pre><code> &commat;Inject &commat;NamedInstance("myExecutor") &commat;ManagedExecutorConfig(maxAsync=10)
+ * <pre><code> {@literal @}Inject {@literal @}NamedInstance("myExecutor") {@literal @}ManagedExecutorConfig(maxAsync=10)
  * ManagedExecutor myExecutor;
  *
- * &commat;Inject &commat;NamedInstance("myContext") &commat;ThreadContextConfig(propagated = { ThreadContext.SECURITY, ThreadContext.CDI })
+ * {@literal @}Inject {@literal @}NamedInstance("myContext") {@literal @}ThreadContextConfig(propagated = { ThreadContext.SECURITY, ThreadContext.CDI })
  * ThreadContext myThreadContext;
  * </code></pre>
  *
@@ -49,10 +49,10 @@ import java.lang.annotation.Target;
  * an existing instance. Injection points with the same {@link NamedInstance#value()} then share the same
  * underlying contextual instance. For example, referencing a name from the previous example,</p>
  *
- * <pre><code> &commat;Inject &commat;NamedInstance("myExecutor")
+ * <pre><code> {@literal @}Inject {@literal @}NamedInstance("myExecutor")
  * ManagedExecutor exec1;
  *
- * &commat;Inject &commat;NamedInstance("myContext")
+ * {@literal @}Inject {@literal @}NamedInstance("myContext")
  * ThreadContext myContextPropagator;
  * </code></pre>
  *

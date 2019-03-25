@@ -37,16 +37,16 @@ import java.lang.annotation.Target;
  * <p>For example, the following injection points share a single
  * {@link ThreadContext} instance,</p>
  *
- * <pre><code> &commat;Inject &commat;NamedInstance("tc1") &commat;ThreadContextConfig(propagated = { ThreadContext.CDI, ThreadContext.APPLICATION })
+ * <pre><code> {@literal @}Inject {@literal @}NamedInstance("tc1") {@literal @}ThreadContextConfig(propagated = { ThreadContext.CDI, ThreadContext.APPLICATION })
  * ThreadContext threadContext1;
  *
- * &commat;Inject
- * void setTask(&commat;NamedInstance("tc1") ThreadContext contextPropagator) {
+ * {@literal @}Inject
+ * void setTask({@literal @}NamedInstance("tc1") ThreadContext contextPropagator) {
  *     task = contextPropagator.contextualTask(...);
  * }
  *
- * &commat;Inject
- * void setContextSnapshot(&commat;NamedInstance("tc1") ThreadContext contextPropagator) {
+ * {@literal @}Inject
+ * void setContextSnapshot({@literal @}NamedInstance("tc1") ThreadContext contextPropagator) {
  *     contextSnapshot = contextPropagator.currentContextExecutor();
  * }
  * </code></pre>
@@ -54,10 +54,10 @@ import java.lang.annotation.Target;
  * <p>Alternatively, the following injection points each represent a distinct
  * {@link ThreadContext} instance,</p>
  *
- * <pre><code> &commat;Inject &commat;ThreadContextConfig(propagated = { ThreadContext.SECURITY, ThreadContext.APPLICATION })
+ * <pre><code> {@literal @}Inject {@literal @}ThreadContextConfig(propagated = { ThreadContext.SECURITY, ThreadContext.APPLICATION })
  * ThreadContext tc2;
  *
- * &commat;Inject &commat;ThreadContextConfig(cleared = ThreadContext.SECURITY, unchanged = ThreadContext.TRANSACTION)
+ * {@literal @}Inject {@literal @}ThreadContextConfig(cleared = ThreadContext.SECURITY, unchanged = ThreadContext.TRANSACTION)
  * ThreadContext tc3;
  * </code></pre>
  *
@@ -145,7 +145,7 @@ public @interface ThreadContextConfig {
      *
      * <p>For example, to run as the current application, but under the
      * transaction of the thread where the task executes:</p>
-     * <pre><code> &commat;Inject &commat;ThreadContextConfig(unchanged = ThreadContext.TRANSACTION,
+     * <pre><code> {@literal @}Inject {@literal @}ThreadContextConfig(unchanged = ThreadContext.TRANSACTION,
      *                              propagated = ThreadContext.APPLICATION,
      *                              cleared = ThreadContext.ALL_REMAINING)
      * ThreadContext threadContext;

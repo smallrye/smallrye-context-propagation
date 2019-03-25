@@ -38,16 +38,16 @@ import java.lang.annotation.Target;
  * <p>For example, the following injection points share a single
  * {@link ManagedExecutor} instance,</p>
  *
- * <pre><code> &commat;Inject &commat;NamedInstance("exec1") &commat;ManagedExecutorConfig(maxAsync=5)
+ * <pre><code> {@literal @}Inject {@literal @}NamedInstance("exec1") {@literal @}ManagedExecutorConfig(maxAsync=5)
  * ManagedExecutor executor;
  *
- * &commat;Inject
- * void setCompletableFuture(&commat;NamedInstance("exec1") ManagedExecutor exec) {
+ * {@literal @}Inject
+ * void setCompletableFuture({@literal @}NamedInstance("exec1") ManagedExecutor exec) {
  *     completableFuture = exec.newIncompleteFuture();
  * }
  *
- * &commat;Inject
- * void setCompletionStage(&commat;NamedInstance("exec1") ManagedExecutor exec) {
+ * {@literal @}Inject
+ * void setCompletionStage({@literal @}NamedInstance("exec1") ManagedExecutor exec) {
  *     completionStage = exec.supplyAsync(supplier);
  * }
  * </code></pre>
@@ -55,10 +55,10 @@ import java.lang.annotation.Target;
  * <p>Alternatively, the following injection points each represent a distinct
  * {@link ManagedExecutor} instance,</p>
  *
- * <pre><code> &commat;Inject &commat;ManagedExecutorConfig(propagated=ThreadContext.CDI)
+ * <pre><code> {@literal @}Inject {@literal @}ManagedExecutorConfig(propagated=ThreadContext.CDI)
  * ManagedExecutor exec2;
  *
- * &commat;Inject &commat;ManagedExecutorConfig(maxAsync=5)
+ * {@literal @}Inject {@literal @}ManagedExecutorConfig(maxAsync=5)
  * ManagedExecutor exec3;
  * </code></pre>
  *
