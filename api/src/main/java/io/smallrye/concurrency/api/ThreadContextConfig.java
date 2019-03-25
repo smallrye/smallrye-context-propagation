@@ -21,6 +21,10 @@ package io.smallrye.concurrency.api;
 import org.eclipse.microprofile.concurrent.ThreadContext;
 
 import javax.enterprise.util.AnnotationLiteral;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * <p>Annotates a CDI injection point for a {@link ThreadContext} such that the container
@@ -69,6 +73,8 @@ import javax.enterprise.util.AnnotationLiteral;
  *
  * @author Matej Novotny
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE, ElementType.PARAMETER})
 public @interface ThreadContextConfig {
     /**
      * <p>Defines the set of thread context types to clear from the thread
@@ -93,7 +99,7 @@ public @interface ThreadContextConfig {
      * or if the {@link #propagated} and/or {@link #unchanged} set
      * includes one or more of the same types as this set.</p>
      */
-    String[] cleared() default {ThreadContext.TRANSACTION};
+    String[] cleared() default {};
 
     /**
      * <p>Defines the set of thread context types to capture from the thread

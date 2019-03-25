@@ -200,4 +200,20 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         return builder.toString();
     }
 
+    public ThreadContextProviderPlan getThreadContextProviderPlan() {
+        return threadContext.getPlan();
+    }
+
+    public int getMaxAsync() {
+        return maxAsync;
+    }
+
+    public int getMaxQueued() {
+        return maxQueued;
+    }
+
+    public String getInjectionPointName() {
+        return injectionPointName;
+    }
+
 }

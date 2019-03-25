@@ -51,7 +51,6 @@ public class DefaultValues {
         this.threadCleared = resolveConfiguration(config, THREAD_CLEARED, SmallRyeConcurrencyManager.NO_STRING);
         this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeConcurrencyManager.ALL_REMAINING_ARRAY);
         this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeConcurrencyManager.NO_STRING);
-        System.err.println(config.getConfigSources());
     }
 
     private static String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue) {
