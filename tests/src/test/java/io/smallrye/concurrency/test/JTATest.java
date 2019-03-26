@@ -2,6 +2,7 @@ package io.smallrye.concurrency.test;
 
 import com.arjuna.ats.arjuna.common.arjPropertyManager;
 import com.arjuna.ats.jta.utils.JNDIManager;
+import io.smallrye.concurrency.inject.TransactionServicesImpl;
 import io.smallrye.concurrency.test.jta.TransactionalService;
 import org.eclipse.microprofile.concurrent.ManagedExecutor;
 import org.eclipse.microprofile.concurrent.ThreadContext;
@@ -15,7 +16,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.transaction.InvalidTransactionException;
-import javax.transaction.NotSupportedException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -23,6 +23,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class JTATest {
     private static final String txnStoreLocation = "target/tx-object-store";
@@ -46,6 +47,7 @@ public class JTATest {
         initJTATM(); // initialise a transaction manager
 
         weld = new Weld(); // CDI implementation
+        weld.addServices(new TransactionServicesImpl());
     }
 
     @AfterClass
@@ -332,6 +334,42 @@ public class JTATest {
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
+        }
+    }
+
+    @Test
+    public void testTransactionWithSuspend() throws Exception {
+        ManagedExecutor executor = ManagedExecutor.builder()
+                .maxAsync(2)
+                .propagated(ThreadContext.TRANSACTION)
+                .cleared(ThreadContext.ALL_REMAINING)
+                .build();
+
+        try (WeldContainer container = weld.initialize()) {
+            // lookup the transaction manager and the test service
+            UserTransaction ut = container.select(UserTransaction.class).get();
+            TransactionalService service = container.select(TransactionalService.class).get();
+
+            ut.begin();
+
+            try {
+                CompletableFuture<Void> stage = executor.runAsync(service::required)
+                        .whenComplete((result, failure) -> {
+                            try {
+                                if (failure == null && ut.getStatus() == Status.STATUS_ACTIVE)
+                                    ut.commit();
+                                else
+                                    ut.rollback();
+                            } catch (Exception x) {
+                                if (failure == null)
+                                    throw new CompletionException(x);
+                            }
+                        });
+
+                stage.get();
+            } finally {
+                container.select(TransactionManager.class).get().suspend();
+            }
         }
     }
 }
