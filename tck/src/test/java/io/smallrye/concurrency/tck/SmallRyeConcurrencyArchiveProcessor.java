@@ -17,10 +17,10 @@ package io.smallrye.concurrency.tck;
 
 import java.io.File;
 
-import io.smallrye.concurrency.tck.cdi.UserTransactionProducer;
 import org.jboss.arquillian.container.test.spi.client.deployment.ApplicationArchiveProcessor;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.ArchivePaths;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -51,9 +51,10 @@ public class SmallRyeConcurrencyArchiveProcessor implements ApplicationArchivePr
                 JavaArchive newJar = ShrinkWrap.createFromZipFile(JavaArchive.class, dependencies[i]);
                 archive.addAsLibrary(newJar);
             }
+
             archive.addAsResource("jndi.properties");
             archive.addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
-            archive.addClass(UserTransactionProducer.class);
+            archive.addAsManifestResource("META-INF/services", ArchivePaths.create("org.jboss.weld.bootstrap.api.Service"));
         }
         if (applicationArchive instanceof JavaArchive) {
             // TODO, add impl for JARs, we would need to add them as packages or
