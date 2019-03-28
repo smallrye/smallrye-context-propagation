@@ -23,7 +23,6 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
     public static final String[] NO_STRING = new String[0];
 
     public static final String[] ALL_REMAINING_ARRAY = new String[] { ThreadContext.ALL_REMAINING };
-    public static final String[] TRANSACTION_ARRAY = new String[] { ThreadContext.TRANSACTION };
 
     private List<ThreadContextProvider> providers;
     private List<ConcurrencyManagerExtension> extensions;

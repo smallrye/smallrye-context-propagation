@@ -14,9 +14,9 @@ public class ThreadContextBuilderImpl implements ThreadContext.Builder {
 
     public ThreadContextBuilderImpl(SmallRyeConcurrencyManager manager) {
         this.manager = manager;
-        this.propagated = SmallRyeConcurrencyManager.ALL_REMAINING_ARRAY;
-        this.unchanged = SmallRyeConcurrencyManager.NO_STRING;
-        this.cleared = SmallRyeConcurrencyManager.TRANSACTION_ARRAY;
+        this.propagated = DefaultValues.INSTANCE.getThreadPropagated();
+        this.unchanged = DefaultValues.INSTANCE.getThreadUnchanged();
+        this.cleared = DefaultValues.INSTANCE.getThreadCleared();
     }
 
     @Override
