@@ -1,2 +1,2 @@
 
-io.smallrye.concurrency.inject.TransactionServicesImpl
+io.smallrye.context.inject.TransactionServicesImpl

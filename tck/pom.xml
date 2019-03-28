@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-concurrency-parent</artifactId>
+        <artifactId>smallrye-context-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-concurrency-tck</artifactId>
-    <name>smallrye-concurrency-tck</name>
+    <artifactId>smallrye-context-tck</artifactId>
+    <name>smallrye-context-tck</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,28 +46,28 @@
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency</artifactId>
+            <artifactId>smallrye-context</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-cdi</artifactId>
+            <artifactId>smallrye-context-cdi</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-jta</artifactId>
+            <artifactId>smallrye-context-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-jta</artifactId>
+            <artifactId>smallrye-context-jta</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
@@ -176,7 +176,7 @@
                 <version>2.22.0</version>
                 <configuration>
                     <dependenciesToScan>
-                        <dependency>org.eclipse.microprofile.concurrency:microprofile-concurrency-tck</dependency>
+                        <dependency>org.eclipse.microprofile.context:microprofile-context-tck</dependency>
                     </dependenciesToScan>
                 </configuration>
             </plugin>

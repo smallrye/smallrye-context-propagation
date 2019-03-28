@@ -12,9 +12,9 @@ public class SmallRyeContextManagerBuilder implements ContextManager.Builder {
 
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private boolean addDiscoveredThreadContextProviders;
-    private boolean addDiscoveredConcurrencyManagerExtensions;
+    private boolean addDiscoveredContextManagerExtensions;
     private List<ThreadContextProvider> contextProviders = new ArrayList<>();
-    private List<ContextManagerExtension> concurrencyManagerExtensions = new ArrayList<>();
+    private List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
 
     @Override
     public SmallRyeContextManagerBuilder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -44,25 +44,25 @@ public class SmallRyeContextManagerBuilder implements ContextManager.Builder {
     public SmallRyeContextManagerBuilder withContextManagerExtensions(
             ContextManagerExtension... propagators) {
         for (ContextManagerExtension contextPropagator : propagators) {
-            concurrencyManagerExtensions.add(contextPropagator);
+            contextManagerExtensions.add(contextPropagator);
         }
         return this;
     }
 
     @Override
     public SmallRyeContextManagerBuilder addDiscoveredContextManagerExtensions() {
-        addDiscoveredConcurrencyManagerExtensions = true;
+        addDiscoveredContextManagerExtensions = true;
         return this;
     }
 
-    private List<ContextManagerExtension> discoverConcurrencyManagerExtensions() {
-        List<ContextManagerExtension> discoveredConcurrencyManagerExtensions = new ArrayList<>();
+    private List<ContextManagerExtension> discoverContextManagerExtensions() {
+        List<ContextManagerExtension> discoveredContextManagerExtensions = new ArrayList<>();
         ServiceLoader<ContextManagerExtension> configSourceLoader = ServiceLoader
                 .load(ContextManagerExtension.class, classLoader);
         configSourceLoader.forEach(configSource -> {
-            discoveredConcurrencyManagerExtensions.add(configSource);
+            discoveredContextManagerExtensions.add(configSource);
         });
-        return discoveredConcurrencyManagerExtensions;
+        return discoveredContextManagerExtensions;
     }
 
     @Override
@@ -75,10 +75,10 @@ public class SmallRyeContextManagerBuilder implements ContextManager.Builder {
     public SmallRyeContextManager build() {
         if (addDiscoveredThreadContextProviders)
             contextProviders.addAll(discoverThreadContextProviders());
-        if (addDiscoveredConcurrencyManagerExtensions)
-            concurrencyManagerExtensions.addAll(discoverConcurrencyManagerExtensions());
+        if (addDiscoveredContextManagerExtensions)
+            contextManagerExtensions.addAll(discoverContextManagerExtensions());
 
-        return new SmallRyeContextManager(contextProviders, concurrencyManagerExtensions);
+        return new SmallRyeContextManager(contextProviders, contextManagerExtensions);
     }
 
 }

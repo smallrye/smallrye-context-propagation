@@ -16,13 +16,13 @@ public class BTest implements BiConsumer<ClassLoader, ClassLoader> {
     @Override
     public void accept(ClassLoader thisClassLoader, ClassLoader parentClassLoader) {
         Assert.assertEquals(thisClassLoader, BTest.class.getClassLoader());
-        ContextManagerProvider concurrencyProvider = ContextManagerProvider.instance();
-        System.err.println("B CP: " + concurrencyProvider);
-        System.err.println("B CM: " + concurrencyProvider.getContextManager());
-        Assert.assertEquals(parentClassLoader, concurrencyProvider.getClass().getClassLoader());
+        ContextManagerProvider contextProvider = ContextManagerProvider.instance();
+        System.err.println("B CP: " + contextProvider);
+        System.err.println("B CM: " + contextProvider.getContextManager());
+        Assert.assertEquals(parentClassLoader, contextProvider.getClass().getClassLoader());
 
-        SmallRyeContextManager concurrencyManager = (SmallRyeContextManager) concurrencyProvider.getContextManager();
-        ThreadContextProviderPlan plan = concurrencyManager.getProviderPlan();
+        SmallRyeContextManager contextManager = (SmallRyeContextManager) contextProvider.getContextManager();
+        ThreadContextProviderPlan plan = contextManager.getProviderPlan();
         Assert.assertEquals(1, plan.propagatedProviders.size());
         Assert.assertEquals("B", plan.propagatedProviders.iterator().next().getThreadContextType());
         Assert.assertTrue(plan.unchangedProviders.isEmpty());

@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-concurrency-parent</artifactId>
+        <artifactId>smallrye-context-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-concurrency-test</artifactId>
-    <name>smallrye-concurrency-test</name>
+    <artifactId>smallrye-context-test</artifactId>
+    <name>smallrye-context-test</name>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -50,38 +50,38 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency</artifactId>
+            <artifactId>smallrye-context</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-propagators-rxjava1</artifactId>
+            <artifactId>smallrye-context-propagators-rxjava1</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-propagators-rxjava2</artifactId>
+            <artifactId>smallrye-context-propagators-rxjava2</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-cdi</artifactId>
+            <artifactId>smallrye-context-cdi</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-jta</artifactId>
+            <artifactId>smallrye-context-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-jta</artifactId>
+            <artifactId>smallrye-context-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>

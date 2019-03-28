@@ -3,7 +3,7 @@
     <persistence-unit name="persistence" transaction-type="JTA">
 
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
-        <class>io.smallrye.concurrency.test.MyEntity</class>
+        <class>io.smallrye.context.test.MyEntity</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.hsqldb.jdbcDriver"/>

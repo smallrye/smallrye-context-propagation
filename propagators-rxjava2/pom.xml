@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-concurrency-parent</artifactId>
+        <artifactId>smallrye-context-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-concurrency-propagators-rxjava2</artifactId>
-    <name>smallrye-concurrency-propagators-rxjava2</name>
+    <artifactId>smallrye-context-propagators-rxjava2</artifactId>
+    <name>smallrye-context-propagators-rxjava2</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -21,7 +21,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency</artifactId>
+            <artifactId>smallrye-context</artifactId>
             <version>${project.version}</version>
         </dependency>
 

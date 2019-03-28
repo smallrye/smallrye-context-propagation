@@ -38,7 +38,7 @@ public class DefaultValues {
     private String[] threadUnchanged;
 
     private DefaultValues() {
-        // NOTE: we do not perform sanity check here, that's done in SmallRyeConcurrencyManager
+        // NOTE: we do not perform sanity check here, that's done in SmallRyeContextManager
         Config config = ConfigProvider.getConfig();
         this.executorAsync = config.getOptionalValue(EXEC_ASYNC, Integer.class)
                 .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync());

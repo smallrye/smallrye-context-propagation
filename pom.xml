@@ -10,12 +10,12 @@
 		<version>1</version>
 	</parent>
 
-	<artifactId>smallrye-concurrency-parent</artifactId>
+	<artifactId>smallrye-context-parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>SmallRye Concurrency</name>
-	<url>https://github.com/smallrye/smallrye-concurrency</url>
+	<name>SmallRye Context</name>
+	<url>https://github.com/smallrye/smallrye-context</url>
 	<description>A pluggable library for context propagation in reactive libraries</description>
 
 	<repositories>
@@ -52,9 +52,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git@github.com:smallrye/smallrye-concurrency.git</connection>
-		<developerConnection>scm:git:git@github.com:smallrye/smallrye-concurrency.git</developerConnection>
-		<url>git@github.com:smallrye/smallrye-concurrency.git</url>
+		<connection>scm:git:git@github.com:smallrye/smallrye-context.git</connection>
+		<developerConnection>scm:git:git@github.com:smallrye/smallrye-context.git</developerConnection>
+		<url>git@github.com:smallrye/smallrye-context.git</url>
 		<tag>HEAD</tag>
 	</scm>
 

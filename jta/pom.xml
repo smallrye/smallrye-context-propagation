@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-concurrency-parent</artifactId>
+        <artifactId>smallrye-context-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-concurrency-jta</artifactId>
-    <name>smallrye-concurrency-jta</name>
+    <artifactId>smallrye-context-jta</artifactId>
+    <name>smallrye-context-jta</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency</artifactId>
+            <artifactId>smallrye-context</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

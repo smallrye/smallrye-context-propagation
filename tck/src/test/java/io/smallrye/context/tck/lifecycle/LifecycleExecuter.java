@@ -54,7 +54,7 @@ public class LifecycleExecuter {
    }
 
 /*   public void executeBeforeDeploy(@Observes BeforeDeploy event, TestClass testClass) {
-      execute(testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.BeforeDeploy.class));
+      execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.BeforeDeploy.class));
    }*/
 
    public void executeAfterDeploy(@Observes AfterDeploy event, TestClass testClass) throws Exception {
@@ -68,7 +68,7 @@ public class LifecycleExecuter {
    }
 
 /*   public void executeAfterUnDeploy(@Observes AfterUnDeploy event, TestClass testClass) {
-      execute(testClass.getMethods(io.smallrye.concurrency.tck.lifecycle.api.AfterUnDeploy.class));
+      execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.AfterUnDeploy.class));
    }*/
 
    private void execute(String msg, Method[] methods)

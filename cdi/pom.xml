@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-concurrency-parent</artifactId>
+        <artifactId>smallrye-context-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-concurrency-cdi</artifactId>
-    <name>smallrye-concurrency-cdi</name>
+    <artifactId>smallrye-context-cdi</artifactId>
+    <name>smallrye-context-cdi</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,12 +21,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency</artifactId>
+            <artifactId>smallrye-context</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-concurrency-api</artifactId>
+            <artifactId>smallrye-context-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
