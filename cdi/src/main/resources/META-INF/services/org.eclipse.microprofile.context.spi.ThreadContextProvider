@@ -1,1 +1,1 @@
-io.smallrye.concurrency.cdi.context.propagation.CdiContextProvider
+io.smallrye.context.cdi.context.propagation.CdiContextProvider
