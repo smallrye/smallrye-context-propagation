@@ -2,7 +2,7 @@ package io.smallrye.concurrency.propagators.rxjava1;
 
 import java.util.concurrent.Executor;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ThreadContext;
 
 import rx.Observable;
 import rx.Observable.OnSubscribe;

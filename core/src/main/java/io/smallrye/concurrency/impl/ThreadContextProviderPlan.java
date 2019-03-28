@@ -2,7 +2,7 @@ package io.smallrye.concurrency.impl;
 
 import java.util.Set;
 
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
 public class ThreadContextProviderPlan {
 

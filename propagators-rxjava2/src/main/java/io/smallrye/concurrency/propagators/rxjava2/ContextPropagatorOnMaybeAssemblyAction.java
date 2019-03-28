@@ -2,7 +2,7 @@ package io.smallrye.concurrency.propagators.rxjava2;
 
 import java.util.concurrent.Executor;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ThreadContext;
 
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;

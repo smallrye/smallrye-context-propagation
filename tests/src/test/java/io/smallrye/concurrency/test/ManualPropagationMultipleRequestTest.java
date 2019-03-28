@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.spi.ContextManagerProvider;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class ManualPropagationMultipleRequestTest {
     @BeforeClass
     public static void init() {
         SmallRyeConcurrencyProvider.getManager();
-        threadContext = (ThreadContextImpl) ConcurrencyProvider.instance().getConcurrencyManager().newThreadContextBuilder().build();
+        threadContext = (ThreadContextImpl) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder().build();
     }
 
     public void newRequest(String reqId) {
@@ -66,13 +66,13 @@ public class ManualPropagationMultipleRequestTest {
 
     @Test
     public void testCompletionStageOnSingleWorkerThread() throws Throwable {
-        ManagedExecutor executor = ConcurrencyProvider.instance().getConcurrencyManager().newManagedExecutorBuilder().maxAsync(1).build();
+        ManagedExecutor executor = ContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder().maxAsync(1).build();
         testCompletionStage(executor);
     }
 
     @Test
     public void testCompletionStageOnTwoWorkerThread() throws Throwable {
-        ManagedExecutor executor = ConcurrencyProvider.instance().getConcurrencyManager().newManagedExecutorBuilder().maxAsync(2).build();
+        ManagedExecutor executor = ContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder().maxAsync(2).build();
         testCompletionStage(executor);
     }
 

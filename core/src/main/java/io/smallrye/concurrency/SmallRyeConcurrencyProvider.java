@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyProviderRegistration;
+import org.eclipse.microprofile.context.spi.ContextManager;
+import org.eclipse.microprofile.context.spi.ContextManagerProvider;
+import org.eclipse.microprofile.context.spi.ContextManagerProviderRegistration;
 
-public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
+public class SmallRyeConcurrencyProvider implements ContextManagerProvider {
 
-    private static ConcurrencyProviderRegistration registration;
+    private static ContextManagerProviderRegistration registration;
 
     /**
      * @deprecated Should be removed in favour of SPI
@@ -18,7 +18,7 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
     @Deprecated
     public static void register() {
         if (registration == null)
-            registration = ConcurrencyProvider.register(new SmallRyeConcurrencyProvider());
+            registration = ContextManagerProvider.register(new SmallRyeConcurrencyProvider());
     }
 
     /**
@@ -30,23 +30,23 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
         registration = null;
     }
 
-    private Map<ClassLoader, ConcurrencyManager> concurrencyManagersForClassLoader = new HashMap<>();
+    private Map<ClassLoader, ContextManager> concurrencyManagersForClassLoader = new HashMap<>();
 
     @Override
-    public ConcurrencyManager getConcurrencyManager() {
-        return getConcurrencyManager(Thread.currentThread().getContextClassLoader());
+    public ContextManager getContextManager() {
+        return getContextManager(Thread.currentThread().getContextClassLoader());
     }
 
     @Override
-    public ConcurrencyManager getConcurrencyManager(ClassLoader classLoader) {
-        ConcurrencyManager config = concurrencyManagersForClassLoader.get(classLoader);
+    public ContextManager getContextManager(ClassLoader classLoader) {
+        ContextManager config = concurrencyManagersForClassLoader.get(classLoader);
         if (config == null) {
             synchronized (this) {
                 config = concurrencyManagersForClassLoader.get(classLoader);
                 if (config == null) {
-                    config = getConcurrencyManagerBuilder().forClassLoader(classLoader)
-                            .addDiscoveredThreadContextProviders().addDiscoveredConcurrencyManagerExtensions().build();
-                    registerConcurrencyManager(config, classLoader);
+                    config = getContextManagerBuilder().forClassLoader(classLoader)
+                            .addDiscoveredThreadContextProviders().addDiscoveredContextManagerExtensions().build();
+                    registerContextManager(config, classLoader);
                 }
             }
         }
@@ -54,24 +54,24 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
     }
 
     @Override
-    public SmallRyeConcurrencyManagerBuilder getConcurrencyManagerBuilder() {
+    public SmallRyeConcurrencyManagerBuilder getContextManagerBuilder() {
         return new SmallRyeConcurrencyManagerBuilder();
     }
 
     @Override
-    public void registerConcurrencyManager(ConcurrencyManager manager, ClassLoader classLoader) {
+    public void registerContextManager(ContextManager manager, ClassLoader classLoader) {
         synchronized (this) {
             concurrencyManagersForClassLoader.put(classLoader, manager);
         }
     }
 
     @Override
-    public void releaseConcurrencyManager(ConcurrencyManager manager) {
+    public void releaseContextManager(ContextManager manager) {
         synchronized (this) {
-            Iterator<Map.Entry<ClassLoader, ConcurrencyManager>> iterator = concurrencyManagersForClassLoader.entrySet()
+            Iterator<Map.Entry<ClassLoader, ContextManager>> iterator = concurrencyManagersForClassLoader.entrySet()
                     .iterator();
             while (iterator.hasNext()) {
-                Map.Entry<ClassLoader, ConcurrencyManager> entry = iterator.next();
+                Map.Entry<ClassLoader, ContextManager> entry = iterator.next();
                 if (entry.getValue() == manager) {
                     iterator.remove();
                     return;
@@ -81,6 +81,6 @@ public class SmallRyeConcurrencyProvider implements ConcurrencyProvider {
     }
 
     static public SmallRyeConcurrencyManager getManager() {
-        return (SmallRyeConcurrencyManager) ConcurrencyProvider.instance().getConcurrencyManager();
+        return (SmallRyeConcurrencyManager) ContextManagerProvider.instance().getContextManager();
     }
 }

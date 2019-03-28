@@ -1,6 +1,6 @@
 package io.smallrye.concurrency.test.jta;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
+import org.eclipse.microprofile.context.ManagedExecutor;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;

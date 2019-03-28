@@ -1,7 +1,7 @@
 package io.smallrye.concurrency.impl;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.ManagedExecutor.Builder;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ManagedExecutor.Builder;
 
 import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 

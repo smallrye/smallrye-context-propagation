@@ -21,12 +21,12 @@ package io.smallrye.concurrency.test.classloading;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyProvider;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ContextManager;
+import org.eclipse.microprofile.context.spi.ContextManagerExtension;
+import org.eclipse.microprofile.context.spi.ContextManagerProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.classloader.ShrinkWrapClassLoader;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -38,20 +38,20 @@ import io.smallrye.concurrency.impl.ThreadContextImpl;
 
 public class MultiClassloadingTest {
 
-    public static class AThreadContextPropagator implements ConcurrencyManagerExtension {
+    public static class AThreadContextPropagator implements ContextManagerExtension {
 
         @Override
-        public void setup(ConcurrencyManager manager) {
+        public void setup(ContextManager manager) {
             // TODO Auto-generated method stub
 
         }
 
     }
 
-    public static class BThreadContextPropagator implements ConcurrencyManagerExtension {
+    public static class BThreadContextPropagator implements ContextManagerExtension {
 
         @Override
-        public void setup(ConcurrencyManager manager) {
+        public void setup(ContextManager manager) {
             // TODO Auto-generated method stub
 
         }
@@ -106,24 +106,24 @@ public class MultiClassloadingTest {
 
         JavaArchive parentJar = ShrinkWrap.create(JavaArchive.class).addPackages(true, ThreadContext.class.getPackage().getName())
                 .addPackages(true, Assert.class.getPackage().getName())
-                // done use addPackages for Smallrye-Concurrency because it
+                // done use addPackages for Smallrye-Context because it
                 // would include test packages
                 .addPackage(SmallRyeConcurrencyProvider.class.getPackage().getName())
                 .addPackage(ThreadContextImpl.class.getPackage().getName())
-                .addPackage(ConcurrencyManagerExtension.class.getPackage().getName())
-                .addAsServiceProvider(ConcurrencyProvider.class, SmallRyeConcurrencyProvider.class);
+                .addPackage(ContextManagerExtension.class.getPackage().getName())
+                .addAsServiceProvider(ContextManagerProvider.class, SmallRyeConcurrencyProvider.class);
         ShrinkWrapClassLoader parentCL = new ShrinkWrapClassLoader((ClassLoader) null, parentJar);
         System.err.println("ParentCL: " + parentCL);
 
         JavaArchive aJar = ShrinkWrap.create(JavaArchive.class)
                 .addAsServiceProviderAndClasses(ThreadContextProvider.class, AThreadContextProvider.class)
-                .addAsServiceProviderAndClasses(ConcurrencyManagerExtension.class, AThreadContextPropagator.class).addClass(ATest.class);
+                .addAsServiceProviderAndClasses(ContextManagerExtension.class, AThreadContextPropagator.class).addClass(ATest.class);
         ShrinkWrapClassLoader aCL = new ShrinkWrapClassLoader(parentCL, aJar);
         System.err.println("aCL: " + aCL);
 
         JavaArchive bJar = ShrinkWrap.create(JavaArchive.class)
                 .addAsServiceProviderAndClasses(ThreadContextProvider.class, BThreadContextProvider.class)
-                .addAsServiceProviderAndClasses(ConcurrencyManagerExtension.class, BThreadContextPropagator.class).addClass(BTest.class);
+                .addAsServiceProviderAndClasses(ContextManagerExtension.class, BThreadContextPropagator.class).addClass(BTest.class);
         ShrinkWrapClassLoader bCL = new ShrinkWrapClassLoader(parentCL, bJar);
         System.err.println("bCL: " + bCL);
 

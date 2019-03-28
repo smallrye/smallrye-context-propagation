@@ -13,8 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.eclipse.microprofile.concurrency</groupId>
-            <artifactId>microprofile-concurrency-api</artifactId>
+            <groupId>org.eclipse.microprofile.context-propagation</groupId>
+            <artifactId>microprofile-context-propagation-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.enterprise</groupId>

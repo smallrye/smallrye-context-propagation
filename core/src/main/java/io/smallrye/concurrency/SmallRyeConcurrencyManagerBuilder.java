@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ContextManager;
+import org.eclipse.microprofile.context.spi.ContextManagerExtension;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
-public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManager.Builder {
+public class SmallRyeConcurrencyManagerBuilder implements ContextManager.Builder {
 
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     private boolean addDiscoveredThreadContextProviders;
     private boolean addDiscoveredConcurrencyManagerExtensions;
     private List<ThreadContextProvider> contextProviders = new ArrayList<>();
-    private List<ConcurrencyManagerExtension> concurrencyManagerExtensions = new ArrayList<>();
+    private List<ContextManagerExtension> concurrencyManagerExtensions = new ArrayList<>();
 
     @Override
     public SmallRyeConcurrencyManagerBuilder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -41,24 +41,24 @@ public class SmallRyeConcurrencyManagerBuilder implements ConcurrencyManager.Bui
     }
 
     @Override
-    public SmallRyeConcurrencyManagerBuilder withConcurrencyManagerExtensions(
-            ConcurrencyManagerExtension... propagators) {
-        for (ConcurrencyManagerExtension contextPropagator : propagators) {
+    public SmallRyeConcurrencyManagerBuilder withContextManagerExtensions(
+            ContextManagerExtension... propagators) {
+        for (ContextManagerExtension contextPropagator : propagators) {
             concurrencyManagerExtensions.add(contextPropagator);
         }
         return this;
     }
 
     @Override
-    public SmallRyeConcurrencyManagerBuilder addDiscoveredConcurrencyManagerExtensions() {
+    public SmallRyeConcurrencyManagerBuilder addDiscoveredContextManagerExtensions() {
         addDiscoveredConcurrencyManagerExtensions = true;
         return this;
     }
 
-    private List<ConcurrencyManagerExtension> discoverConcurrencyManagerExtensions() {
-        List<ConcurrencyManagerExtension> discoveredConcurrencyManagerExtensions = new ArrayList<>();
-        ServiceLoader<ConcurrencyManagerExtension> configSourceLoader = ServiceLoader
-                .load(ConcurrencyManagerExtension.class, classLoader);
+    private List<ContextManagerExtension> discoverConcurrencyManagerExtensions() {
+        List<ContextManagerExtension> discoveredConcurrencyManagerExtensions = new ArrayList<>();
+        ServiceLoader<ContextManagerExtension> configSourceLoader = ServiceLoader
+                .load(ContextManagerExtension.class, classLoader);
         configSourceLoader.forEach(configSource -> {
             discoveredConcurrencyManagerExtensions.add(configSource);
         });

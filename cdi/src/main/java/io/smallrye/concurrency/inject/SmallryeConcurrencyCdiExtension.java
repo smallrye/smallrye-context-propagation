@@ -20,8 +20,8 @@ import io.smallrye.concurrency.api.ManagedExecutorConfig;
 import io.smallrye.concurrency.api.ThreadContextConfig;
 import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 

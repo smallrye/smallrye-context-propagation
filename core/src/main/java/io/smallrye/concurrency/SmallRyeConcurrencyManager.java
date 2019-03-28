@@ -8,29 +8,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ContextManager;
+import org.eclipse.microprofile.context.spi.ContextManagerExtension;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
 import io.smallrye.concurrency.impl.ManagedExecutorBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextBuilderImpl;
 import io.smallrye.concurrency.impl.ThreadContextProviderPlan;
 
-public class SmallRyeConcurrencyManager implements ConcurrencyManager {
+public class SmallRyeConcurrencyManager implements ContextManager {
 
     public static final String[] NO_STRING = new String[0];
 
     public static final String[] ALL_REMAINING_ARRAY = new String[] { ThreadContext.ALL_REMAINING };
 
     private List<ThreadContextProvider> providers;
-    private List<ConcurrencyManagerExtension> extensions;
+    private List<ContextManagerExtension> extensions;
     private Map<String, ThreadContextProvider> providersByType;
 
     private String[] allProviderTypes;
 
-    SmallRyeConcurrencyManager(List<ThreadContextProvider> providers, List<ConcurrencyManagerExtension> extensions) {
+    SmallRyeConcurrencyManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions) {
         this.providers = new ArrayList<ThreadContextProvider>(providers);
         providersByType = new HashMap<>();
         for (ThreadContextProvider provider : providers) {
@@ -39,8 +39,8 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
         // FIXME: check for duplicate types
         // FIXME: check for cycles
         allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
-        this.extensions = new ArrayList<ConcurrencyManagerExtension>(extensions);
-        for (ConcurrencyManagerExtension extension : extensions) {
+        this.extensions = new ArrayList<ContextManagerExtension>(extensions);
+        for (ContextManagerExtension extension : extensions) {
             extension.setup(this);
         }
     }
@@ -150,7 +150,7 @@ public class SmallRyeConcurrencyManager implements ConcurrencyManager {
     }
 
     // For tests
-    public List<ConcurrencyManagerExtension> getExtensions() {
+    public List<ContextManagerExtension> getExtensions() {
         return extensions;
     }
 }

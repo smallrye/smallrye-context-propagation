@@ -3,8 +3,8 @@ package io.smallrye.concurrency;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.microprofile.concurrent.spi.ThreadContextController;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
+import org.eclipse.microprofile.context.spi.ThreadContextController;
+import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 public class ActiveContextState {
 

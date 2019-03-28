@@ -39,8 +39,8 @@
         </dependency>
         
         <dependency>
-            <groupId>org.eclipse.microprofile.concurrency</groupId>
-            <artifactId>microprofile-concurrency-tck</artifactId>
+            <groupId>org.eclipse.microprofile.context-propagation</groupId>
+            <artifactId>microprofile-context-propagation-tck</artifactId>
             <scope>test</scope>
         </dependency>
         

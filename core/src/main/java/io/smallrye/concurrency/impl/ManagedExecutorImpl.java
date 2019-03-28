@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
+import org.eclipse.microprofile.context.ManagedExecutor;
 
 public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedExecutor {
 

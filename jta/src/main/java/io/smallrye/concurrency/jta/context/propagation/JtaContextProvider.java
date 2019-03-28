@@ -1,8 +1,8 @@
 package io.smallrye.concurrency.jta.context.propagation;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.transaction.InvalidTransactionException;

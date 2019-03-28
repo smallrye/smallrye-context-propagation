@@ -1,8 +1,8 @@
 package io.smallrye.concurrency.propagators.rxjava1;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManager;
-import org.eclipse.microprofile.concurrent.spi.ConcurrencyManagerExtension;
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ContextManager;
+import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 
 import rx.Completable;
 import rx.Observable;
@@ -15,9 +15,9 @@ import rx.plugins.RxJavaHooks;
  *
  * @author Stéphane Épardaud
  */
-public class RxJava1ContextPropagator implements ConcurrencyManagerExtension {
+public class RxJava1ContextPropagator implements ContextManagerExtension {
 
-    public void setup(ConcurrencyManager manager) {
+    public void setup(ContextManager manager) {
         ThreadContext threadContext = manager.newThreadContextBuilder().build();
         RxJavaHooks.setOnSingleCreate(new ContextPropagatorOnSingleCreateAction(threadContext));
         RxJavaHooks.setOnObservableCreate(new ContextPropagatorOnObservableCreateAction(threadContext));

@@ -12,7 +12,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
+import org.eclipse.microprofile.context.ManagedExecutor;
 
 final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     private final CompletableFuture<T> f;

@@ -1,9 +1,9 @@
 package io.smallrye.concurrency.cdi.context.propagation;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextController;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ThreadContextController;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 import org.jboss.weld.context.WeldAlterableContext;
 import org.jboss.weld.context.api.ContextualInstance;
 import org.jboss.weld.context.bound.BoundConversationContext;

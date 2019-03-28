@@ -14,7 +14,7 @@ import javax.ws.rs.core.UriInfo;
 
 import io.smallrye.concurrency.api.ThreadContextConfig;
 import io.smallrye.concurrency.test.jta.TransactionalBean;
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ThreadContext;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.client.WebClient;

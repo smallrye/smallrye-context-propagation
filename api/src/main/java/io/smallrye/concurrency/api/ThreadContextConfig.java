@@ -18,7 +18,7 @@
  */
 package io.smallrye.concurrency.api;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ThreadContext;
 
 import javax.enterprise.util.AnnotationLiteral;
 import java.lang.annotation.ElementType;
@@ -69,7 +69,7 @@ import java.lang.annotation.Target;
  * <p>A <code>ThreadContext</code> must fail to inject, raising
  * {@link javax.enterprise.inject.spi.DeploymentException DeploymentException}
  * on application startup, if more than one provider provides the same thread context
- * {@link org.eclipse.microprofile.concurrent.spi.ThreadContextProvider#getThreadContextType type}.
+ * {@link org.eclipse.microprofile.context.spi.ThreadContextProvider#getThreadContextType type}.
  *
  * @author Matej Novotny
  */

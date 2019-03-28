@@ -2,8 +2,8 @@ package io.smallrye.concurrency.test;
 
 import java.util.Map;
 
-import org.eclipse.microprofile.concurrent.spi.ThreadContextProvider;
-import org.eclipse.microprofile.concurrent.spi.ThreadContextSnapshot;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 import org.jboss.resteasy.core.ResteasyContext;
 
 public class RESTEasyContextProvider implements ThreadContextProvider {

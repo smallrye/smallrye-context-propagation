@@ -1,7 +1,7 @@
 package io.smallrye.concurrency.tck;
 
-import org.eclipse.microprofile.concurrency.tck.ConcurrencyManagerTest;
+import org.eclipse.microprofile.context.tck.ContextManagerTest;
 
-public class TckConcurrencyManagerTest extends ConcurrencyManagerTest {
+public class TckConcurrencyManagerTest extends ContextManagerTest {
 
 }

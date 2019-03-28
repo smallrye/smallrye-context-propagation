@@ -1,6 +1,6 @@
 package io.smallrye.concurrency.impl;
 
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ThreadContext;
 
 import io.smallrye.concurrency.SmallRyeConcurrencyManager;
 

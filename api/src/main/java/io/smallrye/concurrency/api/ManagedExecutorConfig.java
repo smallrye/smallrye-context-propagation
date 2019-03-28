@@ -18,8 +18,8 @@
  */
 package io.smallrye.concurrency.api;
 
-import org.eclipse.microprofile.concurrent.ManagedExecutor;
-import org.eclipse.microprofile.concurrent.ThreadContext;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
 
 import javax.enterprise.util.AnnotationLiteral;
 import java.lang.annotation.ElementType;
