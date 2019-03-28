@@ -8,4 +8,4 @@ image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", l
 === Links
 
 * http://github.com/smallrye/smallrye-context-propagation/[Project Homepage]
-* {microprofile-context}[Eclipse MicroProfile Context]
+* {microprofile-context}[Eclipse MicroProfile Context Propagation]
