@@ -1,11 +1,11 @@
-:microprofile-concurrency: https://github.com/eclipse/microprofile-concurrency/
+:microprofile-context: https://github.com/eclipse/microprofile-context-propagation/
 
-image:https://semaphoreci.com/api/v1/smallrye/smallrye-concurrency/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-concurrency"]
+image:https://semaphoreci.com/api/v1/smallrye/smallrye-context-propagation/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-context-propagation"]
 image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
-= SmallRye Concurrency
+= SmallRye Context Propagation 
 
 === Links
 
-* http://github.com/smallrye/smallrye-concurrency/[Project Homepage]
-* {microprofile-concurrency}[Eclipse MicroProfile Concurrency]
+* http://github.com/smallrye/smallrye-context-propagation/[Project Homepage]
+* {microprofile-context}[Eclipse MicroProfile Context]

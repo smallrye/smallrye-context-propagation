@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-context-parent</artifactId>
+        <artifactId>smallrye-context-propagation-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-context-jta</artifactId>
-    <name>smallrye-context-jta</name>
+    <artifactId>smallrye-context-propagation-jta</artifactId>
+    <name>smallrye-context-propagation-jta</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context</artifactId>
+            <artifactId>smallrye-context-propagation</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

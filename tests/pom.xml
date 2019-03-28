@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-context-parent</artifactId>
+        <artifactId>smallrye-context-propagation-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-context-test</artifactId>
-    <name>smallrye-context-test</name>
+    <artifactId>smallrye-context-propagation-test</artifactId>
+    <name>smallrye-context-propagation-test</name>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -50,38 +50,38 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context</artifactId>
+            <artifactId>smallrye-context-propagation</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagators-rxjava1</artifactId>
+            <artifactId>smallrye-context-propagation-propagators-rxjava1</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagators-rxjava2</artifactId>
+            <artifactId>smallrye-context-propagation-propagators-rxjava2</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-cdi</artifactId>
+            <artifactId>smallrye-context-propagation-cdi</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-jta</artifactId>
+            <artifactId>smallrye-context-propagation-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-jta</artifactId>
+            <artifactId>smallrye-context-propagation-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>
