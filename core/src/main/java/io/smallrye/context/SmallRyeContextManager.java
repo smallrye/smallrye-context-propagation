@@ -14,6 +14,7 @@ import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
+import io.smallrye.context.impl.DefaultValues;
 import io.smallrye.context.impl.ManagedExecutorBuilderImpl;
 import io.smallrye.context.impl.ThreadContextBuilderImpl;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
@@ -30,6 +31,8 @@ public class SmallRyeContextManager implements ContextManager {
 
     private String[] allProviderTypes;
 
+    private DefaultValues defaultValues;
+
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions) {
         this.providers = new ArrayList<ThreadContextProvider>(providers);
         providersByType = new HashMap<>();
@@ -40,6 +43,8 @@ public class SmallRyeContextManager implements ContextManager {
         // FIXME: check for cycles
         allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
         this.extensions = new ArrayList<ContextManagerExtension>(extensions);
+        this.defaultValues = new DefaultValues();
+        // Extensions may call our methods, so do all init before we call this
         for (ContextManagerExtension extension : extensions) {
             extension.setup(this);
         }
@@ -152,5 +157,9 @@ public class SmallRyeContextManager implements ContextManager {
     // For tests
     public List<ContextManagerExtension> getExtensions() {
         return extensions;
+    }
+
+    public DefaultValues getDefaultValues() {
+        return defaultValues;
     }
 }

@@ -16,9 +16,6 @@ import java.util.NoSuchElementException;
  */
 public class DefaultValues {
 
-    // single instance
-    public static final DefaultValues INSTANCE = new DefaultValues();
-
     // constants defined by spec for MP Config
     private final String EXEC_ASYNC = "ManagedExecutor/maxAsync";
     private final String EXEC_QUEUE = "ManagedExecutor/maxQueued";
@@ -37,7 +34,7 @@ public class DefaultValues {
     private String[] threadCleared;
     private String[] threadUnchanged;
 
-    private DefaultValues() {
+    public DefaultValues() {
         // NOTE: we do not perform sanity check here, that's done in SmallRyeContextManager
         Config config = ConfigProvider.getConfig();
         this.executorAsync = config.getOptionalValue(EXEC_ASYNC, Integer.class)
@@ -54,7 +51,7 @@ public class DefaultValues {
         this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeContextManager.NO_STRING);
     }
 
-    private static String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue) {
+    private String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue) {
         try {
             return mpConfig.getValue(key, String[].class);
         } catch (NoSuchElementException e) {
