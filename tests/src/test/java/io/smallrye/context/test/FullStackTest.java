@@ -15,9 +15,6 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.ws.rs.container.CompletionCallback;
 
-import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
-import com.arjuna.ats.jta.utils.JNDIManager;
-import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyContext;
@@ -32,7 +29,6 @@ import org.jboss.weld.environment.se.Weld;
 import org.jnp.server.NamingBeanImpl;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.arjuna.ats.jta.logging.jtaLogger;
@@ -57,7 +53,6 @@ public class FullStackTest {
         VertxResteasyDeployment deployment = new VertxResteasyDeployment();
 
         weld = new Weld();
-//        weld.addExtension(new VertxExtension());
         weld.initialize();
 
         try {
@@ -143,9 +138,12 @@ public class FullStackTest {
                     // let's not throw here
                     e.printStackTrace();
                 }
-                cdiContext.invalidate();
-                cdiContext.deactivate();
-                cdiContext.dissociate(contextMap);
+                // only need to terminate CDI context for "/test/async", otherwise context propagation handles it
+                if (cdiContext.isActive()) {
+                    cdiContext.invalidate();
+                    cdiContext.deactivate();
+                    cdiContext.dissociate(contextMap);
+                }
             }
             protected void endTransaction(TransactionManager tm, Transaction tx, boolean success) throws Exception {
 
