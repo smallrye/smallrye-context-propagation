@@ -44,7 +44,7 @@ public class CdiContextPropagatesTest {
                 latch.countDown();
             });
 
-            if (!latch.await(3, TimeUnit.SECONDS)) {
+            if (!latch.await(20, TimeUnit.SECONDS)) {
                 Assert.fail("Waiting for CountDownLatch failed!");
             }
             finalState = reqScopedBean.getState();
