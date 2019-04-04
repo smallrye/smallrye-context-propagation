@@ -10,13 +10,14 @@
     <artifactId>smallrye-context-propagation-test</artifactId>
     <name>smallrye-context-propagation-test</name>
     <properties>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
         <maven.deploy.skip>true</maven.deploy.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <arquillian.version>1.4.0.Final</arquillian.version>
         <version.narayana>5.9.3.Final</version.narayana>
         <version.jnpserver>5.0.3.GA</version.jnpserver>
     </properties>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -121,7 +122,7 @@
             <artifactId>hibernate-core</artifactId>
             <version>5.4.1.Final</version>
         </dependency>
-      
+
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
@@ -140,7 +141,7 @@
             <artifactId>vertx-core</artifactId>
             <version>3.6.2</version>
         </dependency>
-        
+
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
