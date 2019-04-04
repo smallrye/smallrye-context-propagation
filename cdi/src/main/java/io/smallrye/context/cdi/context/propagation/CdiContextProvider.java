@@ -100,13 +100,16 @@ public class CdiContextProvider implements ThreadContextProvider {
                 controller = () -> {
                     // clean up contexts we previously activated by calling deactivate() on them
                     if (scopeToContextualInstances.containsKey(requestContext.getScope())) {
-                        requestContext.deactivate();
+                        if(requestContext.isActive())
+                            requestContext.deactivate();
                     }
                     if (scopeToContextualInstances.containsKey(sessionContext.getScope())) {
-                        sessionContext.deactivate();
+                        if(sessionContext.isActive())
+                            sessionContext.deactivate();
                     }
                     if (scopeToContextualInstances.containsKey(conversationContext.getScope())) {
-                        conversationContext.deactivate();
+                        if(conversationContext.isActive())
+                            conversationContext.deactivate();
                     }
                 };
             } else {
