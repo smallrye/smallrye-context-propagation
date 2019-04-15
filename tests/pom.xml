@@ -76,6 +76,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>smallrye-context-propagation-resteasy</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>smallrye-context-propagation-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

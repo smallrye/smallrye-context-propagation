@@ -1,18 +1,21 @@
-package io.smallrye.context.test;
+package io.smallrye.context.resteasy;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 import org.jboss.resteasy.core.ResteasyContext;
 
-public class RESTEasyContextProvider implements ThreadContextProvider {
+public class ResteasyContextProvider implements ThreadContextProvider {
+
+    private static final String JAXRS_CONTEXT = "JAX-RS";
 
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
-        Map<Class<?>, Object> capturedContext = ResteasyContext.getContextDataMap();
+        Map<Class<?>, Object> context = ResteasyContext.getContextDataMap();
         return () -> {
-            ResteasyContext.pushContextDataMap(capturedContext);
+            ResteasyContext.pushContextDataMap(context);
             return () -> {
                 ResteasyContext.removeContextDataLevel();
             };
@@ -21,21 +24,17 @@ public class RESTEasyContextProvider implements ThreadContextProvider {
 
     @Override
     public ThreadContextSnapshot clearedContext(Map<String, String> props) {
+        Map<Class<?>, Object> context = Collections.emptyMap();
         return () -> {
-            Map<Class<?>, Object> movedContext = ResteasyContext.getContextDataMap();
-            ResteasyContext.clearContextData();
+            ResteasyContext.pushContextDataMap(context);
             return () -> {
-                if (movedContext == null)
-                    ResteasyContext.clearContextData();
-                else
-                    ResteasyContext.pushContextDataMap(movedContext);
+                ResteasyContext.removeContextDataLevel();
             };
         };
     }
 
     @Override
     public String getThreadContextType() {
-        return "RESTEasyContext";
+        return JAXRS_CONTEXT;
     }
-
 }

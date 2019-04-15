@@ -67,6 +67,7 @@
 		<version.cdi>2.0.SP1</version.cdi>
 		<version.weld.core>3.1.0.Final</version.weld.core>
 		<version.weld.api>3.1.Final</version.weld.api>
+		<version.resteasy>4.0.0.CR2</version.resteasy>
 	</properties>
 
 	<developers>
@@ -183,6 +184,7 @@
     <modules>
         <module>core</module>
         <module>cdi</module>
+        <module>resteasy</module>
         <module>jta</module>
         <module>propagators-rxjava1</module>
         <module>propagators-rxjava2</module>
