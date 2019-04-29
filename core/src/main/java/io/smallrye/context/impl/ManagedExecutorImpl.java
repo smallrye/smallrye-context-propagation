@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -17,12 +18,13 @@ import java.util.function.Supplier;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 
-public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedExecutor {
+public class ManagedExecutorImpl implements ManagedExecutor {
 
     private final ThreadContextImpl threadContext;
     private final int maxAsync;
     private final int maxQueued;
     private final String injectionPointName;
+    private final ExecutorService executor;
     
     private class NoPropagationExecutor implements Executor {
         @Override
@@ -33,62 +35,63 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
     
     private final Executor noPropagationExecutor = new NoPropagationExecutor();
 
-    public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext) {
-        this(maxAsync, maxQueued, threadContext, null);
-    }
-
-    public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext, String injectionPointName) {
-        super(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync,
+    public static ManagedExecutor newThreadPoolExecutor(int maxAsync, int maxQueued, ThreadContextImpl threadContext, String injectionPointName) {
+        ThreadPoolExecutor exec = new ThreadPoolExecutor(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync,
                 maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync, 5000l, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued),
                 new ThreadPoolExecutor.AbortPolicy());
         // we set core thread == max threads but allow for core thread timeout
         // this prevents delaying spawning of new thread to when the queue is full
-        this.allowCoreThreadTimeOut(true);
+        exec.allowCoreThreadTimeOut(true);
+        return new ManagedExecutorImpl(maxAsync, maxQueued, threadContext, exec, injectionPointName);
+    }
+    
+    public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext, ExecutorService executor, String injectionPointName) {
         this.threadContext = threadContext;
         this.maxAsync = maxAsync;
         this.maxQueued = maxQueued;
         this.injectionPointName = injectionPointName;
+        this.executor = executor;
     }
 
     @Override
     public void shutdown() {
-        super.shutdown();
+        executor.shutdown();
     }
 
     @Override
     public List<Runnable> shutdownNow() {
-        return super.shutdownNow();
+        return executor.shutdownNow();
     }
 
     @Override
     public boolean isShutdown() {
-        return super.isShutdown();
+        return executor.isShutdown();
     }
 
     @Override
     public boolean isTerminated() {
-        return super.isTerminated();
+        return executor.isTerminated();
     }
 
     @Override
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return super.awaitTermination(timeout, unit);
+        return executor.awaitTermination(timeout, unit);
     }
 
     @Override
     public <T> Future<T> submit(Callable<T> task) {
-        return super.submit(threadContext.contextualCallableUnlessContextualized(task));
+        return executor.submit(threadContext.contextualCallableUnlessContextualized(task));
     }
 
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
-        return super.submit(threadContext.contextualRunnableUnlessContextualized(task), result);
+        return executor.submit(threadContext.contextualRunnableUnlessContextualized(task), result);
     }
 
     @Override
     public Future<?> submit(Runnable task) {
-        return super.submit(threadContext.contextualRunnableUnlessContextualized(task));
+        return executor.submit(threadContext.contextualRunnableUnlessContextualized(task));
     }
 
     @Override
@@ -97,7 +100,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         for (Callable<T> task : tasks) {
             wrappedTasks.add(threadContext.contextualCallableUnlessContextualized(task));
         }
-        return super.invokeAll(wrappedTasks);
+        return executor.invokeAll(wrappedTasks);
     }
 
     @Override
@@ -107,7 +110,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         for (Callable<T> task : tasks) {
             wrappedTasks.add(threadContext.contextualCallableUnlessContextualized(task));
         }
-        return super.invokeAll(wrappedTasks, timeout, unit);
+        return executor.invokeAll(wrappedTasks, timeout, unit);
     }
 
     @Override
@@ -116,7 +119,7 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         for (Callable<T> task : tasks) {
             wrappedTasks.add(threadContext.contextualCallableUnlessContextualized(task));
         }
-        return super.invokeAny(wrappedTasks);
+        return executor.invokeAny(wrappedTasks);
     }
 
     @Override
@@ -126,16 +129,16 @@ public class ManagedExecutorImpl extends ThreadPoolExecutor implements ManagedEx
         for (Callable<T> task : tasks) {
             wrappedTasks.add(threadContext.contextualCallableUnlessContextualized(task));
         }
-        return super.invokeAny(wrappedTasks, timeout, unit);
+        return executor.invokeAny(wrappedTasks, timeout, unit);
     }
 
     @Override
     public void execute(Runnable command) {
-        super.execute(threadContext.contextualRunnableUnlessContextualized(command));
+        executor.execute(threadContext.contextualRunnableUnlessContextualized(command));
     }
 
     private void executeWithoutPropagation(Runnable command){
-        super.execute(command);
+        executor.execute(command);
     }
     
     @Override

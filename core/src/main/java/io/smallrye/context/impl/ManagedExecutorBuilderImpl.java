@@ -26,7 +26,7 @@ public class ManagedExecutorBuilderImpl implements ManagedExecutor.Builder {
 
     @Override
     public ManagedExecutor build() {
-        return new ManagedExecutorImpl(maxAsync, maxQueued,
+        return ManagedExecutorImpl.newThreadPoolExecutor(maxAsync, maxQueued,
                 new ThreadContextImpl(manager, propagated, SmallRyeContextManager.NO_STRING, cleared), injectionPointName);
     }
 
