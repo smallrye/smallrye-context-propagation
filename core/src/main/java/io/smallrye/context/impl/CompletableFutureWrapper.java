@@ -28,7 +28,6 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
         this.f = f;
         f.whenComplete((r, t) -> {
             if (t != null) {
-                System.err.println("Got exception: " + t);
                 if (t instanceof CompletionException)
                     t = t.getCause();
                 super.completeExceptionally(t);
