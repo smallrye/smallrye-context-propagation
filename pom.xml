@@ -66,6 +66,7 @@
 		<version.weld.core>3.1.0.Final</version.weld.core>
 		<version.weld.api>3.1.Final</version.weld.api>
 		<version.resteasy>4.0.0.CR2</version.resteasy>
+        <version.jboss.threads>3.0.0.Beta3</version.jboss.threads>
 	</properties>
 
 	<developers>

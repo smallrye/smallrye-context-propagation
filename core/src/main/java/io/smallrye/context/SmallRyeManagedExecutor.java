@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.threads.ViewExecutor;
 
 import io.smallrye.context.impl.DefaultValues;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
@@ -38,7 +39,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
     
     private final Executor noPropagationExecutor = new NoPropagationExecutor();
 
-    public static SmallRyeManagedExecutor newThreadPoolExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, String injectionPointName) {
+    public static ExecutorService newThreadPoolExecutor(int maxAsync, int maxQueued) {
         ThreadPoolExecutor exec = new ThreadPoolExecutor(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync,
                 maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync, 5000l, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued),
@@ -46,7 +47,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         // we set core thread == max threads but allow for core thread timeout
         // this prevents delaying spawning of new thread to when the queue is full
         exec.allowCoreThreadTimeOut(true);
-        return new SmallRyeManagedExecutor(maxAsync, maxQueued, threadContext, exec, injectionPointName);
+        return exec;
     }
     
     public SmallRyeManagedExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, ExecutorService executor, String injectionPointName) {
@@ -244,8 +245,14 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
 
         @Override
         public SmallRyeManagedExecutor build() {
-            return SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued,
-                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared), injectionPointName);
+            ExecutorService executor;
+            if(executorService != null)
+                executor = ViewExecutor.builder(executorService).setMaxSize(maxAsync).setQueueLimit(maxQueued).build();
+            else
+                executor = SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued);
+            return new SmallRyeManagedExecutor(maxAsync, maxQueued, 
+                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared), 
+                    executor, injectionPointName);
         }
 
         @Override

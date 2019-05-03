@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
@@ -28,12 +29,12 @@ public class SmallRyeContextManager implements ContextManager {
     private List<ThreadContextProvider> providers;
     private List<ContextManagerExtension> extensions;
     private Map<String, ThreadContextProvider> providersByType;
-
     private String[] allProviderTypes;
-
     private DefaultValues defaultValues;
+    private ExecutorService defaultExecutorService;
 
-    SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions) {
+    SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions, ExecutorService defaultExecutorService) {
+        this.defaultExecutorService = defaultExecutorService;
         this.providers = new ArrayList<ThreadContextProvider>(providers);
         providersByType = new HashMap<>();
         for (ThreadContextProvider provider : providers) {
@@ -154,6 +155,10 @@ public class SmallRyeContextManager implements ContextManager {
         return new SmallRyeThreadContext.Builder(this);
     }
 
+    public ExecutorService getDefaultExecutorService() {
+        return defaultExecutorService;
+    }
+
     // For tests
     public List<ContextManagerExtension> getExtensions() {
         return extensions;
@@ -170,6 +175,7 @@ public class SmallRyeContextManager implements ContextManager {
         private boolean addDiscoveredContextManagerExtensions;
         private List<ThreadContextProvider> contextProviders = new ArrayList<>();
         private List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
+        private ExecutorService defaultExecutorService;
 
         @Override
         public Builder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -233,8 +239,15 @@ public class SmallRyeContextManager implements ContextManager {
             if (addDiscoveredContextManagerExtensions)
                 contextManagerExtensions.addAll(discoverContextManagerExtensions());
 
-            return new SmallRyeContextManager(contextProviders, contextManagerExtensions);
+            return new SmallRyeContextManager(contextProviders, contextManagerExtensions, defaultExecutorService);
+        }
+        
+        //
+        // Extras
+        
+        public Builder withDefaultExecutorService(ExecutorService executorService) {
+            this.defaultExecutorService = executorService;
+            return this;
         }
     }
-
 }

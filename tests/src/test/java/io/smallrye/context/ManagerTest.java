@@ -23,7 +23,7 @@ public class ManagerTest {
 
     @Test
     public void testContext() {
-        SmallRyeContextManager manager = new SmallRyeContextManager(Arrays.asList(A, B), Collections.emptyList());
+        SmallRyeContextManager manager = new SmallRyeContextManager(Arrays.asList(A, B), Collections.emptyList(), null);
 
         // all providers
         ThreadContextProviderPlan providers = manager.getProviderPlan();
