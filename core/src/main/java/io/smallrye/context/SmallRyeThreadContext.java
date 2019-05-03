@@ -1,4 +1,4 @@
-package io.smallrye.context.impl;
+package io.smallrye.context;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -13,11 +13,13 @@ import java.util.function.Supplier;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
-import io.smallrye.context.ActiveContextState;
-import io.smallrye.context.CapturedContextState;
-import io.smallrye.context.SmallRyeContextManager;
+import io.smallrye.context.impl.ActiveContextState;
+import io.smallrye.context.impl.CapturedContextState;
+import io.smallrye.context.impl.Contextualized;
+import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.impl.ThreadContextProviderPlan;
 
-public class ThreadContextImpl implements ThreadContext {
+public class SmallRyeThreadContext implements ThreadContext {
 
     private final class ContextualSupplier<R> implements Supplier<R>, Contextualized {
         private final CapturedContextState state;
@@ -163,12 +165,12 @@ public class ThreadContextImpl implements ThreadContext {
     private final ThreadContextProviderPlan plan;
     private final String injectionPointName;
 
-    public ThreadContextImpl(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
+    public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
             String[] cleared) {
         this(manager, propagated, unchanged, cleared, null);
     }
 
-    public ThreadContextImpl(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
+    public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
                              String[] cleared, String injectionPointName) {
         this.manager = manager;
         this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
@@ -192,7 +194,7 @@ public class ThreadContextImpl implements ThreadContext {
         return withContextCapture(future, null);
     }
 
-    <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, ManagedExecutor executor) {
+    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, ManagedExecutor executor) {
         return new CompletableFutureWrapper<>(this, future, executor);
     }
 
@@ -333,7 +335,7 @@ public class ThreadContextImpl implements ThreadContext {
     public String toString() {
         final String DELIMITER = ", ";
         StringBuilder builder = new StringBuilder();
-        builder.append(ThreadContextImpl.class.getName()).append(DELIMITER);
+        builder.append(SmallRyeThreadContext.class.getName()).append(DELIMITER);
         builder.append("with cleared contexts: ").append(plan.clearedProviders).append(DELIMITER);
         builder.append("with propagated contexts: ").append(plan.propagatedProviders).append(DELIMITER);
         builder.append("with unchanged contexts: ").append(plan.unchangedProviders);
@@ -342,4 +344,54 @@ public class ThreadContextImpl implements ThreadContext {
         }
         return builder.toString();
     }
+    
+    public static class Builder implements ThreadContext.Builder {
+
+        private String[] propagated;
+        private String[] unchanged;
+        private String[] cleared;
+        private SmallRyeContextManager manager;
+        private String injectionPointName = null;
+
+        public Builder(SmallRyeContextManager manager) {
+            this.manager = manager;
+            DefaultValues defaultValues = manager.getDefaultValues();
+            this.propagated = defaultValues.getThreadPropagated();
+            this.unchanged = defaultValues.getThreadUnchanged();
+            this.cleared = defaultValues.getThreadCleared();
+        }
+
+        @Override
+        public SmallRyeThreadContext build() {
+            return new SmallRyeThreadContext(manager, propagated, unchanged, cleared, injectionPointName);
+        }
+
+        @Override
+        public Builder propagated(String... types) {
+            propagated = types;
+            return this;
+        }
+
+        @Override
+        public Builder unchanged(String... types) {
+            unchanged = types;
+            return this;
+        }
+
+        @Override
+        public Builder cleared(String... types) {
+            cleared = types;
+            return this;
+        }
+
+        //
+        // Extras
+        
+        public Builder injectionPointName(String name) {
+            this.injectionPointName = name;
+            return this;
+        }
+
+    }
+
 }

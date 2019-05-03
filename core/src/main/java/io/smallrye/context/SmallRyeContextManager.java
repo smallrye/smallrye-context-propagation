@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
@@ -14,9 +15,8 @@ import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
+import io.smallrye.context.impl.CapturedContextState;
 import io.smallrye.context.impl.DefaultValues;
-import io.smallrye.context.impl.ManagedExecutorBuilderImpl;
-import io.smallrye.context.impl.ThreadContextBuilderImpl;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeContextManager implements ContextManager {
@@ -146,12 +146,12 @@ public class SmallRyeContextManager implements ContextManager {
 
     @Override
     public ManagedExecutor.Builder newManagedExecutorBuilder() {
-        return new ManagedExecutorBuilderImpl(this);
+        return new SmallRyeManagedExecutor.Builder(this);
     }
 
     @Override
     public ThreadContext.Builder newThreadContextBuilder() {
-        return new ThreadContextBuilderImpl(this);
+        return new SmallRyeThreadContext.Builder(this);
     }
 
     // For tests
@@ -162,4 +162,79 @@ public class SmallRyeContextManager implements ContextManager {
     public DefaultValues getDefaultValues() {
         return defaultValues;
     }
+    
+    public static class Builder implements ContextManager.Builder {
+
+        private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        private boolean addDiscoveredThreadContextProviders;
+        private boolean addDiscoveredContextManagerExtensions;
+        private List<ThreadContextProvider> contextProviders = new ArrayList<>();
+        private List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
+
+        @Override
+        public Builder withThreadContextProviders(ThreadContextProvider... providers) {
+            for (ThreadContextProvider contextProvider : providers) {
+                contextProviders.add(contextProvider);
+            }
+            return this;
+        }
+
+        @Override
+        public Builder addDiscoveredThreadContextProviders() {
+            addDiscoveredThreadContextProviders = true;
+            return this;
+        }
+
+        private List<ThreadContextProvider> discoverThreadContextProviders() {
+            List<ThreadContextProvider> discoveredThreadContextProviders = new ArrayList<>();
+            ServiceLoader<ThreadContextProvider> configSourceLoader = ServiceLoader.load(ThreadContextProvider.class,
+                    classLoader);
+            configSourceLoader.forEach(configSource -> {
+                discoveredThreadContextProviders.add(configSource);
+            });
+            return discoveredThreadContextProviders;
+        }
+
+        @Override
+        public Builder withContextManagerExtensions(
+                ContextManagerExtension... propagators) {
+            for (ContextManagerExtension contextPropagator : propagators) {
+                contextManagerExtensions.add(contextPropagator);
+            }
+            return this;
+        }
+
+        @Override
+        public Builder addDiscoveredContextManagerExtensions() {
+            addDiscoveredContextManagerExtensions = true;
+            return this;
+        }
+
+        private List<ContextManagerExtension> discoverContextManagerExtensions() {
+            List<ContextManagerExtension> discoveredContextManagerExtensions = new ArrayList<>();
+            ServiceLoader<ContextManagerExtension> configSourceLoader = ServiceLoader
+                    .load(ContextManagerExtension.class, classLoader);
+            configSourceLoader.forEach(configSource -> {
+                discoveredContextManagerExtensions.add(configSource);
+            });
+            return discoveredContextManagerExtensions;
+        }
+
+        @Override
+        public Builder forClassLoader(ClassLoader classLoader) {
+            this.classLoader = classLoader;
+            return this;
+        }
+
+        @Override
+        public SmallRyeContextManager build() {
+            if (addDiscoveredThreadContextProviders)
+                contextProviders.addAll(discoverThreadContextProviders());
+            if (addDiscoveredContextManagerExtensions)
+                contextManagerExtensions.addAll(discoverContextManagerExtensions());
+
+            return new SmallRyeContextManager(contextProviders, contextManagerExtensions);
+        }
+    }
+
 }

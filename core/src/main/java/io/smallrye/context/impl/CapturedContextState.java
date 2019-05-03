@@ -1,4 +1,4 @@
-package io.smallrye.context;
+package io.smallrye.context.impl;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,14 +7,14 @@ import java.util.Map;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
-import io.smallrye.context.impl.ThreadContextProviderPlan;
+import io.smallrye.context.SmallRyeContextManager;
 
 public class CapturedContextState {
 
     private List<ThreadContextSnapshot> threadContext = new LinkedList<>();
     private SmallRyeContextManager context;
 
-    CapturedContextState(SmallRyeContextManager context, ThreadContextProviderPlan plan,
+    public CapturedContextState(SmallRyeContextManager context, ThreadContextProviderPlan plan,
             Map<String, String> props) {
         this.context = context;
         for (ThreadContextProvider provider : plan.propagatedProviders) {

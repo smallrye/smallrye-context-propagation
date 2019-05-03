@@ -13,17 +13,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.smallrye.context.SmallRyeContextManagerProvider;
-import io.smallrye.context.impl.ThreadContextImpl;
-import io.smallrye.context.test.MyContext;
+import io.smallrye.context.SmallRyeThreadContext;
 
 public class ManualPropagationMultipleRequestTest {
 
-    private static ThreadContextImpl threadContext;
+    private static SmallRyeThreadContext threadContext;
 
     @BeforeClass
     public static void init() {
         SmallRyeContextManagerProvider.getManager();
-        threadContext = (ThreadContextImpl) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder().build();
+        threadContext = (SmallRyeThreadContext) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder().build();
     }
 
     public void newRequest(String reqId) {

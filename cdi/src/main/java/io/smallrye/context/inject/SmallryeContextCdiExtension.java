@@ -15,11 +15,11 @@
  */
 package io.smallrye.context.inject;
 
+import io.smallrye.context.SmallRyeManagedExecutor;
+import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.api.ManagedExecutorConfig;
 import io.smallrye.context.api.NamedInstance;
 import io.smallrye.context.api.ThreadContextConfig;
-import io.smallrye.context.impl.ManagedExecutorBuilderImpl;
-import io.smallrye.context.impl.ThreadContextBuilderImpl;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
@@ -174,7 +174,7 @@ public class SmallryeContextCdiExtension implements Extension {
                         // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
                         t.shutdown();
                     })
-                    .createWith(param -> ((ManagedExecutorBuilderImpl)ManagedExecutor.builder())
+                    .createWith(param -> ((SmallRyeManagedExecutor.Builder)ManagedExecutor.builder())
                             .injectionPointName(entry.getKey().getMpConfigName())
                             .maxAsync(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, annotation.maxAsync()))
@@ -197,7 +197,7 @@ public class SmallryeContextCdiExtension implements Extension {
                         // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
                         t.shutdown();
                     })
-                    .createWith(param -> ((ManagedExecutorBuilderImpl)ManagedExecutor.builder())
+                    .createWith(param -> ((SmallRyeManagedExecutor.Builder)ManagedExecutor.builder())
                             .injectionPointName(ipName.getMpConfigName())
                             .maxAsync(resolveConfiguration(ipName.getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
@@ -220,7 +220,7 @@ public class SmallryeContextCdiExtension implements Extension {
                     .disposeWith((ThreadContext t, Instance<Object> u) -> {
                         // no-op at this point
                     })
-                    .createWith(param -> ((ThreadContextBuilderImpl)ThreadContext.builder())
+                    .createWith(param -> ((SmallRyeThreadContext.Builder)ThreadContext.builder())
                             .injectionPointName(entry.getKey().getMpConfigName())
                             .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + cleared,
                                     String[].class, annotation.cleared()))
@@ -241,7 +241,7 @@ public class SmallryeContextCdiExtension implements Extension {
                     .disposeWith((ThreadContext t, Instance<Object> u) -> {
                         // no-op
                     })
-                    .createWith(param -> ((ThreadContextBuilderImpl)ThreadContext.builder())
+                    .createWith(param -> ((SmallRyeThreadContext.Builder)ThreadContext.builder())
                             .injectionPointName(ipName.getMpConfigName())
                             .cleared(resolveConfiguration(ipName.getMpConfigName() + TCConfig + cleared,
                                     String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))

@@ -54,8 +54,8 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
     }
 
     @Override
-    public SmallRyeContextManagerBuilder getContextManagerBuilder() {
-        return new SmallRyeContextManagerBuilder();
+    public SmallRyeContextManager.Builder getContextManagerBuilder() {
+        return new SmallRyeContextManager.Builder();
     }
 
     @Override

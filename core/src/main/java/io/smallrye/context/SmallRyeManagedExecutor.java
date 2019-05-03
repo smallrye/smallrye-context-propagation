@@ -1,4 +1,4 @@
-package io.smallrye.context.impl;
+package io.smallrye.context;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,9 +18,12 @@ import java.util.function.Supplier;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 
-public class ManagedExecutorImpl implements ManagedExecutor {
+import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.impl.ThreadContextProviderPlan;
 
-    private final ThreadContextImpl threadContext;
+public class SmallRyeManagedExecutor implements ManagedExecutor {
+
+    private final SmallRyeThreadContext threadContext;
     private final int maxAsync;
     private final int maxQueued;
     private final String injectionPointName;
@@ -29,13 +32,13 @@ public class ManagedExecutorImpl implements ManagedExecutor {
     private class NoPropagationExecutor implements Executor {
         @Override
         public void execute(Runnable command) {
-            ManagedExecutorImpl.this.executeWithoutPropagation(command);
+            SmallRyeManagedExecutor.this.executeWithoutPropagation(command);
         }
     }
     
     private final Executor noPropagationExecutor = new NoPropagationExecutor();
 
-    public static ManagedExecutor newThreadPoolExecutor(int maxAsync, int maxQueued, ThreadContextImpl threadContext, String injectionPointName) {
+    public static SmallRyeManagedExecutor newThreadPoolExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, String injectionPointName) {
         ThreadPoolExecutor exec = new ThreadPoolExecutor(maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync,
                 maxAsync == -1 ? Runtime.getRuntime().availableProcessors() : maxAsync, 5000l, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued),
@@ -43,10 +46,10 @@ public class ManagedExecutorImpl implements ManagedExecutor {
         // we set core thread == max threads but allow for core thread timeout
         // this prevents delaying spawning of new thread to when the queue is full
         exec.allowCoreThreadTimeOut(true);
-        return new ManagedExecutorImpl(maxAsync, maxQueued, threadContext, exec, injectionPointName);
+        return new SmallRyeManagedExecutor(maxAsync, maxQueued, threadContext, exec, injectionPointName);
     }
     
-    public ManagedExecutorImpl(int maxAsync, int maxQueued, ThreadContextImpl threadContext, ExecutorService executor, String injectionPointName) {
+    public SmallRyeManagedExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, ExecutorService executor, String injectionPointName) {
         this.threadContext = threadContext;
         this.maxAsync = maxAsync;
         this.maxQueued = maxQueued;
@@ -191,7 +194,7 @@ public class ManagedExecutorImpl implements ManagedExecutor {
     public String toString() {
         final String DELIMITER = ", ";
         StringBuilder builder = new StringBuilder();
-        builder.append(ManagedExecutorImpl.class.getName()).append(DELIMITER);
+        builder.append(SmallRyeManagedExecutor.class.getName()).append(DELIMITER);
         builder.append("with maxAsync: ").append(maxAsync).append(DELIMITER);
         builder.append("with maxQueued: ").append(maxQueued).append(DELIMITER);
         builder.append("with cleared contexts: ").append(threadContext.getPlan().clearedProviders).append(DELIMITER);
@@ -219,4 +222,74 @@ public class ManagedExecutorImpl implements ManagedExecutor {
         return injectionPointName;
     }
 
+    public static class Builder implements ManagedExecutor.Builder {
+
+        private SmallRyeContextManager manager;
+        private int maxAsync;
+        private int maxQueued;
+        private String[] propagated;
+        private String[] cleared;
+        private String injectionPointName = null;
+        private ExecutorService executorService;
+
+        public Builder(SmallRyeContextManager manager) {
+            this.manager = manager;
+            DefaultValues defaultValues = manager.getDefaultValues();
+            // initiate with default values
+            this.propagated = defaultValues.getExecutorPropagated();
+            this.cleared = defaultValues.getExecutorCleared();
+            this.maxAsync = defaultValues.getExecutorAsync();
+            this.maxQueued = defaultValues.getExecutorQueue();
+        }
+
+        @Override
+        public SmallRyeManagedExecutor build() {
+            return SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued,
+                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared), injectionPointName);
+        }
+
+        @Override
+        public Builder propagated(String... types) {
+            this.propagated = types;
+            return this;
+        }
+
+        @Override
+        public Builder maxAsync(int max) {
+            if (max == 0 || max < -1) {
+                throw new IllegalArgumentException("ManagedExecutor parameter maxAsync cannot be 0 or lower then -1.");
+            }
+            this.maxAsync = max;
+            return this;
+        }
+
+        @Override
+        public Builder maxQueued(int max) {
+            if (max == 0 || max < -1) {
+                throw new IllegalArgumentException("ManagedExecutor parameter maxQueued cannot be 0 or lower than -1.");
+            }
+            this.maxQueued = max;
+            return this;
+        }
+
+        @Override
+        public Builder cleared(String... types) {
+            this.cleared = types;
+            return this;
+        }
+
+        //
+        // Extras
+
+        public Builder injectionPointName(String name) {
+            this.injectionPointName = name;
+            return this;
+        }
+
+        public Builder withExecutorService(ExecutorService executorService) {
+            this.executorService = executorService;
+            return this;
+        }
+
+    }
 }

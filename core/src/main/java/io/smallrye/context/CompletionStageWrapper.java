@@ -1,4 +1,4 @@
-package io.smallrye.context.impl;
+package io.smallrye.context;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -10,9 +10,9 @@ import java.util.function.Function;
 
 final class CompletionStageWrapper<T> implements CompletionStage<T> {
     private final CompletionStage<T> f;
-    private final ThreadContextImpl context;
+    private final SmallRyeThreadContext context;
 
-    CompletionStageWrapper(ThreadContextImpl context, CompletionStage<T> f) {
+    CompletionStageWrapper(SmallRyeThreadContext context, CompletionStage<T> f) {
         this.context = context;
         this.f = f;
     }

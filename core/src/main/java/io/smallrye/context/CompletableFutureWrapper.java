@@ -1,4 +1,4 @@
-package io.smallrye.context.impl;
+package io.smallrye.context;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -16,14 +16,14 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 
 final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     private final CompletableFuture<T> f;
-    private final ThreadContextImpl context;
+    private final SmallRyeThreadContext context;
     /**
      * If this executor is not null, we're wrapping a CF. If it is null, we're a dependent stage of
      * another CF, so we have different behaviour
      */
     private final ManagedExecutor executor;
 
-    CompletableFutureWrapper(ThreadContextImpl context, CompletableFuture<T> f, ManagedExecutor executor) {
+    CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, ManagedExecutor executor) {
         this.context = context;
         this.f = f;
         f.whenComplete((r, t) -> {

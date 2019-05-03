@@ -41,8 +41,8 @@ import org.junit.Test;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigProviderResolver;
 import io.smallrye.context.SmallRyeContextManagerProvider;
+import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.api.ManagedExecutorConfig;
-import io.smallrye.context.impl.ThreadContextImpl;
 
 public class MultiClassloadingTest {
 
@@ -121,7 +121,7 @@ public class MultiClassloadingTest {
                 // done use addPackages for Smallrye-Context because it
                 // would include test packages
                 .addPackage(SmallRyeContextManagerProvider.class.getPackage().getName())
-                .addPackage(ThreadContextImpl.class.getPackage().getName())
+                .addPackage(SmallRyeThreadContext.class.getPackage().getName())
                 .addPackage(ContextManagerExtension.class.getPackage().getName())
                 .addPackage(ManagedExecutorConfig.class.getPackage().getName())
                 .addAsServiceProvider(ConfigProviderResolver.class, SmallRyeConfigProviderResolver.class)

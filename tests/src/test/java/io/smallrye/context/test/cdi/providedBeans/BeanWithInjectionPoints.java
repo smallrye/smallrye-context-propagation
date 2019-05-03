@@ -1,23 +1,23 @@
 package io.smallrye.context.test.cdi.providedBeans;
 
-import io.smallrye.context.api.ManagedExecutorConfig;
-import io.smallrye.context.api.NamedInstance;
-import io.smallrye.context.api.ThreadContextConfig;
-import io.smallrye.context.impl.ManagedExecutorImpl;
-import io.smallrye.context.impl.ThreadContextImpl;
-import io.smallrye.context.impl.ThreadContextProviderPlan;
-import io.vertx.core.cli.annotations.Name;
-import org.eclipse.microprofile.context.ManagedExecutor;
-import org.eclipse.microprofile.context.ThreadContext;
-import org.eclipse.microprofile.context.spi.ThreadContextProvider;
-import org.hibernate.engine.spi.Managed;
-import org.jboss.weld.proxy.WeldClientProxy;
-import org.junit.Assert;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.HashSet;
-import java.util.Set;
+
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
+import org.jboss.weld.proxy.WeldClientProxy;
+import org.junit.Assert;
+
+import io.smallrye.context.SmallRyeManagedExecutor;
+import io.smallrye.context.SmallRyeThreadContext;
+import io.smallrye.context.api.ManagedExecutorConfig;
+import io.smallrye.context.api.NamedInstance;
+import io.smallrye.context.api.ThreadContextConfig;
+import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 /**
  * There are multiple context providers added in tests, we do not assert on those and only look for CDI and JTA now.
@@ -60,7 +60,7 @@ public class BeanWithInjectionPoints {
     ThreadContext configuredThreadContext;
 
     public void assertDefaultExecutor() {
-        ManagedExecutorImpl exec = unwrapExecutor(defaultConfigExecutor);
+        SmallRyeManagedExecutor exec = unwrapExecutor(defaultConfigExecutor);
         Assert.assertEquals(-1,exec.getMaxAsync());
         Assert.assertEquals(-1,exec.getMaxQueued());
         ThreadContextProviderPlan plan = exec.getThreadContextProviderPlan();
@@ -73,13 +73,13 @@ public class BeanWithInjectionPoints {
 
     public void assertSharedExecutorsAreTheSame() {
         // simply unwrap both and compare reference
-        ManagedExecutorImpl shared1 = unwrapExecutor(executor2);
-        ManagedExecutorImpl shared2 = unwrapExecutor(executor3);
+        SmallRyeManagedExecutor shared1 = unwrapExecutor(executor2);
+        SmallRyeManagedExecutor shared2 = unwrapExecutor(executor3);
         Assert.assertSame(shared1, shared2);
     }
 
     public void assertConfiguredManagedExecutor() {
-        ManagedExecutorImpl exec = unwrapExecutor(configuredExecutor);
+        SmallRyeManagedExecutor exec = unwrapExecutor(configuredExecutor);
         Assert.assertEquals(2,exec.getMaxAsync());
         Assert.assertEquals(3,exec.getMaxQueued());
         ThreadContextProviderPlan plan = exec.getThreadContextProviderPlan();
@@ -92,13 +92,13 @@ public class BeanWithInjectionPoints {
 
     public void assertSharedThreadContextsAreTheSame() {
         //unwrap and compare references
-        ThreadContextImpl shared1 = unwrapThreadContext(threadContext1);
-        ThreadContextImpl shared2 = unwrapThreadContext(threadContext2);
+        SmallRyeThreadContext shared1 = unwrapThreadContext(threadContext1);
+        SmallRyeThreadContext shared2 = unwrapThreadContext(threadContext2);
         Assert.assertSame(shared1, shared2);
     }
 
     public void assertConfiguredThreadContext() {
-        ThreadContextImpl context = unwrapThreadContext(configuredThreadContext);
+        SmallRyeThreadContext context = unwrapThreadContext(configuredThreadContext);
         ThreadContextProviderPlan plan = context.getPlan();
         Assert.assertEquals(0,plan.unchangedProviders.size());
         Set<String> propagated = providersToStringSet(plan.propagatedProviders);
@@ -108,7 +108,7 @@ public class BeanWithInjectionPoints {
     }
 
     public void assertDefaultThreadContext() {
-        ThreadContextImpl context = unwrapThreadContext(defaultThreadContext);
+        SmallRyeThreadContext context = unwrapThreadContext(defaultThreadContext);
         ThreadContextProviderPlan plan = context.getPlan();
         Assert.assertEquals(0,plan.unchangedProviders.size());
         Assert.assertEquals(0,plan.clearedProviders.size());
@@ -117,17 +117,17 @@ public class BeanWithInjectionPoints {
         Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));
     }
 
-    private ManagedExecutorImpl unwrapExecutor(ManagedExecutor executor) {
+    private SmallRyeManagedExecutor unwrapExecutor(ManagedExecutor executor) {
         if (executor instanceof WeldClientProxy) {
-            return (ManagedExecutorImpl) ((WeldClientProxy) executor).getMetadata().getContextualInstance();
+            return (SmallRyeManagedExecutor) ((WeldClientProxy) executor).getMetadata().getContextualInstance();
         } else {
             throw new IllegalStateException("Injected proxies are expected to be instance of WeldClientProxy");
         }
     }
 
-    private ThreadContextImpl unwrapThreadContext(ThreadContext executor) {
+    private SmallRyeThreadContext unwrapThreadContext(ThreadContext executor) {
         if (executor instanceof WeldClientProxy) {
-            return (ThreadContextImpl) ((WeldClientProxy) executor).getMetadata().getContextualInstance();
+            return (SmallRyeThreadContext) ((WeldClientProxy) executor).getMetadata().getContextualInstance();
         } else {
             throw new IllegalStateException("Injected proxies are expected to be instance of WeldClientProxy");
         }
