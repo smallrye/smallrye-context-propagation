@@ -38,10 +38,13 @@ public class SmallRyeContextManager implements ContextManager {
         this.providers = new ArrayList<ThreadContextProvider>(providers);
         providersByType = new HashMap<>();
         for (ThreadContextProvider provider : providers) {
-            providersByType.put(provider.getThreadContextType(), provider);
+            String type = provider.getThreadContextType();
+            // check for duplicate providers
+            if(providersByType.containsKey(type))
+                throw new IllegalStateException("ThreadContextProvider type already registered: "+type
+                        +" first instance: "+providersByType.get(type)+", second instance: "+provider);
+            providersByType.put(type, provider);
         }
-        // FIXME: check for duplicate types
-        // FIXME: check for cycles
         allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
         this.extensions = new ArrayList<ContextManagerExtension>(extensions);
         this.defaultValues = new DefaultValues();
