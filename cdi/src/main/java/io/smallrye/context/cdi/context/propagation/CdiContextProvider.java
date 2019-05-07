@@ -134,8 +134,6 @@ public class CdiContextProvider implements ThreadContextProvider {
                 if (conversationContext != null && scopeToContextualInstances.get(conversationContext.getScope()) != null) {
                     conversationContext.clearAndSet(scopeToContextualInstances.get(conversationContext.getScope()));
                 }
-                // WORKAROUND FOR WELD-2556, clear caches
-                RequestScopedCache.invalidate();
 
                 // return ThreadContextController which reverts state to what was previously on this thread
                 controller = () -> {
@@ -148,8 +146,6 @@ public class CdiContextProvider implements ThreadContextProvider {
                     if (conversationContext != null && scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()) != null) {
                         conversationContext.clearAndSet(scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()));
                     }
-                    // WORKAROUND FOR WELD-2556, clear caches
-                    RequestScopedCache.invalidate();
                 };
             }
 
@@ -256,8 +252,6 @@ public class CdiContextProvider implements ThreadContextProvider {
                 if (conversationContext != null && activeScopes.contains(conversationContext.getScope())) {
                     conversationContext.clearAndSet(Collections.emptySet());
                 }
-                // WORKAROUND FOR WELD-2556, clear caches
-                RequestScopedCache.invalidate();
 
                 // return ThreadContextController which reverts state to what was previously on this thread
                 controller = () -> {
@@ -270,8 +264,6 @@ public class CdiContextProvider implements ThreadContextProvider {
                     if (conversationContext != null && scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()) != null) {
                         conversationContext.clearAndSet(scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()));
                     }
-                    // WORKAROUND FOR WELD-2556, clear caches
-                    RequestScopedCache.invalidate();
                 };
             }
 
