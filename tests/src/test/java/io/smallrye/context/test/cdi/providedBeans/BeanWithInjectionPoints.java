@@ -19,6 +19,10 @@ import io.smallrye.context.api.NamedInstance;
 import io.smallrye.context.api.ThreadContextConfig;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 
+import static io.smallrye.context.test.cdi.providedBeans.Utils.providersToStringSet;
+import static io.smallrye.context.test.cdi.providedBeans.Utils.unwrapExecutor;
+import static io.smallrye.context.test.cdi.providedBeans.Utils.unwrapThreadContext;
+
 /**
  * There are multiple context providers added in tests, we do not assert on those and only look for CDI and JTA now.
  */
@@ -115,29 +119,5 @@ public class BeanWithInjectionPoints {
         Set<String> propagated = providersToStringSet(plan.propagatedProviders);
         Assert.assertTrue(propagated.contains(ThreadContext.CDI));
         Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));
-    }
-
-    private SmallRyeManagedExecutor unwrapExecutor(ManagedExecutor executor) {
-        if (executor instanceof WeldClientProxy) {
-            return (SmallRyeManagedExecutor) ((WeldClientProxy) executor).getMetadata().getContextualInstance();
-        } else {
-            throw new IllegalStateException("Injected proxies are expected to be instance of WeldClientProxy");
-        }
-    }
-
-    private SmallRyeThreadContext unwrapThreadContext(ThreadContext executor) {
-        if (executor instanceof WeldClientProxy) {
-            return (SmallRyeThreadContext) ((WeldClientProxy) executor).getMetadata().getContextualInstance();
-        } else {
-            throw new IllegalStateException("Injected proxies are expected to be instance of WeldClientProxy");
-        }
-    }
-
-    private Set<String> providersToStringSet(Set<ThreadContextProvider> providers) {
-        Set<String> result = new HashSet<>();
-        for (ThreadContextProvider provider : providers) {
-            result.add(provider.getThreadContextType());
-        }
-        return result;
     }
 }
