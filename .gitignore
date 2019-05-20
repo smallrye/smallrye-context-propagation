@@ -26,3 +26,7 @@ hs_err_pid*
 .classpath
 target
 .settings
+
+# ignore intellij files
+.idea
+*.iml
