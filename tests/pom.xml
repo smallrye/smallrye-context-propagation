@@ -3,14 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-context-propagation-parent</artifactId>
-        <version>1.0.8-SNAPSHOT</version>
+        <artifactId>smallrye-context-propagation-parent-1.0</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-context-propagation-test</artifactId>
     <name>smallrye-context-propagation-test</name>
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <maven.deploy.skip>true</maven.deploy.skip>
         <version.narayana>5.9.3.Final</version.narayana>
         <version.jnpserver>5.0.3.GA</version.jnpserver>
     </properties>
@@ -36,44 +35,44 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation</artifactId>
+            <artifactId>smallrye-context-propagation-1.0</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-propagators-rxjava1</artifactId>
+            <artifactId>smallrye-context-propagation-propagators-rxjava1-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-propagators-rxjava2</artifactId>
+            <artifactId>smallrye-context-propagation-propagators-rxjava2-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-cdi</artifactId>
+            <artifactId>smallrye-context-propagation-cdi-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-resteasy</artifactId>
+            <artifactId>smallrye-context-propagation-resteasy-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-jta</artifactId>
+            <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-jta</artifactId>
+            <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>
@@ -180,16 +179,16 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
+                <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
         </plugins>
