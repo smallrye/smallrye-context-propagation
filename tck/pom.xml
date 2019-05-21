@@ -3,15 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-context-propagation-parent</artifactId>
-        <version>1.0.8-SNAPSHOT</version>
+        <artifactId>smallrye-context-propagation-parent-1.0</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-context-propagation-tck</artifactId>
     <name>smallrye-context-propagation-tck</name>
-    <url>http://maven.apache.org</url>
+
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <maven.deploy.skip>true</maven.deploy.skip>
         <version.narayana>5.9.3.Final</version.narayana>
         <version.jnpserver>5.0.3.GA</version.jnpserver>
     </properties>
@@ -31,28 +30,28 @@
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation</artifactId>
+            <artifactId>smallrye-context-propagation-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-cdi</artifactId>
+            <artifactId>smallrye-context-propagation-cdi-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-jta</artifactId>
+            <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-jta</artifactId>
+            <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
@@ -158,6 +157,21 @@
                     <dependenciesToScan>
                         <dependency>org.eclipse.microprofile.context-propagation:microprofile-context-propagation-tck</dependency>
                     </dependenciesToScan>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
         </plugins>
