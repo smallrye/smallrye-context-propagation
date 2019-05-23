@@ -17,9 +17,8 @@
         </dependency>
 
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-1.0</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.eclipse.microprofile.context-propagation</groupId>
+            <artifactId>microprofile-context-propagation-api</artifactId>
         </dependency>
 
         <dependency>
