@@ -60,12 +60,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-resteasy-1.0</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -94,6 +88,11 @@
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-core</artifactId>
+            <version>${version.resteasy}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-context-propagation</artifactId>
             <version>${version.resteasy}</version>
         </dependency>
         <dependency>
