@@ -17,13 +17,13 @@ import java.util.NoSuchElementException;
 public class DefaultValues {
 
     // constants defined by spec for MP Config
-    private final String EXEC_ASYNC = "ManagedExecutor/maxAsync";
-    private final String EXEC_QUEUE = "ManagedExecutor/maxQueued";
-    private final String EXEC_PROPAGATED = "ManagedExecutor/propagated";
-    private final String EXEC_CLEARED = "ManagedExecutor/cleared";
-    private final String THREAD_CLEARED = "ThreadContext/cleared";
-    private final String THREAD_PROPAGATED = "ThreadContext/propagated";
-    private final String THREAD_UNCHANGED = "ThreadContext/unchanged";
+    private final String EXEC_ASYNC = "mp.context.ManagedExecutor.maxAsync";
+    private final String EXEC_QUEUE = "mp.context.ManagedExecutor.maxQueued";
+    private final String EXEC_PROPAGATED = "mp.context.ManagedExecutor.propagated";
+    private final String EXEC_CLEARED = "mp.context.ManagedExecutor.cleared";
+    private final String THREAD_CLEARED = "mp.context.ThreadContext.cleared";
+    private final String THREAD_PROPAGATED = "mp.context.ThreadContext.propagated";
+    private final String THREAD_UNCHANGED = "mp.context.ThreadContext.unchanged";
 
     // actual defaults
     private String[] executorPropagated;
