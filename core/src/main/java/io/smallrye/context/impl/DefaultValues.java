@@ -6,7 +6,9 @@ import io.smallrye.context.api.ManagedExecutorConfig;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Holds default values for {@code ManagedExecutor} and {@code ThreadContext}. It firstly looks into MP Config
@@ -37,24 +39,30 @@ public class DefaultValues {
     public DefaultValues() {
         // NOTE: we do not perform sanity check here, that's done in SmallRyeContextManager
         Config config = ConfigProvider.getConfig();
+        Set<String> allkeys = new HashSet<>();
+        config.getPropertyNames().forEach(item -> allkeys.add(item));
         this.executorAsync = config.getOptionalValue(EXEC_ASYNC, Integer.class)
                 .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync());
         this.executorQueue = config.getOptionalValue(EXEC_QUEUE, Integer.class)
                 .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued());
-        // remaining values have to be done via try-catch block as a workaround for
+        // remaining values have to be done via try-catch block because SmallRye Config
+        // considers key with empty value as non-existent
         // https://github.com/smallrye/smallrye-config/issues/83
-        // once fixed, rewrite this to getOptionalValue()
-        this.executorPropagated = resolveConfiguration(config, EXEC_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY);
-        this.executorCleared = resolveConfiguration(config, EXEC_CLEARED, SmallRyeContextManager.NO_STRING);
-        this.threadCleared = resolveConfiguration(config, THREAD_CLEARED, SmallRyeContextManager.NO_STRING);
-        this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY);
-        this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeContextManager.NO_STRING);
+        this.executorPropagated = resolveConfiguration(config, EXEC_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY, allkeys);
+        this.executorCleared = resolveConfiguration(config, EXEC_CLEARED, SmallRyeContextManager.NO_STRING, allkeys);
+        this.threadCleared = resolveConfiguration(config, THREAD_CLEARED, SmallRyeContextManager.NO_STRING, allkeys);
+        this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY, allkeys);
+        this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeContextManager.NO_STRING, allkeys);
     }
 
-    private String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue) {
+    private String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue, Set<String> allKeys) {
         try {
             return mpConfig.getValue(key, String[].class);
         } catch (NoSuchElementException e) {
+            // check keys, there still might be a key with no value assigned
+            if (allKeys.contains(key)) {
+                return new String[]{};
+            }
             return originalValue;
         }
     }
