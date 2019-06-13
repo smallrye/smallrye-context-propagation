@@ -35,6 +35,7 @@ import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
@@ -71,6 +72,7 @@ public class SmallryeContextCdiExtension implements Extension {
 
     // used when adding beans, we need to make sure we have correct configuration, MP config allows to override it
     private final Config mpConfig = ConfigProvider.getConfig();
+    private Set<String> allkeys = new HashSet<>();
 
     private Map<InjectionPointName, ManagedExecutorConfig> executorMap = new HashMap<>();
     private Set<InjectionPointName> unconfiguredExecutorIPs = new HashSet<>();
@@ -79,6 +81,10 @@ public class SmallryeContextCdiExtension implements Extension {
 
     private Set<InjectionPointName> userDefinedMEProducers = new HashSet<>();
     private Set<InjectionPointName> userDefinedTCProducers = new HashSet<>();
+
+    public void init (@Observes BeforeBeanDiscovery bbd) {
+        mpConfig.getPropertyNames().forEach(item -> allkeys.add(item));
+    }
 
     public void processInjectionPointME(@Observes ProcessInjectionPoint<?, ManagedExecutor> pip) {
         InjectionPoint ip = pip.getInjectionPoint();
@@ -338,11 +344,14 @@ public class SmallryeContextCdiExtension implements Extension {
      */
     private <K> K resolveConfiguration(String mpConfigName, Class<K> expectedReturnType, K originalValue) {
         // workaround for https://github.com/smallrye/smallrye-config/issues/83
-        // once resolved, we should be using getOptionalValue() as follows:
-        //return mpConfig.getOptionalValue(mpConfigName, expectedReturnType).orElse(defaultValue);
+        // SmallRye Config considers key with empty value to be non-existent, we use try-catch to cheat that
         try {
             return mpConfig.getValue(mpConfigName, expectedReturnType);
         } catch (NoSuchElementException e) {
+            // additional check that it isn't just key with empty value
+            if (allkeys.contains(mpConfigName) && expectedReturnType.isAssignableFrom(String[].class)) {
+                return (K)new String[]{};
+            }
             // ok, MP Conf does not override this property, let's use the original one
             return originalValue;
         }
