@@ -10,7 +10,7 @@
     <name>smallrye-context-propagation-jta</name>
 
     <properties>
-        <version.narayana>5.9.3.Final</version.narayana>
+        <version.narayana>5.9.5.Final</version.narayana>
     </properties>
     <dependencies>
         <dependency>

@@ -10,7 +10,7 @@
     <name>smallrye-context-propagation-test</name>
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <version.narayana>5.9.3.Final</version.narayana>
+        <version.narayana>5.9.5.Final</version.narayana>
         <version.jnpserver>5.0.3.GA</version.jnpserver>
     </properties>
 
