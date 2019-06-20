@@ -1,6 +1,7 @@
 :microprofile-context: https://github.com/eclipse/microprofile-context-propagation/
 
 image:https://semaphoreci.com/api/v1/smallrye/smallrye-context-propagation/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-context-propagation"]
+image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-context-propagation&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-context-propagation"]
 image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
 = SmallRye Context Propagation 
