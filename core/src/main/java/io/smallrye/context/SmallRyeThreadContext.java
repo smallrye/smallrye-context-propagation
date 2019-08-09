@@ -171,14 +171,14 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
-                             String[] cleared, String injectionPointName) {
+            String[] cleared, String injectionPointName) {
         this.manager = manager;
         this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
         this.injectionPointName = injectionPointName;
     }
 
     private void checkPrecontextualized(Object action) {
-        if(action instanceof Contextualized)
+        if (action instanceof Contextualized)
             throw new IllegalArgumentException("Action is already contextualized");
     }
 
@@ -225,7 +225,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     <T, U> BiConsumer<T, U> contextualConsumerUnlessContextualized(BiConsumer<T, U> consumer) {
-        if(consumer instanceof Contextualized)
+        if (consumer instanceof Contextualized)
             return consumer;
         return contextualConsumer(consumer);
     }
@@ -241,11 +241,11 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     <T, U, R> BiFunction<T, U, R> contextualFunctionUnlessContextualized(BiFunction<T, U, R> function) {
-        if(function instanceof Contextualized)
+        if (function instanceof Contextualized)
             return function;
         return contextualFunction(function);
     }
-    
+
     <T, U, R> BiFunction<T, U, R> contextualFunction(CapturedContextState state, BiFunction<T, U, R> function) {
         checkPrecontextualized(function);
         return new ContextualBiFunction<T, U, R>(state, function);
@@ -257,11 +257,11 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     <R> Callable<R> contextualCallableUnlessContextualized(Callable<R> callable) {
-        if(callable instanceof Contextualized)
+        if (callable instanceof Contextualized)
             return callable;
         return contextualCallable(callable);
     }
-    
+
     <R> Callable<R> contextualCallable(CapturedContextState state, Callable<R> callable) {
         checkPrecontextualized(callable);
         return new ContextualCallable<R>(state, callable);
@@ -273,11 +273,11 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     <T> Consumer<T> contextualConsumerUnlessContextualized(Consumer<T> consumer) {
-        if(consumer instanceof Contextualized)
+        if (consumer instanceof Contextualized)
             return consumer;
         return contextualConsumer(consumer);
     }
-    
+
     <T> Consumer<T> contextualConsumer(CapturedContextState state, Consumer<T> consumer) {
         checkPrecontextualized(consumer);
         return new ContextualConsumer<T>(state, consumer);
@@ -289,11 +289,11 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     <T, R> Function<T, R> contextualFunctionUnlessContextualized(Function<T, R> function) {
-        if(function instanceof Contextualized)
+        if (function instanceof Contextualized)
             return function;
         return contextualFunction(function);
     }
-    
+
     <T, R> Function<T, R> contextualFunction(CapturedContextState state, Function<T, R> function) {
         checkPrecontextualized(function);
         return new ContextualFunction<T, R>(state, function);
@@ -305,7 +305,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     Runnable contextualRunnableUnlessContextualized(Runnable runnable) {
-        if(runnable instanceof Contextualized)
+        if (runnable instanceof Contextualized)
             return runnable;
         return contextualRunnable(runnable);
     }
@@ -321,11 +321,11 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     <R> Supplier<R> contextualSupplierUnlessContextualized(Supplier<R> supplier) {
-        if(supplier instanceof Contextualized)
+        if (supplier instanceof Contextualized)
             return supplier;
         return contextualSupplier(supplier);
     }
-    
+
     <R> Supplier<R> contextualSupplier(CapturedContextState state, Supplier<R> supplier) {
         checkPrecontextualized(supplier);
         return new ContextualSupplier<R>(state, supplier);
@@ -344,7 +344,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
         return builder.toString();
     }
-    
+
     public static class Builder implements ThreadContext.Builder {
 
         private String[] propagated;
@@ -386,7 +386,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         //
         // Extras
-        
+
         public Builder injectionPointName(String name) {
             this.injectionPointName = name;
             return this;

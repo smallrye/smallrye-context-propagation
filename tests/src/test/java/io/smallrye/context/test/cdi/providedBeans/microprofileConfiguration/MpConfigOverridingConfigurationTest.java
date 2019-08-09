@@ -1,16 +1,17 @@
 package io.smallrye.context.test.cdi.providedBeans.microprofileConfiguration;
 
-import io.smallrye.context.SmallRyeManagedExecutor;
-import io.smallrye.context.SmallRyeThreadContext;
-import io.smallrye.context.impl.ThreadContextProviderPlan;
-import io.smallrye.context.test.cdi.providedBeans.Utils;
+import java.util.Set;
+
 import org.eclipse.microprofile.context.ThreadContext;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Set;
+import io.smallrye.context.SmallRyeManagedExecutor;
+import io.smallrye.context.SmallRyeThreadContext;
+import io.smallrye.context.impl.ThreadContextProviderPlan;
+import io.smallrye.context.test.cdi.providedBeans.Utils;
 
 public class MpConfigOverridingConfigurationTest {
 
@@ -26,7 +27,8 @@ public class MpConfigOverridingConfigurationTest {
             // verify IP as method parameter where we set empty value via MP config
             container.event().select(String.class).fire("foo");
             Assert.assertTrue(SomeBean.OBSERVER_NOTIFIED);
-            ThreadContextProviderPlan plan = Utils.unwrapExecutor(bean.getExecutorFromObserverMethod()).getThreadContextProviderPlan();
+            ThreadContextProviderPlan plan = Utils.unwrapExecutor(bean.getExecutorFromObserverMethod())
+                    .getThreadContextProviderPlan();
             Set<String> propagated = Utils.providersToStringSet(plan.propagatedProviders);
             Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));
             Assert.assertTrue(propagated.contains(ThreadContext.CDI));
@@ -42,7 +44,8 @@ public class MpConfigOverridingConfigurationTest {
         ThreadContextProviderPlan threadContextProviderPlan = me.getThreadContextProviderPlan();
         // CDI context is moved to cleared contexts by MP config
         Assert.assertTrue(threadContextProviderPlan.clearedProviders.size() == 1);
-        Assert.assertEquals(ThreadContext.CDI, threadContextProviderPlan.clearedProviders.iterator().next().getThreadContextType());
+        Assert.assertEquals(ThreadContext.CDI,
+                threadContextProviderPlan.clearedProviders.iterator().next().getThreadContextType());
         // indirectly verify that propagated contained all remaining, e.g. transactions will be there
         Set<String> propagated = Utils.providersToStringSet(threadContextProviderPlan.propagatedProviders);
         Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));
@@ -53,7 +56,8 @@ public class MpConfigOverridingConfigurationTest {
         ThreadContextProviderPlan threadContextProviderPlan = tc.getPlan();
         // CDI context is moved to cleared contexts by MP config
         Assert.assertTrue(threadContextProviderPlan.clearedProviders.size() == 1);
-        Assert.assertEquals(ThreadContext.CDI, threadContextProviderPlan.clearedProviders.iterator().next().getThreadContextType());
+        Assert.assertEquals(ThreadContext.CDI,
+                threadContextProviderPlan.clearedProviders.iterator().next().getThreadContextType());
         // indirectly verify that propagated contained all remaining, e.g. transactions will be there
         Set<String> propagated = Utils.providersToStringSet(threadContextProviderPlan.propagatedProviders);
         Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));

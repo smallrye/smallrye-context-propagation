@@ -33,16 +33,17 @@ public class SmallRyeContextManager implements ContextManager {
     private DefaultValues defaultValues;
     private ExecutorService defaultExecutorService;
 
-    SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions, ExecutorService defaultExecutorService) {
+    SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
+            ExecutorService defaultExecutorService) {
         this.defaultExecutorService = defaultExecutorService;
         this.providers = new ArrayList<ThreadContextProvider>(providers);
         providersByType = new HashMap<>();
         for (ThreadContextProvider provider : providers) {
             String type = provider.getThreadContextType();
             // check for duplicate providers
-            if(providersByType.containsKey(type))
-                throw new IllegalStateException("ThreadContextProvider type already registered: "+type
-                        +" first instance: "+providersByType.get(type)+", second instance: "+provider);
+            if (providersByType.containsKey(type))
+                throw new IllegalStateException("ThreadContextProvider type already registered: " + type
+                        + " first instance: " + providersByType.get(type) + ", second instance: " + provider);
             providersByType.put(type, provider);
         }
         allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
@@ -170,7 +171,7 @@ public class SmallRyeContextManager implements ContextManager {
     public DefaultValues getDefaultValues() {
         return defaultValues;
     }
-    
+
     public static class Builder implements ContextManager.Builder {
 
         private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -244,10 +245,10 @@ public class SmallRyeContextManager implements ContextManager {
 
             return new SmallRyeContextManager(contextProviders, contextManagerExtensions, defaultExecutorService);
         }
-        
+
         //
         // Extras
-        
+
         public Builder withDefaultExecutorService(ExecutorService executorService) {
             this.defaultExecutorService = executorService;
             return this;

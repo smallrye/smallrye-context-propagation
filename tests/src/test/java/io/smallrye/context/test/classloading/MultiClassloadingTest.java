@@ -41,7 +41,6 @@ import org.junit.Test;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigProviderResolver;
 import io.smallrye.context.SmallRyeContextManagerProvider;
-import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.api.ManagedExecutorConfig;
 import io.smallrye.context.impl.DefaultValues;
 
@@ -113,7 +112,8 @@ public class MultiClassloadingTest {
     public void test() throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         String thisPackage = MultiClassloadingTest.class.getPackage().getName();
 
-        JavaArchive parentJar = ShrinkWrap.create(JavaArchive.class).addPackages(true, ThreadContext.class.getPackage().getName())
+        JavaArchive parentJar = ShrinkWrap.create(JavaArchive.class)
+                .addPackages(true, ThreadContext.class.getPackage().getName())
                 .addPackages(true, Assert.class.getPackage().getName())
                 .addPackages(true, ConfigProvider.class.getPackage().getName())
                 .addPackages(true, SmallRyeConfig.class.getPackage().getName())
@@ -132,25 +132,29 @@ public class MultiClassloadingTest {
 
         JavaArchive aJar = ShrinkWrap.create(JavaArchive.class)
                 .addAsServiceProviderAndClasses(ThreadContextProvider.class, AThreadContextProvider.class)
-                .addAsServiceProviderAndClasses(ContextManagerExtension.class, AThreadContextPropagator.class).addClass(ATest.class);
+                .addAsServiceProviderAndClasses(ContextManagerExtension.class, AThreadContextPropagator.class)
+                .addClass(ATest.class);
         ShrinkWrapClassLoader aCL = new ShrinkWrapClassLoader(parentCL, aJar);
         System.err.println("aCL: " + aCL);
 
         JavaArchive bJar = ShrinkWrap.create(JavaArchive.class)
                 .addAsServiceProviderAndClasses(ThreadContextProvider.class, BThreadContextProvider.class)
-                .addAsServiceProviderAndClasses(ContextManagerExtension.class, BThreadContextPropagator.class).addClass(BTest.class);
+                .addAsServiceProviderAndClasses(ContextManagerExtension.class, BThreadContextPropagator.class)
+                .addClass(BTest.class);
         ShrinkWrapClassLoader bCL = new ShrinkWrapClassLoader(parentCL, bJar);
         System.err.println("bCL: " + bCL);
 
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(aCL);
-            BiConsumer<ClassLoader, ClassLoader> aTest = (BiConsumer<ClassLoader, ClassLoader>) aCL.loadClass(thisPackage + ".ATest")
+            BiConsumer<ClassLoader, ClassLoader> aTest = (BiConsumer<ClassLoader, ClassLoader>) aCL
+                    .loadClass(thisPackage + ".ATest")
                     .newInstance();
             aTest.accept(aCL, parentCL);
 
             Thread.currentThread().setContextClassLoader(bCL);
-            BiConsumer<ClassLoader, ClassLoader> bTest = (BiConsumer<ClassLoader, ClassLoader>) bCL.loadClass(thisPackage + ".BTest")
+            BiConsumer<ClassLoader, ClassLoader> bTest = (BiConsumer<ClassLoader, ClassLoader>) bCL
+                    .loadClass(thisPackage + ".BTest")
                     .newInstance();
             bTest.accept(bCL, parentCL);
         } finally {

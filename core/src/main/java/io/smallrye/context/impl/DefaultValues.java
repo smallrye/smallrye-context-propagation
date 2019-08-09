@@ -1,14 +1,14 @@
 package io.smallrye.context.impl;
 
-import io.smallrye.context.SmallRyeContextManager;
-import io.smallrye.context.api.ManagedExecutorConfig;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import io.smallrye.context.SmallRyeContextManager;
+import io.smallrye.context.api.ManagedExecutorConfig;
 
 /**
  * Holds default values for {@code ManagedExecutor} and {@code ThreadContext}. It firstly looks into MP Config
@@ -48,10 +48,12 @@ public class DefaultValues {
         // remaining values have to be done via try-catch block because SmallRye Config
         // considers key with empty value as non-existent
         // https://github.com/smallrye/smallrye-config/issues/83
-        this.executorPropagated = resolveConfiguration(config, EXEC_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY, allkeys);
+        this.executorPropagated = resolveConfiguration(config, EXEC_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY,
+                allkeys);
         this.executorCleared = resolveConfiguration(config, EXEC_CLEARED, SmallRyeContextManager.NO_STRING, allkeys);
         this.threadCleared = resolveConfiguration(config, THREAD_CLEARED, SmallRyeContextManager.NO_STRING, allkeys);
-        this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY, allkeys);
+        this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY,
+                allkeys);
         this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeContextManager.NO_STRING, allkeys);
     }
 
@@ -61,7 +63,7 @@ public class DefaultValues {
         } catch (NoSuchElementException e) {
             // check keys, there still might be a key with no value assigned
             if (allKeys.contains(key)) {
-                return new String[]{};
+                return new String[] {};
             }
             return originalValue;
         }

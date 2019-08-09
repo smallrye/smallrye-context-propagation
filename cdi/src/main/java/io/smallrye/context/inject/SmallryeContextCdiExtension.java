@@ -15,16 +15,17 @@
  */
 package io.smallrye.context.inject;
 
-import io.smallrye.context.SmallRyeManagedExecutor;
-import io.smallrye.context.SmallRyeThreadContext;
-import io.smallrye.context.api.ManagedExecutorConfig;
-import io.smallrye.context.api.NamedInstance;
-import io.smallrye.context.api.ThreadContextConfig;
-
-import org.eclipse.microprofile.context.ManagedExecutor;
-import org.eclipse.microprofile.context.ThreadContext;
-import org.eclipse.microprofile.config.Config;
-import org.eclipse.microprofile.config.ConfigProvider;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -40,17 +41,17 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessInjectionPoint;
 import javax.enterprise.inject.spi.ProcessProducer;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
+
+import io.smallrye.context.SmallRyeManagedExecutor;
+import io.smallrye.context.SmallRyeThreadContext;
+import io.smallrye.context.api.ManagedExecutorConfig;
+import io.smallrye.context.api.NamedInstance;
+import io.smallrye.context.api.ThreadContextConfig;
 
 /**
  * CDI extension that takes care of injectable ThreadContext and ManagedExecutor instances.
@@ -82,7 +83,7 @@ public class SmallryeContextCdiExtension implements Extension {
     private Set<InjectionPointName> userDefinedMEProducers = new HashSet<>();
     private Set<InjectionPointName> userDefinedTCProducers = new HashSet<>();
 
-    public void init (@Observes BeforeBeanDiscovery bbd) {
+    public void init(@Observes BeforeBeanDiscovery bbd) {
         mpConfig.getPropertyNames().forEach(item -> allkeys.add(item));
     }
 
@@ -171,7 +172,7 @@ public class SmallryeContextCdiExtension implements Extension {
         // add beans for configured ManagedExecutors
         for (Map.Entry<InjectionPointName, ManagedExecutorConfig> entry : executorMap.entrySet()) {
             ManagedExecutorConfig annotation = entry.getValue();
-            abd.<ManagedExecutor>addBean()
+            abd.<ManagedExecutor> addBean()
                     .beanClass(ManagedExecutor.class)
                     .addTransitiveTypeClosure(ManagedExecutor.class)
                     .addQualifier(NamedInstance.Literal.of(entry.getKey().getNamedInstanceName()))
@@ -180,7 +181,7 @@ public class SmallryeContextCdiExtension implements Extension {
                         // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
                         t.shutdown();
                     })
-                    .createWith(param -> ((SmallRyeManagedExecutor.Builder)ManagedExecutor.builder())
+                    .createWith(param -> ((SmallRyeManagedExecutor.Builder) ManagedExecutor.builder())
                             .injectionPointName(entry.getKey().getMpConfigName())
                             .maxAsync(resolveConfiguration(entry.getKey().getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, annotation.maxAsync()))
@@ -194,7 +195,7 @@ public class SmallryeContextCdiExtension implements Extension {
         }
         // add beans for unconfigured ManagedExecutors
         for (InjectionPointName ipName : unconfiguredExecutorIPs) {
-            abd.<ManagedExecutor>addBean()
+            abd.<ManagedExecutor> addBean()
                     .beanClass(ManagedExecutor.class)
                     .addTransitiveTypeClosure(ManagedExecutor.class)
                     .addQualifier(NamedInstance.Literal.of(ipName.getNamedInstanceName()))
@@ -203,7 +204,7 @@ public class SmallryeContextCdiExtension implements Extension {
                         // bean is ApplicationScoped, ME.shutdown() is called only after whole app is being shutdown
                         t.shutdown();
                     })
-                    .createWith(param -> ((SmallRyeManagedExecutor.Builder)ManagedExecutor.builder())
+                    .createWith(param -> ((SmallRyeManagedExecutor.Builder) ManagedExecutor.builder())
                             .injectionPointName(ipName.getMpConfigName())
                             .maxAsync(resolveConfiguration(ipName.getMpConfigName() + MEConfig + maxAsync,
                                     Integer.class, ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync()))
@@ -218,7 +219,7 @@ public class SmallryeContextCdiExtension implements Extension {
         // add beans for configured ThreadContext
         for (Map.Entry<InjectionPointName, ThreadContextConfig> entry : threadContextMap.entrySet()) {
             ThreadContextConfig annotation = entry.getValue();
-            abd.<ThreadContext>addBean()
+            abd.<ThreadContext> addBean()
                     .beanClass(ThreadContext.class)
                     .addTransitiveTypeClosure(ThreadContext.class)
                     .addQualifier(NamedInstance.Literal.of(entry.getKey().getNamedInstanceName()))
@@ -226,7 +227,7 @@ public class SmallryeContextCdiExtension implements Extension {
                     .disposeWith((ThreadContext t, Instance<Object> u) -> {
                         // no-op at this point
                     })
-                    .createWith(param -> ((SmallRyeThreadContext.Builder)ThreadContext.builder())
+                    .createWith(param -> ((SmallRyeThreadContext.Builder) ThreadContext.builder())
                             .injectionPointName(entry.getKey().getMpConfigName())
                             .cleared(resolveConfiguration(entry.getKey().getMpConfigName() + TCConfig + cleared,
                                     String[].class, annotation.cleared()))
@@ -239,7 +240,7 @@ public class SmallryeContextCdiExtension implements Extension {
 
         // add beans for unconfigured ThreadContext
         for (InjectionPointName ipName : unconfiguredContextIPs) {
-            abd.<ThreadContext>addBean()
+            abd.<ThreadContext> addBean()
                     .beanClass(ThreadContext.class)
                     .addTransitiveTypeClosure(ThreadContext.class)
                     .addQualifier(NamedInstance.Literal.of(ipName.getNamedInstanceName()))
@@ -247,7 +248,7 @@ public class SmallryeContextCdiExtension implements Extension {
                     .disposeWith((ThreadContext t, Instance<Object> u) -> {
                         // no-op
                     })
-                    .createWith(param -> ((SmallRyeThreadContext.Builder)ThreadContext.builder())
+                    .createWith(param -> ((SmallRyeThreadContext.Builder) ThreadContext.builder())
                             .injectionPointName(ipName.getMpConfigName())
                             .cleared(resolveConfiguration(ipName.getMpConfigName() + TCConfig + cleared,
                                     String[].class, ThreadContextConfig.Literal.DEFAULT_INSTANCE.cleared()))
@@ -298,7 +299,7 @@ public class SmallryeContextCdiExtension implements Extension {
      * further processing. Can return null which indicates no such annotation is present (default configuration or simply a
      * named instance).
      *
-     * @param injectionPoint  {@link InjectionPoint}
+     * @param injectionPoint {@link InjectionPoint}
      * @param annotationClazz class of the annotation we want to extract
      * @return extracted {@link ManagedExecutorConfig} or {@link ThreadContextConfig} annotation or null if it is not present
      */
@@ -311,7 +312,8 @@ public class SmallryeContextCdiExtension implements Extension {
     }
 
     private String getUniqueName(InjectionPoint ip) {
-        Optional<NamedInstance> optionalQulifier = ip.getQualifiers().stream().filter(ann -> ann.annotationType().equals(NamedInstance.class))
+        Optional<NamedInstance> optionalQulifier = ip.getQualifiers().stream()
+                .filter(ann -> ann.annotationType().equals(NamedInstance.class))
                 .map(ann -> (NamedInstance) ann) // not a repeateble annotation, finding first will suffice
                 .findFirst();
         return (optionalQulifier.isPresent()) ? optionalQulifier.get().value() : null;
@@ -350,7 +352,7 @@ public class SmallryeContextCdiExtension implements Extension {
         } catch (NoSuchElementException e) {
             // additional check that it isn't just key with empty value
             if (allkeys.contains(mpConfigName) && expectedReturnType.isAssignableFrom(String[].class)) {
-                return (K)new String[]{};
+                return (K) new String[] {};
             }
             // ok, MP Conf does not override this property, let's use the original one
             return originalValue;

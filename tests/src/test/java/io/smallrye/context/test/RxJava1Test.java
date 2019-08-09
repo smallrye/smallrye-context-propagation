@@ -9,7 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.smallrye.context.SmallRyeContextManagerProvider;
-import io.smallrye.context.test.MyContext;
 import rx.Completable;
 import rx.Emitter.BackpressureMode;
 import rx.Observable;

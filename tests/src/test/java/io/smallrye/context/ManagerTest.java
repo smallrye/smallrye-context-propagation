@@ -9,7 +9,6 @@ import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.smallrye.context.SmallRyeContextManager;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 import io.smallrye.context.test.DefaultThreadContextProvider;
 
@@ -34,7 +33,7 @@ public class ManagerTest {
 
         // A propagated, B cleared, none unchanged
         providers = manager.getProviderPlan(new String[] { "A" }, SmallRyeContextManager.NO_STRING,
-                                            SmallRyeContextManager.ALL_REMAINING_ARRAY);
+                SmallRyeContextManager.ALL_REMAINING_ARRAY);
         Assert.assertEquals(1, providers.propagatedProviders.size());
         Assert.assertTrue(providers.propagatedProviders.contains(A));
         Assert.assertEquals(1, providers.clearedProviders.size());

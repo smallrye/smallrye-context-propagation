@@ -22,7 +22,8 @@ public class ManualPropagationMultipleRequestTest {
     @BeforeClass
     public static void init() {
         SmallRyeContextManagerProvider.getManager();
-        threadContext = (SmallRyeThreadContext) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder().build();
+        threadContext = (SmallRyeThreadContext) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder()
+                .build();
     }
 
     public void newRequest(String reqId) {
@@ -66,13 +67,15 @@ public class ManualPropagationMultipleRequestTest {
 
     @Test
     public void testCompletionStageOnSingleWorkerThread() throws Throwable {
-        ManagedExecutor executor = ContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder().maxAsync(1).build();
+        ManagedExecutor executor = ContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder().maxAsync(1)
+                .build();
         testCompletionStage(executor);
     }
 
     @Test
     public void testCompletionStageOnTwoWorkerThread() throws Throwable {
-        ManagedExecutor executor = ContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder().maxAsync(2).build();
+        ManagedExecutor executor = ContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder().maxAsync(2)
+                .build();
         testCompletionStage(executor);
     }
 

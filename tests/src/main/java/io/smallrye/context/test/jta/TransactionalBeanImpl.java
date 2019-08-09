@@ -1,8 +1,9 @@
 package io.smallrye.context.test.jta;
 
-import javax.transaction.TransactionScoped;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.transaction.TransactionScoped;
 
 @TransactionScoped
 public class TransactionalBeanImpl implements TransactionalBean, Serializable {

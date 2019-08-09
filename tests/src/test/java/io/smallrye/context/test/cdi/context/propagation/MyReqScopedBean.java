@@ -1,7 +1,8 @@
 package io.smallrye.context.test.cdi.context.propagation;
 
-import javax.enterprise.context.RequestScoped;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class MyReqScopedBean {

@@ -1,5 +1,18 @@
 package io.smallrye.context.cdi.context.propagation;
 
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.spi.CDI;
+
 import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ThreadContextController;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
@@ -11,20 +24,7 @@ import org.jboss.weld.context.bound.BoundLiteral;
 import org.jboss.weld.context.bound.BoundRequestContext;
 import org.jboss.weld.context.bound.BoundSessionContext;
 import org.jboss.weld.context.bound.MutableBoundRequest;
-import org.jboss.weld.contexts.cache.RequestScopedCache;
 import org.jboss.weld.manager.api.WeldManager;
-
-import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.spi.CDI;
-import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class CdiContextProvider implements ThreadContextProvider {
 
@@ -60,9 +60,12 @@ public class CdiContextProvider implements ThreadContextProvider {
             ThreadContextController controller;
             if (!isContextActiveOnThisThread) {
                 // no active contexts yet, we will create Bound versions
-                BoundRequestContext requestContext = weldManager.instance().select(BoundRequestContext.class, BoundLiteral.INSTANCE).get();
-                BoundSessionContext sessionContext = weldManager.instance().select(BoundSessionContext.class, BoundLiteral.INSTANCE).get();
-                BoundConversationContext conversationContext = weldManager.instance().select(BoundConversationContext.class, BoundLiteral.INSTANCE).get();
+                BoundRequestContext requestContext = weldManager.instance()
+                        .select(BoundRequestContext.class, BoundLiteral.INSTANCE).get();
+                BoundSessionContext sessionContext = weldManager.instance()
+                        .select(BoundSessionContext.class, BoundLiteral.INSTANCE).get();
+                BoundConversationContext conversationContext = weldManager.instance()
+                        .select(BoundConversationContext.class, BoundLiteral.INSTANCE).get();
                 Map<String, Object> requestMap = null;
                 Map<String, Object> sessionMap = null;
 
@@ -143,7 +146,8 @@ public class CdiContextProvider implements ThreadContextProvider {
                     if (sessionContext != null && scopeToInstancesToRestoreInTheEnd.get(sessionContext.getScope()) != null) {
                         sessionContext.clearAndSet(scopeToInstancesToRestoreInTheEnd.get(sessionContext.getScope()));
                     }
-                    if (conversationContext != null && scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()) != null) {
+                    if (conversationContext != null
+                            && scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()) != null) {
                         conversationContext.clearAndSet(scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()));
                     }
                 };
@@ -186,9 +190,12 @@ public class CdiContextProvider implements ThreadContextProvider {
             ThreadContextController controller;
             if (!isContextActiveOnThisThread) {
                 // no active contexts yet, we will create Bound versions
-                BoundRequestContext requestContext = weldManager.instance().select(BoundRequestContext.class, BoundLiteral.INSTANCE).get();
-                BoundSessionContext sessionContext = weldManager.instance().select(BoundSessionContext.class, BoundLiteral.INSTANCE).get();
-                BoundConversationContext conversationContext = weldManager.instance().select(BoundConversationContext.class, BoundLiteral.INSTANCE).get();
+                BoundRequestContext requestContext = weldManager.instance()
+                        .select(BoundRequestContext.class, BoundLiteral.INSTANCE).get();
+                BoundSessionContext sessionContext = weldManager.instance()
+                        .select(BoundSessionContext.class, BoundLiteral.INSTANCE).get();
+                BoundConversationContext conversationContext = weldManager.instance()
+                        .select(BoundConversationContext.class, BoundLiteral.INSTANCE).get();
                 Map<String, Object> requestMap = null;
                 Map<String, Object> sessionMap = null;
 
@@ -261,7 +268,8 @@ public class CdiContextProvider implements ThreadContextProvider {
                     if (sessionContext != null && scopeToInstancesToRestoreInTheEnd.get(sessionContext.getScope()) != null) {
                         sessionContext.clearAndSet(scopeToInstancesToRestoreInTheEnd.get(sessionContext.getScope()));
                     }
-                    if (conversationContext != null && scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()) != null) {
+                    if (conversationContext != null
+                            && scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()) != null) {
                         conversationContext.clearAndSet(scopeToInstancesToRestoreInTheEnd.get(conversationContext.getScope()));
                     }
                 };

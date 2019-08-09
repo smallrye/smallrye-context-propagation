@@ -1,16 +1,17 @@
 package io.smallrye.context.jta.context.propagation;
 
-import org.eclipse.microprofile.context.ThreadContext;
-import org.eclipse.microprofile.context.spi.ThreadContextProvider;
-import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import java.util.Map;
-import java.util.logging.Logger;
+
+import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ThreadContextProvider;
+import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 public class JtaContextProvider implements ThreadContextProvider {
     private static final Logger logger = Logger.getLogger(JtaContextProvider.class.getName());
@@ -26,29 +27,29 @@ public class JtaContextProvider implements ThreadContextProvider {
         return () -> {
             // remove/restore current transaction
             Transaction currentTransaction = currentTransaction();
-            if(capturedTransaction != null) {
-                if(capturedTransaction != currentTransaction) {
-                    if(currentTransaction != null)
+            if (capturedTransaction != null) {
+                if (capturedTransaction != currentTransaction) {
+                    if (currentTransaction != null)
                         suspendTransaction();
                     resumeTransaction(capturedTransaction);
-                }else{
+                } else {
                     // else we're already in the right transaction
-                    logger.fine("Keeping current transaction "+currentTransaction);
+                    logger.fine("Keeping current transaction " + currentTransaction);
                 }
-            } else if(currentTransaction != null) {
+            } else if (currentTransaction != null) {
                 suspendTransaction();
             }
             return () -> {
-                if(capturedTransaction != null) {
-                    if(capturedTransaction != currentTransaction) {
+                if (capturedTransaction != null) {
+                    if (capturedTransaction != currentTransaction) {
                         suspendTransaction();
-                        if(currentTransaction != null)
+                        if (currentTransaction != null)
                             resumeTransaction(currentTransaction);
-                    }else{
+                    } else {
                         // else we already were in the right transaction
-                        logger.fine("Keeping (not restoring) current transaction "+currentTransaction);
+                        logger.fine("Keeping (not restoring) current transaction " + currentTransaction);
                     }
-                } else if(currentTransaction != null) {
+                } else if (currentTransaction != null) {
                     resumeTransaction(currentTransaction);
                 }
             };
@@ -57,7 +58,7 @@ public class JtaContextProvider implements ThreadContextProvider {
 
     private void resumeTransaction(Transaction transaction) {
         try {
-            logger.fine("Resuming transaction "+transaction);
+            logger.fine("Resuming transaction " + transaction);
             tm().resume(transaction);
         } catch (InvalidTransactionException | IllegalStateException | SystemException e) {
             throw new RuntimeException(e);
@@ -67,7 +68,7 @@ public class JtaContextProvider implements ThreadContextProvider {
     private void suspendTransaction() {
         try {
             Transaction t = tm().suspend();
-            logger.fine("Suspending transaction "+t);
+            logger.fine("Suspending transaction " + t);
         } catch (SystemException e) {
             throw new RuntimeException(e);
         }
@@ -96,11 +97,11 @@ public class JtaContextProvider implements ThreadContextProvider {
         return () -> {
             // remove/restore current transaction
             Transaction currentTransaction = currentTransaction();
-            if(currentTransaction != null) {
+            if (currentTransaction != null) {
                 suspendTransaction();
             }
             return () -> {
-                if(currentTransaction != null) {
+                if (currentTransaction != null) {
                     resumeTransaction(currentTransaction);
                 }
             };

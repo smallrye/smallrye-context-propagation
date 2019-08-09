@@ -9,6 +9,6 @@ public class MyEntity {
     @Id
     @GeneratedValue
     public Long id;
-    
+
     public String name;
 }

@@ -39,7 +39,8 @@ public class SmallRyeContextArchiveProcessor implements ApplicationArchiveProces
     public void process(Archive<?> applicationArchive, TestClass testClass) {
         // SmallRye Conc. CDI impl
         String dependencyToAdd = "io.smallrye:smallrye-context-propagation-cdi-1.0";
-        File[] dependencies = Maven.resolver().loadPomFromFile(new File("pom.xml")).resolve(dependencyToAdd).withTransitivity().asFile();
+        File[] dependencies = Maven.resolver().loadPomFromFile(new File("pom.xml")).resolve(dependencyToAdd).withTransitivity()
+                .asFile();
         // in case to WAR, we add it as a library, as would user in their app
         if (applicationArchive instanceof WebArchive) {
             WebArchive archive = (WebArchive) applicationArchive;

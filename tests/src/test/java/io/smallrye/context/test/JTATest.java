@@ -1,10 +1,15 @@
 package io.smallrye.context.test;
 
-import com.arjuna.ats.arjuna.common.arjPropertyManager;
-import com.arjuna.ats.jta.utils.JNDIManager;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
-import io.smallrye.context.inject.TransactionServicesImpl;
-import io.smallrye.context.test.jta.TransactionalService;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
@@ -17,15 +22,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.transaction.InvalidTransactionException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import com.arjuna.ats.arjuna.common.arjPropertyManager;
+import com.arjuna.ats.jta.utils.JNDIManager;
+
+import io.smallrye.context.inject.TransactionServicesImpl;
+import io.smallrye.context.test.jta.TransactionalService;
 
 public class JTATest {
     private static final String txnStoreLocation = "target/tx-object-store";
@@ -208,7 +209,7 @@ public class JTATest {
     }
 
     private void callServiceExpectFailure(TransactionalServiceCall<TransactionManager, TransactionalService> op,
-                                          TransactionManager tm, TransactionalService ts) {
+            TransactionManager tm, TransactionalService ts) {
         try {
             final Transaction transaction = tm.suspend();
             try {
@@ -273,15 +274,17 @@ public class JTATest {
 
     @Test
     public void testRunUnderTransactionOfExecutingThread() {
-/*        ThreadContext threadContext = ThreadContext.builder()
-                .propagated(ThreadContext.TRANSACTION)
-                .cleared(ThreadContext.ALL_REMAINING)
-                .build();*/
+        /*
+         * ThreadContext threadContext = ThreadContext.builder()
+         * .propagated(ThreadContext.TRANSACTION)
+         * .cleared(ThreadContext.ALL_REMAINING)
+         * .build();
+         */
 
         try (WeldContainer container = weld.initialize()) {
             // lookup the transaction manager and the test service
             TransactionManager transactionManager = container.select(TransactionManager.class).get();
-//            TransactionalService service = container.select(TransactionalService.class).get();
+            //            TransactionalService service = container.select(TransactionalService.class).get();
             Callable<Boolean> transactionCallable = () -> {
                 return transactionManager.getTransaction() != null;
             };

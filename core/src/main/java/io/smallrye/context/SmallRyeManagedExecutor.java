@@ -29,14 +29,14 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
     private final int maxQueued;
     private final String injectionPointName;
     private final ExecutorService executor;
-    
+
     private class NoPropagationExecutor implements Executor {
         @Override
         public void execute(Runnable command) {
             SmallRyeManagedExecutor.this.executeWithoutPropagation(command);
         }
     }
-    
+
     private final Executor noPropagationExecutor = new NoPropagationExecutor();
 
     public static ExecutorService newThreadPoolExecutor(int maxAsync, int maxQueued) {
@@ -49,8 +49,9 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         exec.allowCoreThreadTimeOut(true);
         return exec;
     }
-    
-    public SmallRyeManagedExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, ExecutorService executor, String injectionPointName) {
+
+    public SmallRyeManagedExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, ExecutorService executor,
+            String injectionPointName) {
         this.threadContext = threadContext;
         this.maxAsync = maxAsync;
         this.maxQueued = maxQueued;
@@ -141,10 +142,10 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         executor.execute(threadContext.contextualRunnableUnlessContextualized(command));
     }
 
-    private void executeWithoutPropagation(Runnable command){
+    private void executeWithoutPropagation(Runnable command) {
         executor.execute(command);
     }
-    
+
     @Override
     public <U> CompletableFuture<U> completedFuture(U value) {
         return threadContext.withContextCapture(CompletableFuture.completedFuture(value), this);
@@ -173,7 +174,8 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         // we pass it, so to avoid double contextualisation we pass it a non-propagating executor
         // if we contextualise the function it passes to execute(), then our begin/endContext calls will run outside
         // of any thread synchronisation such as join() and it would be all sorts of wrong
-        return threadContext.withContextCapture(CompletableFuture.runAsync(threadContext.contextualRunnableUnlessContextualized(runnable), noPropagationExecutor), this);
+        return threadContext.withContextCapture(CompletableFuture
+                .runAsync(threadContext.contextualRunnableUnlessContextualized(runnable), noPropagationExecutor), this);
     }
 
     @Override
@@ -182,7 +184,8 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         // we pass it, so to avoid double contextualisation we pass it a non-propagating executor
         // if we contextualise the function it passes to execute(), then our begin/endContext calls will run outside
         // of any thread synchronisation such as join() and it would be all sorts of wrong
-        return threadContext.withContextCapture(CompletableFuture.supplyAsync(threadContext.contextualSupplierUnlessContextualized(supplier), noPropagationExecutor), this);
+        return threadContext.withContextCapture(CompletableFuture
+                .supplyAsync(threadContext.contextualSupplierUnlessContextualized(supplier), noPropagationExecutor), this);
     }
 
     @Override
@@ -246,12 +249,12 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         @Override
         public SmallRyeManagedExecutor build() {
             ExecutorService executor;
-            if(executorService != null)
+            if (executorService != null)
                 executor = ViewExecutor.builder(executorService).setMaxSize(maxAsync).setQueueLimit(maxQueued).build();
             else
                 executor = SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued);
-            return new SmallRyeManagedExecutor(maxAsync, maxQueued, 
-                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared), 
+            return new SmallRyeManagedExecutor(maxAsync, maxQueued,
+                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared),
                     executor, injectionPointName);
         }
 
