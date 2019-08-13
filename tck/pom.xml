@@ -3,16 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-context-propagation-parent-1.0</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <artifactId>smallrye-context-propagation-parent</artifactId>
+        <version>1.0.11-SNAPSHOT</version>
     </parent>
     <artifactId>smallrye-context-propagation-tck</artifactId>
     <name>smallrye-context-propagation-tck</name>
 
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
-        <version.narayana>5.9.3.Final</version.narayana>
-        <version.jnpserver>5.0.3.GA</version.jnpserver>
     </properties>
 
     <dependencies>
@@ -30,28 +28,28 @@
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-1.0</artifactId>
+            <artifactId>smallrye-context-propagation</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-cdi-1.0</artifactId>
+            <artifactId>smallrye-context-propagation-cdi</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
+            <artifactId>smallrye-context-propagation-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-jta-1.0</artifactId>
+            <artifactId>smallrye-context-propagation-jta</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
@@ -175,6 +173,22 @@
                 </configuration>
             </plugin>
         </plugins>
-
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
