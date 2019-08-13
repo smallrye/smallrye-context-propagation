@@ -1,14 +1,15 @@
 package io.smallrye.context.test.cdi.providedBeans.microprofileConfiguration;
 
-import io.smallrye.context.api.ManagedExecutorConfig;
-import io.smallrye.context.api.NamedInstance;
-import io.smallrye.context.api.ThreadContextConfig;
-import org.eclipse.microprofile.context.ManagedExecutor;
-import org.eclipse.microprofile.context.ThreadContext;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
+
+import io.smallrye.context.api.ManagedExecutorConfig;
+import io.smallrye.context.api.NamedInstance;
+import io.smallrye.context.api.ThreadContextConfig;
 
 /**
  * MP config overrides all the ME and TC injection points in some aspect.
@@ -57,7 +58,8 @@ public class SomeBean {
         return overrideConfiguredTC;
     }
 
-    public void observeSomething(@Observes String payload, @ManagedExecutorConfig(cleared = ThreadContext.CDI) ManagedExecutor parameterME) {
+    public void observeSomething(@Observes String payload,
+            @ManagedExecutorConfig(cleared = ThreadContext.CDI) ManagedExecutor parameterME) {
         OBSERVER_NOTIFIED = true;
         executorFromObserverMethod = parameterME;
     }

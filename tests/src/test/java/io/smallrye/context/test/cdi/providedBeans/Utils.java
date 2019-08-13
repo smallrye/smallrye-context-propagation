@@ -1,14 +1,15 @@
 package io.smallrye.context.test.cdi.providedBeans;
 
-import io.smallrye.context.SmallRyeManagedExecutor;
-import io.smallrye.context.SmallRyeThreadContext;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.jboss.weld.proxy.WeldClientProxy;
 
-import java.util.HashSet;
-import java.util.Set;
+import io.smallrye.context.SmallRyeManagedExecutor;
+import io.smallrye.context.SmallRyeThreadContext;
 
 public class Utils {
 

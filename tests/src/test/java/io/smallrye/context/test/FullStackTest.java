@@ -75,10 +75,10 @@ public class FullStackTest {
 
                 // set up CDI request context
                 BoundRequestContext cdiContext = CDI.current().select(BoundRequestContext.class).get();
-                Map<String,Object> contextMap = new HashMap<String,Object>();
+                Map<String, Object> contextMap = new HashMap<String, Object>();
                 cdiContext.associate(contextMap);
                 cdiContext.activate();
-                
+
                 EntityManager entityManager = CDI.current().select(EntityManager.class).get();
                 TransactionManager transactionManager = CDI.current().select(TransactionManager.class).get();
                 Transaction transaction;
@@ -88,32 +88,32 @@ public class FullStackTest {
                 } catch (SystemException | NotSupportedException e) {
                     throw new RuntimeException(e);
                 }
-                System.err.println("BEGIN transaction "+transaction);
-                
+                System.err.println("BEGIN transaction " + transaction);
+
                 boolean success = false;
                 try {
                     super.invoke(req, response);
                     success = true;
                 } finally {
                     // tear down request contexts
-                    if(req.getAsyncContext().isSuspended()) {
+                    if (req.getAsyncContext().isSuspended()) {
                         // make sure we remove the CDI context
                         cdiContext.deactivate();
                         cdiContext.dissociate(contextMap);
                         Transaction t2;
                         try {
                             t2 = transactionManager.suspend();
-                            System.err.println("SUSPEND "+t2);
+                            System.err.println("SUSPEND " + t2);
                         } catch (SystemException e) {
                             throw new RuntimeException(e);
                         }
                         // clear it later
-                        req.getAsyncContext().getAsyncResponse().register((CompletionCallback)(t) -> {
+                        req.getAsyncContext().getAsyncResponse().register((CompletionCallback) (t) -> {
                             try {
-                                System.err.println("RESUME "+t2);
+                                System.err.println("RESUME " + t2);
                                 Transaction currentTransaction = transactionManager.getTransaction();
-                                if(currentTransaction != t2) {
-                                    if(currentTransaction != null)
+                                if (currentTransaction != t2) {
+                                    if (currentTransaction != null)
                                         transactionManager.suspend();
                                     transactionManager.resume(t2);
                                 }
@@ -125,13 +125,14 @@ public class FullStackTest {
                     } else {
                         // clear it now
                         terminateContext(cdiContext, contextMap, entityManager, transactionManager, transaction, success);
-                    }       
+                    }
                 }
             }
 
-            private void terminateContext(BoundRequestContext cdiContext, Map<String, Object> contextMap, EntityManager entityManager, 
-                                          TransactionManager tm, Transaction tx, boolean success) {
-                System.err.println("END: "+success+" "+tx);
+            private void terminateContext(BoundRequestContext cdiContext, Map<String, Object> contextMap,
+                    EntityManager entityManager,
+                    TransactionManager tm, Transaction tx, boolean success) {
+                System.err.println("END: " + success + " " + tx);
                 try {
                     endTransaction(tm, tx, success);
                 } catch (Exception e) {
@@ -145,6 +146,7 @@ public class FullStackTest {
                     cdiContext.dissociate(contextMap);
                 }
             }
+
             protected void endTransaction(TransactionManager tm, Transaction tx, boolean success) throws Exception {
 
                 if (tx != tm.getTransaction()) {
@@ -168,14 +170,14 @@ public class FullStackTest {
         vertxJaxrsServer.setSecurityDomain(null);
         vertxJaxrsServer.start();
     }
-    
+
     @After
     public void after() {
         weld.shutdown();
         vertxJaxrsServer.stop();
         namingBean.stop();
     }
-    
+
     @Test
     public void fullStack() {
         RestAssured.when().get("/test").then().statusCode(200).body(is("OK"));

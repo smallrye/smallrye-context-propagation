@@ -45,7 +45,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public boolean complete(T value) {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.complete(value);
         // wrapper
         return f.complete(value);
@@ -54,7 +54,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public boolean completeExceptionally(Throwable ex) {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.completeExceptionally(ex);
         // wrapper
         return f.completeExceptionally(ex);
@@ -63,7 +63,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.cancel(mayInterruptIfRunning);
         // wrapper
         return f.cancel(mayInterruptIfRunning);
@@ -72,7 +72,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public boolean isCancelled() {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.isCancelled();
         // wrapper
         return f.isCancelled();
@@ -81,7 +81,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public boolean isCompletedExceptionally() {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.isCompletedExceptionally();
         // wrapper
         return f.isCompletedExceptionally();
@@ -90,7 +90,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public void obtrudeValue(T value) {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             super.obtrudeValue(value);
         else
             // wrapper
@@ -100,7 +100,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public void obtrudeException(Throwable ex) {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             super.obtrudeException(ex);
         else
             // wrapper
@@ -110,7 +110,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public int getNumberOfDependents() {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.getNumberOfDependents();
         // wrapper
         return f.getNumberOfDependents();
@@ -119,7 +119,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public boolean isDone() {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.isDone();
         // wrapper
         return f.isDone();
@@ -128,7 +128,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public T get() throws InterruptedException, ExecutionException {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.get();
         // wrapper
         return f.get();
@@ -137,7 +137,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.get(timeout, unit);
         // wrapper
         return f.get(timeout, unit);
@@ -146,7 +146,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public T join() {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.join();
         // wrapper
         return f.join();
@@ -155,7 +155,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public T getNow(T valueIfAbsent) {
         // dependent stage
-        if(executor == null)
+        if (executor == null)
             return super.getNow(valueIfAbsent);
         // wrapper
         return f.getNow(valueIfAbsent);
@@ -179,12 +179,14 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.handleAsync(context.contextualFunctionUnlessContextualized(fn), executor), executor);
+        return context.withContextCapture(f.handleAsync(context.contextualFunctionUnlessContextualized(fn), executor),
+                executor);
     }
 
     @Override
     public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn, Executor executor) {
-        return context.withContextCapture(f.handleAsync(context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
+        return context.withContextCapture(f.handleAsync(context.contextualFunctionUnlessContextualized(fn), executor),
+                this.executor);
     }
 
     @Override
@@ -195,12 +197,14 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public <U> CompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenApplyAsync(context.contextualFunctionUnlessContextualized(fn), executor), executor);
+        return context.withContextCapture(f.thenApplyAsync(context.contextualFunctionUnlessContextualized(fn), executor),
+                executor);
     }
 
     @Override
     public <U> CompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn, Executor executor) {
-        return context.withContextCapture(f.thenApplyAsync(context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
+        return context.withContextCapture(f.thenApplyAsync(context.contextualFunctionUnlessContextualized(fn), executor),
+                this.executor);
     }
 
     @Override
@@ -211,12 +215,14 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenAcceptAsync(context.contextualConsumerUnlessContextualized(action), executor), executor);
+        return context.withContextCapture(f.thenAcceptAsync(context.contextualConsumerUnlessContextualized(action), executor),
+                executor);
     }
 
     @Override
     public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action, Executor executor) {
-        return context.withContextCapture(f.thenAcceptAsync(context.contextualConsumerUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(f.thenAcceptAsync(context.contextualConsumerUnlessContextualized(action), executor),
+                this.executor);
     }
 
     @Override
@@ -227,12 +233,14 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public CompletableFuture<Void> thenRunAsync(Runnable action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenRunAsync(context.contextualRunnableUnlessContextualized(action), executor), executor);
+        return context.withContextCapture(f.thenRunAsync(context.contextualRunnableUnlessContextualized(action), executor),
+                executor);
     }
 
     @Override
     public CompletableFuture<Void> thenRunAsync(Runnable action, Executor executor) {
-        return context.withContextCapture(f.thenRunAsync(context.contextualRunnableUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(f.thenRunAsync(context.contextualRunnableUnlessContextualized(action), executor),
+                this.executor);
     }
 
     @Override
@@ -245,51 +253,59 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     public <U, V> CompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other,
             BiFunction<? super T, ? super U, ? extends V> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor),
+        return context.withContextCapture(
+                f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor),
                 executor);
     }
 
     @Override
     public <U, V> CompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other,
             BiFunction<? super T, ? super U, ? extends V> fn, Executor executor) {
-        return context.withContextCapture(f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
+        return context.withContextCapture(
+                f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
     }
 
     @Override
     public <U> CompletableFuture<Void> thenAcceptBoth(CompletionStage<? extends U> other,
             BiConsumer<? super T, ? super U> action) {
-        return context.withContextCapture(f.thenAcceptBoth(other, context.contextualConsumerUnlessContextualized(action)), executor);
+        return context.withContextCapture(f.thenAcceptBoth(other, context.contextualConsumerUnlessContextualized(action)),
+                executor);
     }
 
     @Override
     public <U> CompletableFuture<Void> thenAcceptBothAsync(CompletionStage<? extends U> other,
             BiConsumer<? super T, ? super U> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor),
+        return context.withContextCapture(
+                f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor),
                 executor);
     }
 
     @Override
     public <U> CompletableFuture<Void> thenAcceptBothAsync(CompletionStage<? extends U> other,
             BiConsumer<? super T, ? super U> action, Executor executor) {
-        return context.withContextCapture(f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(
+                f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor), this.executor);
     }
 
     @Override
     public CompletableFuture<Void> runAfterBoth(CompletionStage<?> other, Runnable action) {
-        return context.withContextCapture(f.runAfterBoth(other, context.contextualRunnableUnlessContextualized(action)), executor);
+        return context.withContextCapture(f.runAfterBoth(other, context.contextualRunnableUnlessContextualized(action)),
+                executor);
     }
 
     @Override
     public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor),
+        return context.withContextCapture(
+                f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor),
                 executor);
     }
 
     @Override
     public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return context.withContextCapture(f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(
+                f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor), this.executor);
     }
 
     @Override
@@ -300,49 +316,57 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public <U> CompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor),
+        return context.withContextCapture(
+                f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor),
                 executor);
     }
 
     @Override
     public <U> CompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn,
             Executor executor) {
-        return context.withContextCapture(f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
+        return context.withContextCapture(
+                f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
     }
 
     @Override
     public CompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        return context.withContextCapture(f.acceptEither(other, context.contextualConsumerUnlessContextualized(action)), executor);
+        return context.withContextCapture(f.acceptEither(other, context.contextualConsumerUnlessContextualized(action)),
+                executor);
     }
 
     @Override
     public CompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor),
+        return context.withContextCapture(
+                f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor),
                 executor);
     }
 
     @Override
     public CompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action,
             Executor executor) {
-        return context.withContextCapture(f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(
+                f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor), this.executor);
     }
 
     @Override
     public CompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action) {
-        return context.withContextCapture(f.runAfterEither(other, context.contextualRunnableUnlessContextualized(action)), executor);
+        return context.withContextCapture(f.runAfterEither(other, context.contextualRunnableUnlessContextualized(action)),
+                executor);
     }
 
     @Override
     public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor),
+        return context.withContextCapture(
+                f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor),
                 executor);
     }
 
     @Override
     public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return context.withContextCapture(f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(
+                f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor), this.executor);
     }
 
     @Override
@@ -353,13 +377,15 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor), executor);
+        return context.withContextCapture(f.thenComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor),
+                executor);
     }
 
     @Override
     public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn,
             Executor executor) {
-        return context.withContextCapture(f.thenComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor), this.executor);
+        return context.withContextCapture(f.thenComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor),
+                this.executor);
     }
 
     @Override
@@ -370,12 +396,14 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     @Override
     public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor), executor);
+        return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor),
+                executor);
     }
 
     @Override
     public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action, Executor executor) {
-        return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor), this.executor);
+        return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor),
+                this.executor);
     }
 
     @Override

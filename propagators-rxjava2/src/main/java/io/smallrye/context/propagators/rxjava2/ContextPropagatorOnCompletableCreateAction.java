@@ -9,7 +9,8 @@ import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 
-public class ContextPropagatorOnCompletableCreateAction implements BiFunction<Completable, CompletableObserver, CompletableObserver> {
+public class ContextPropagatorOnCompletableCreateAction
+        implements BiFunction<Completable, CompletableObserver, CompletableObserver> {
 
     private ThreadContext threadContext;
 

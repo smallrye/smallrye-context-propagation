@@ -1,6 +1,9 @@
 package io.smallrye.context.test.cdi.providedBeans;
 
-import java.util.HashSet;
+import static io.smallrye.context.test.cdi.providedBeans.Utils.providersToStringSet;
+import static io.smallrye.context.test.cdi.providedBeans.Utils.unwrapExecutor;
+import static io.smallrye.context.test.cdi.providedBeans.Utils.unwrapThreadContext;
+
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -8,8 +11,6 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
-import org.eclipse.microprofile.context.spi.ThreadContextProvider;
-import org.jboss.weld.proxy.WeldClientProxy;
 import org.junit.Assert;
 
 import io.smallrye.context.SmallRyeManagedExecutor;
@@ -18,10 +19,6 @@ import io.smallrye.context.api.ManagedExecutorConfig;
 import io.smallrye.context.api.NamedInstance;
 import io.smallrye.context.api.ThreadContextConfig;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
-
-import static io.smallrye.context.test.cdi.providedBeans.Utils.providersToStringSet;
-import static io.smallrye.context.test.cdi.providedBeans.Utils.unwrapExecutor;
-import static io.smallrye.context.test.cdi.providedBeans.Utils.unwrapThreadContext;
 
 /**
  * There are multiple context providers added in tests, we do not assert on those and only look for CDI and JTA now.
@@ -65,11 +62,11 @@ public class BeanWithInjectionPoints {
 
     public void assertDefaultExecutor() {
         SmallRyeManagedExecutor exec = unwrapExecutor(defaultConfigExecutor);
-        Assert.assertEquals(-1,exec.getMaxAsync());
-        Assert.assertEquals(-1,exec.getMaxQueued());
+        Assert.assertEquals(-1, exec.getMaxAsync());
+        Assert.assertEquals(-1, exec.getMaxQueued());
         ThreadContextProviderPlan plan = exec.getThreadContextProviderPlan();
-        Assert.assertEquals(0,plan.unchangedProviders.size());
-        Assert.assertEquals(0,plan.clearedProviders.size());
+        Assert.assertEquals(0, plan.unchangedProviders.size());
+        Assert.assertEquals(0, plan.clearedProviders.size());
         Set<String> propagated = providersToStringSet(plan.propagatedProviders);
         Assert.assertTrue(propagated.contains(ThreadContext.CDI));
         Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));
@@ -84,10 +81,10 @@ public class BeanWithInjectionPoints {
 
     public void assertConfiguredManagedExecutor() {
         SmallRyeManagedExecutor exec = unwrapExecutor(configuredExecutor);
-        Assert.assertEquals(2,exec.getMaxAsync());
-        Assert.assertEquals(3,exec.getMaxQueued());
+        Assert.assertEquals(2, exec.getMaxAsync());
+        Assert.assertEquals(3, exec.getMaxQueued());
         ThreadContextProviderPlan plan = exec.getThreadContextProviderPlan();
-        Assert.assertEquals(0,plan.unchangedProviders.size());
+        Assert.assertEquals(0, plan.unchangedProviders.size());
         Set<String> propagated = providersToStringSet(plan.propagatedProviders);
         Set<String> cleared = providersToStringSet(plan.clearedProviders);
         Assert.assertTrue(cleared.contains(ThreadContext.CDI));
@@ -104,7 +101,7 @@ public class BeanWithInjectionPoints {
     public void assertConfiguredThreadContext() {
         SmallRyeThreadContext context = unwrapThreadContext(configuredThreadContext);
         ThreadContextProviderPlan plan = context.getPlan();
-        Assert.assertEquals(0,plan.unchangedProviders.size());
+        Assert.assertEquals(0, plan.unchangedProviders.size());
         Set<String> propagated = providersToStringSet(plan.propagatedProviders);
         Set<String> cleared = providersToStringSet(plan.clearedProviders);
         Assert.assertTrue(propagated.contains(ThreadContext.CDI));
@@ -114,8 +111,8 @@ public class BeanWithInjectionPoints {
     public void assertDefaultThreadContext() {
         SmallRyeThreadContext context = unwrapThreadContext(defaultThreadContext);
         ThreadContextProviderPlan plan = context.getPlan();
-        Assert.assertEquals(0,plan.unchangedProviders.size());
-        Assert.assertEquals(0,plan.clearedProviders.size());
+        Assert.assertEquals(0, plan.unchangedProviders.size());
+        Assert.assertEquals(0, plan.clearedProviders.size());
         Set<String> propagated = providersToStringSet(plan.propagatedProviders);
         Assert.assertTrue(propagated.contains(ThreadContext.CDI));
         Assert.assertTrue(propagated.contains(ThreadContext.TRANSACTION));

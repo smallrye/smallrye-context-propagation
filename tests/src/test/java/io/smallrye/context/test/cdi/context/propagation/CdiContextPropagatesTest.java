@@ -1,5 +1,11 @@
 package io.smallrye.context.test.cdi.context.propagation;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import javax.enterprise.context.control.RequestContextController;
+import javax.enterprise.inject.spi.CDI;
+
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 import org.jboss.weld.environment.se.Weld;
@@ -7,11 +13,6 @@ import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.enterprise.context.control.RequestContextController;
-import javax.enterprise.inject.spi.CDI;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class CdiContextPropagatesTest {
 

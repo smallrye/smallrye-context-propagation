@@ -19,13 +19,14 @@ package io.smallrye.context.tck.lifecycle;
 
 import java.lang.reflect.Method;
 
-import com.arjuna.ats.arjuna.common.arjPropertyManager;
-import com.arjuna.ats.jta.utils.JNDIManager;
 import org.jboss.arquillian.container.spi.event.container.AfterDeploy;
 import org.jboss.arquillian.container.spi.event.container.BeforeUnDeploy;
 import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jnp.server.NamingBeanImpl;
+
+import com.arjuna.ats.arjuna.common.arjPropertyManager;
+import com.arjuna.ats.jta.utils.JNDIManager;
 
 /**
  * LifecycleExecuter
@@ -34,59 +35,57 @@ import org.jnp.server.NamingBeanImpl;
  * @version $Revision: $
  */
 public class LifecycleExecuter {
-   private static final String txnStoreLocation = "target/tx-object-store";
-   private NamingBeanImpl namingBean;
+    private static final String txnStoreLocation = "target/tx-object-store";
+    private NamingBeanImpl namingBean;
 
-   private void registerJTA() throws Exception {
-      // Start a JNDI server
-      namingBean = new NamingBeanImpl();
-      namingBean.start();
+    private void registerJTA() throws Exception {
+        // Start a JNDI server
+        namingBean = new NamingBeanImpl();
+        namingBean.start();
 
-      // Bind the JTA implementation to the correct JNDI contexts
-      JNDIManager.bindJTAImplementation();
+        // Bind the JTA implementation to the correct JNDI contexts
+        JNDIManager.bindJTAImplementation();
 
-      // Set object store location
-      arjPropertyManager.getObjectStoreEnvironmentBean().setObjectStoreDir(txnStoreLocation);
-   }
+        // Set object store location
+        arjPropertyManager.getObjectStoreEnvironmentBean().setObjectStoreDir(txnStoreLocation);
+    }
 
-   private void unregisterJTA() throws Exception {
-      namingBean.stop();
-   }
+    private void unregisterJTA() throws Exception {
+        namingBean.stop();
+    }
 
-/*   public void executeBeforeDeploy(@Observes BeforeDeploy event, TestClass testClass) {
-      execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.BeforeDeploy.class));
-   }*/
+    /*
+     * public void executeBeforeDeploy(@Observes BeforeDeploy event, TestClass testClass) {
+     * execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.BeforeDeploy.class));
+     * }
+     */
 
-   public void executeAfterDeploy(@Observes AfterDeploy event, TestClass testClass) throws Exception {
-      registerJTA();
-      execute("AfterDeploy", testClass.getMethods(io.smallrye.context.tck.lifecycle.api.AfterDeploy.class));
-   }
-   
-   public void executeBeforeUnDeploy(@Observes BeforeUnDeploy event, TestClass testClass) throws Exception {
-      unregisterJTA();
-      execute("BeforeUnDeploy", testClass.getMethods(io.smallrye.context.tck.lifecycle.api.BeforeUnDeploy.class));
-   }
+    public void executeAfterDeploy(@Observes AfterDeploy event, TestClass testClass) throws Exception {
+        registerJTA();
+        execute("AfterDeploy", testClass.getMethods(io.smallrye.context.tck.lifecycle.api.AfterDeploy.class));
+    }
 
-/*   public void executeAfterUnDeploy(@Observes AfterUnDeploy event, TestClass testClass) {
-      execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.AfterUnDeploy.class));
-   }*/
+    public void executeBeforeUnDeploy(@Observes BeforeUnDeploy event, TestClass testClass) throws Exception {
+        unregisterJTA();
+        execute("BeforeUnDeploy", testClass.getMethods(io.smallrye.context.tck.lifecycle.api.BeforeUnDeploy.class));
+    }
 
-   private void execute(String msg, Method[] methods)
-   {
-      if(methods == null)
-      {
-         return;
-      }
-      for(Method method : methods)
-      {
-         try
-         {
-            method.invoke(null);
-         }
-         catch (Exception e) 
-         {
-            throw new RuntimeException(msg + ":  Could not execute method: " + method, e);
-         }
-      }
-   }
+    /*
+     * public void executeAfterUnDeploy(@Observes AfterUnDeploy event, TestClass testClass) {
+     * execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.AfterUnDeploy.class));
+     * }
+     */
+
+    private void execute(String msg, Method[] methods) {
+        if (methods == null) {
+            return;
+        }
+        for (Method method : methods) {
+            try {
+                method.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException(msg + ":  Could not execute method: " + method, e);
+            }
+        }
+    }
 }

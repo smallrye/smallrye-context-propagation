@@ -18,46 +18,61 @@
  */
 package io.smallrye.context.api;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
-import org.eclipse.microprofile.context.ThreadContext;
-
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Qualifier;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
+
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
+
 /**
- * <p>This annotation is used to achieve out of the box {@link ManagedExecutor} and {@link ThreadContext} instance
- * sharing through CDI injection.</p>
+ * <p>
+ * This annotation is used to achieve out of the box {@link ManagedExecutor} and {@link ThreadContext} instance
+ * sharing through CDI injection.
+ * </p>
  *
- * <p>Qualifies a CDI injection point for a {@link ManagedExecutor} or {@link ThreadContext} with a unique name
- * across the application.</p>
+ * <p>
+ * Qualifies a CDI injection point for a {@link ManagedExecutor} or {@link ThreadContext} with a unique name
+ * across the application.
+ * </p>
  *
- * <p>This annotation can be used in combination with the {@link ManagedExecutorConfig} or
- * {@link ThreadContextConfig} annotation to define a new instance. For example,</p>
+ * <p>
+ * This annotation can be used in combination with the {@link ManagedExecutorConfig} or
+ * {@link ThreadContextConfig} annotation to define a new instance. For example,
+ * </p>
  *
- * <pre><code> {@literal @}Inject {@literal @}NamedInstance("myExecutor") {@literal @}ManagedExecutorConfig(maxAsync=10)
+ * <pre>
+ * <code> {@literal @}Inject {@literal @}NamedInstance("myExecutor") {@literal @}ManagedExecutorConfig(maxAsync=10)
  * ManagedExecutor myExecutor;
  *
  * {@literal @}Inject {@literal @}NamedInstance("myContext") {@literal @}ThreadContextConfig(propagated = { ThreadContext.SECURITY, ThreadContext.CDI })
  * ThreadContext myThreadContext;
- * </code></pre>
+ * </code>
+ * </pre>
  *
- * <p>Once used as shown above, this annotation can be used on its own to qualify an injection point with the name of
+ * <p>
+ * Once used as shown above, this annotation can be used on its own to qualify an injection point with the name of
  * an existing instance. Injection points with the same {@link NamedInstance#value()} then share the same
- * underlying contextual instance. For example, referencing a name from the previous example,</p>
+ * underlying contextual instance. For example, referencing a name from the previous example,
+ * </p>
  *
- * <pre><code> {@literal @}Inject {@literal @}NamedInstance("myExecutor")
+ * <pre>
+ * <code> {@literal @}Inject {@literal @}NamedInstance("myExecutor")
  * ManagedExecutor exec1;
  *
  * {@literal @}Inject {@literal @}NamedInstance("myContext")
  * ThreadContext myContextPropagator;
- * </code></pre>
+ * </code>
+ * </pre>
  *
- * <p>Alternatively, an application can use this annotation as a normal CDI qualifier,
- * defining its own scope, producer, and disposer. For example,</p>
+ * <p>
+ * Alternatively, an application can use this annotation as a normal CDI qualifier,
+ * defining its own scope, producer, and disposer. For example,
+ * </p>
  *
  * @author Matej Novotny
  */

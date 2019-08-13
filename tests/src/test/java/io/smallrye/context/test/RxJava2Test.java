@@ -16,7 +16,6 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 import io.smallrye.context.SmallRyeContextManagerProvider;
-import io.smallrye.context.test.MyContext;
 
 public class RxJava2Test {
 

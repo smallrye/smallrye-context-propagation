@@ -112,7 +112,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
     @Override
     public <U, V> CompletionStage<V> thenCombineAsync(CompletionStage<? extends U> other,
             BiFunction<? super T, ? super U, ? extends V> fn, Executor executor) {
-        return context.withContextCapture(f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor));
+        return context
+                .withContextCapture(f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -131,7 +132,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
     @Override
     public <U> CompletionStage<Void> thenAcceptBothAsync(CompletionStage<? extends U> other,
             BiConsumer<? super T, ? super U> action, Executor executor) {
-        return context.withContextCapture(f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor));
+        return context.withContextCapture(
+                f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override
@@ -147,7 +149,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
 
     @Override
     public CompletionStage<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return context.withContextCapture(f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor));
+        return context.withContextCapture(
+                f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor));
     }
 
     @Override
@@ -164,7 +167,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
     @Override
     public <U> CompletionStage<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn,
             Executor executor) {
-        return context.withContextCapture(f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor));
+        return context
+                .withContextCapture(f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -181,7 +185,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
     @Override
     public CompletionStage<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action,
             Executor executor) {
-        return context.withContextCapture(f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor));
+        return context.withContextCapture(
+                f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override
@@ -197,7 +202,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
 
     @Override
     public CompletionStage<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return context.withContextCapture(f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor));
+        return context.withContextCapture(
+                f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor));
     }
 
     @Override
@@ -230,7 +236,8 @@ final class CompletionStageWrapper<T> implements CompletionStage<T> {
 
     @Override
     public CompletionStage<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action, Executor executor) {
-        return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor));
+        return context
+                .withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override

@@ -1,7 +1,5 @@
 package io.smallrye.context.inject;
 
-import org.jboss.weld.transaction.spi.TransactionServices;
-
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -9,6 +7,8 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
+
+import org.jboss.weld.transaction.spi.TransactionServices;
 
 public class TransactionServicesImpl implements TransactionServices {
     private Transaction getTransaction() {
