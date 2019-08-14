@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-context-propagation-parent-1.0</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <artifactId>smallrye-context-propagation-parent</artifactId>
+        <version>1.0.11-SNAPSHOT</version>
     </parent>
-    <artifactId>smallrye-context-propagation-1.0</artifactId>
+    <artifactId>smallrye-context-propagation</artifactId>
     <name>smallrye-context-propagation</name>
 
     <dependencies>
@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>smallrye-context-propagation-api-1.0</artifactId>
+            <artifactId>smallrye-context-propagation-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -35,4 +35,21 @@
             <version>${version.jboss.threads}</version>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
