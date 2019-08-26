@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
 import io.smallrye.context.impl.ActiveContextState;
@@ -195,11 +194,14 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor) {
-        return new CompletableFutureWrapper<>(this, future, executor);
+        return new CompletableFutureWrapper<>(this, future, executor, false);
     }
 
     @Override
     public <T> CompletionStage<T> withContextCapture(CompletionStage<T> future) {
+        if (future instanceof CompletableFuture)
+            // the MP-CP TCK insists we cannot complete instances returned by this API
+            return new CompletableFutureWrapper<>(this, (CompletableFuture<T>) future, null, true);
         return new CompletionStageWrapper<>(this, future);
     }
 

@@ -12,8 +12,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
-
 final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
     private final CompletableFuture<T> f;
     private final SmallRyeThreadContext context;
@@ -22,8 +20,9 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
      * another CF, so we have different behaviour
      */
     private final Executor executor;
+    private final boolean minimal;
 
-    CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor) {
+    CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor, boolean minimal) {
         this.context = context;
         this.f = f;
         f.whenComplete((r, t) -> {
@@ -35,6 +34,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
                 super.complete(r);
         });
         this.executor = executor;
+        this.minimal = minimal;
     }
 
     private void checkDefaultExecutor() {
@@ -42,8 +42,14 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
             throw new UnsupportedOperationException("Async methods not supported when no executor is specified");
     }
 
+    private void checkMinimal() {
+        if (minimal)
+            throw new UnsupportedOperationException("Completion methods not supported for minimal CompletionStage instances");
+    }
+
     @Override
     public boolean complete(T value) {
+        checkMinimal();
         // dependent stage
         if (executor == null)
             return super.complete(value);
@@ -53,6 +59,7 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
 
     @Override
     public boolean completeExceptionally(Throwable ex) {
+        checkMinimal();
         // dependent stage
         if (executor == null)
             return super.completeExceptionally(ex);
