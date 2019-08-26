@@ -21,9 +21,9 @@ final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
      * If this executor is not null, we're wrapping a CF. If it is null, we're a dependent stage of
      * another CF, so we have different behaviour
      */
-    private final ManagedExecutor executor;
+    private final Executor executor;
 
-    CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, ManagedExecutor executor) {
+    CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor) {
         this.context = context;
         this.f = f;
         f.whenComplete((r, t) -> {

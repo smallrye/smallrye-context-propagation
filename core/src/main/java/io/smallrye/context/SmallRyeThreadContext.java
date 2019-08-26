@@ -194,7 +194,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         return withContextCapture(future, null);
     }
 
-    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, ManagedExecutor executor) {
+    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor) {
         return new CompletableFutureWrapper<>(this, future, executor);
     }
 
