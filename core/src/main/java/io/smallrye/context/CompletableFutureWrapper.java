@@ -12,17 +12,19 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-final class CompletableFutureWrapper<T> extends CompletableFuture<T> {
-    private final CompletableFuture<T> f;
-    private final SmallRyeThreadContext context;
+import io.smallrye.context.impl.Contextualized;
+
+public class CompletableFutureWrapper<T> extends CompletableFuture<T> implements Contextualized {
+    protected final CompletableFuture<T> f;
+    protected final SmallRyeThreadContext context;
     /**
      * If this executor is not null, we're wrapping a CF. If it is null, we're a dependent stage of
      * another CF, so we have different behaviour
      */
-    private final Executor executor;
+    protected final Executor executor;
     private final boolean minimal;
 
-    CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor, boolean minimal) {
+    public CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor, boolean minimal) {
         this.context = context;
         this.f = f;
         f.whenComplete((r, t) -> {
