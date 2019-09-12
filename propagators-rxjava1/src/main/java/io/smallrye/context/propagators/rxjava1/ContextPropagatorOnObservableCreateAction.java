@@ -47,6 +47,7 @@ public class ContextPropagatorOnObservableCreateAction implements Func1<OnSubscr
             private final Executor contextExecutor;
 
             public OnAssemblyObservableSubscriber(Subscriber<? super T> actual, Executor contextExecutor) {
+                super(actual);
                 this.actual = actual;
                 this.contextExecutor = contextExecutor;
                 actual.add(this);
