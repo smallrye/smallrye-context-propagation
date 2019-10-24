@@ -22,61 +22,63 @@ public class JtaContextProvider implements ThreadContextProvider {
             //return null as per docs to state that propagation of this context is not supported
             return null;
         }
-
-        Transaction capturedTransaction = currentTransaction();
+        TransactionManager tm = tm();
+        Transaction capturedTransaction = currentTransaction(tm);
         return () -> {
+            // Thread
             // remove/restore current transaction
-            Transaction currentTransaction = currentTransaction();
+            Transaction currentTransaction = currentTransaction(tm);
             if (capturedTransaction != null) {
                 if (capturedTransaction != currentTransaction) {
                     if (currentTransaction != null)
-                        suspendTransaction();
-                    resumeTransaction(capturedTransaction);
+                        suspendTransaction(tm);
+                    resumeTransaction(tm, capturedTransaction);
                 } else {
                     // else we're already in the right transaction
                     logger.fine("Keeping current transaction " + currentTransaction);
                 }
             } else if (currentTransaction != null) {
-                suspendTransaction();
+                suspendTransaction(tm);
             }
             return () -> {
+                // Main
                 if (capturedTransaction != null) {
                     if (capturedTransaction != currentTransaction) {
-                        suspendTransaction();
+                        suspendTransaction(tm);
                         if (currentTransaction != null)
-                            resumeTransaction(currentTransaction);
+                            resumeTransaction(tm, currentTransaction);
                     } else {
                         // else we already were in the right transaction
                         logger.fine("Keeping (not restoring) current transaction " + currentTransaction);
                     }
                 } else if (currentTransaction != null) {
-                    resumeTransaction(currentTransaction);
+                    resumeTransaction(tm, currentTransaction);
                 }
             };
         };
     }
 
-    private void resumeTransaction(Transaction transaction) {
+    private void resumeTransaction(TransactionManager tm, Transaction transaction) {
         try {
             logger.fine("Resuming transaction " + transaction);
-            tm().resume(transaction);
+            tm.resume(transaction);
         } catch (InvalidTransactionException | IllegalStateException | SystemException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void suspendTransaction() {
+    private void suspendTransaction(TransactionManager tm) {
         try {
-            Transaction t = tm().suspend();
+            Transaction t = tm.suspend();
             logger.fine("Suspending transaction " + t);
         } catch (SystemException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Transaction currentTransaction() {
+    private Transaction currentTransaction(TransactionManager tm) {
         try {
-            return tm().getTransaction();
+            return tm.getTransaction();
         } catch (SystemException e) {
             e.printStackTrace();
             return null;
@@ -94,15 +96,16 @@ public class JtaContextProvider implements ThreadContextProvider {
             return null;
         }
 
+        TransactionManager tm = tm();
         return () -> {
             // remove/restore current transaction
-            Transaction currentTransaction = currentTransaction();
+            Transaction currentTransaction = currentTransaction(tm);
             if (currentTransaction != null) {
-                suspendTransaction();
+                suspendTransaction(tm);
             }
             return () -> {
                 if (currentTransaction != null) {
-                    resumeTransaction(currentTransaction);
+                    resumeTransaction(tm, currentTransaction);
                 }
             };
         };
