@@ -52,7 +52,7 @@
         <version.hibernate>5.4.8.Final</version.hibernate>
         <version.hsqldb>2.5.0</version.hsqldb>
         <version.vertx>3.8.3</version.vertx>
-        <version.hamcrest>2.1</version.hamcrest>
+        <version.hamcrest>2.2</version.hamcrest>
 
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
