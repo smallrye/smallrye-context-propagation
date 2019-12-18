@@ -44,6 +44,7 @@ import javax.enterprise.inject.spi.ProcessProducer;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.spi.ConfigSource;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
@@ -72,7 +73,7 @@ public class SmallryeContextCdiExtension implements Extension {
     private final String TCConfig = nameDelimiter + "ThreadContextConfig";
 
     // used when adding beans, we need to make sure we have correct configuration, MP config allows to override it
-    private final Config mpConfig = ConfigProvider.getConfig();
+    private final Config mpConfig = new LazyConfig();
     private Set<String> allkeys = new HashSet<>();
 
     private Map<InjectionPointName, ManagedExecutorConfig> executorMap = new HashMap<>();
@@ -370,5 +371,41 @@ public class SmallryeContextCdiExtension implements Extension {
         this.userDefinedTCProducers.clear();
         this.executorMap.clear();
         this.threadContextMap.clear();
+    }
+
+    // Used to delay the ConfigProvider.getConfig() call until we need the config
+    // Doing it too early may break application deployment in application servers
+    private class LazyConfig implements Config {
+        private Config delegate;
+
+        private void initialize() {
+            if (delegate == null) {
+                delegate = ConfigProvider.getConfig();
+            }
+        }
+
+        @Override
+        public <T> T getValue(String propertyName, Class<T> propertyType) {
+            initialize();
+            return delegate.getValue(propertyName, propertyType);
+        }
+
+        @Override
+        public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
+            initialize();
+            return delegate.getOptionalValue(propertyName, propertyType);
+        }
+
+        @Override
+        public Iterable<String> getPropertyNames() {
+            initialize();
+            return delegate.getPropertyNames();
+        }
+
+        @Override
+        public Iterable<ConfigSource> getConfigSources() {
+            initialize();
+            return delegate.getConfigSources();
+        }
     }
 }
