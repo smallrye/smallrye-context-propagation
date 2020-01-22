@@ -161,6 +161,7 @@ public class FullStackTest {
             }
 
         });
+        deployment.start();
 
         vertxJaxrsServer = new MyVertxJaxrsServer();
         vertxJaxrsServer.setVertxOptions(new VertxOptions().setEventLoopPoolSize(1));
