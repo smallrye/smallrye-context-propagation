@@ -51,7 +51,7 @@
         <version.resteasy>4.4.2.Final</version.resteasy>
         <version.hibernate>5.4.10.Final</version.hibernate>
         <version.hsqldb>2.5.0</version.hsqldb>
-        <version.vertx>3.8.4</version.vertx>
+        <version.vertx>3.8.5</version.vertx>
         <version.hamcrest>2.2</version.hamcrest>
 
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
