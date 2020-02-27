@@ -48,7 +48,7 @@
 
         <!-- Testing versions -->
         <version.jnpserver>5.0.5.Final</version.jnpserver>
-        <version.resteasy>4.4.2.Final</version.resteasy>
+        <version.resteasy>4.5.1.Final</version.resteasy>
         <version.hibernate>5.4.10.Final</version.hibernate>
         <version.hsqldb>2.5.0</version.hsqldb>
         <version.vertx>3.8.5</version.vertx>
