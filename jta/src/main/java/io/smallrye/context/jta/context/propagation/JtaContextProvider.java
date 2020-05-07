@@ -1,8 +1,12 @@
 package io.smallrye.context.jta.context.propagation;
 
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
@@ -15,6 +19,8 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 public class JtaContextProvider implements ThreadContextProvider {
     private static final Logger logger = Logger.getLogger(JtaContextProvider.class.getName());
+
+    private volatile TransactionManager transactionManager;
 
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
@@ -35,7 +41,9 @@ public class JtaContextProvider implements ThreadContextProvider {
                     resumeTransaction(tm, capturedTransaction);
                 } else {
                     // else we're already in the right transaction
-                    logger.fine("Keeping current transaction " + currentTransaction);
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.fine("Keeping current transaction " + currentTransaction);
+                    }
                 }
             } else if (currentTransaction != null) {
                 suspendTransaction(tm);
@@ -49,7 +57,9 @@ public class JtaContextProvider implements ThreadContextProvider {
                             resumeTransaction(tm, currentTransaction);
                     } else {
                         // else we already were in the right transaction
-                        logger.fine("Keeping (not restoring) current transaction " + currentTransaction);
+                        if (logger.isLoggable(Level.FINE)) {
+                            logger.fine("Keeping (not restoring) current transaction " + currentTransaction);
+                        }
                     }
                 } else if (currentTransaction != null) {
                     resumeTransaction(tm, currentTransaction);
@@ -60,7 +70,9 @@ public class JtaContextProvider implements ThreadContextProvider {
 
     private void resumeTransaction(TransactionManager tm, Transaction transaction) {
         try {
-            logger.fine("Resuming transaction " + transaction);
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Resuming transaction " + transaction);
+            }
             tm.resume(transaction);
         } catch (InvalidTransactionException | IllegalStateException | SystemException e) {
             throw new RuntimeException(e);
@@ -70,7 +82,9 @@ public class JtaContextProvider implements ThreadContextProvider {
     private void suspendTransaction(TransactionManager tm) {
         try {
             Transaction t = tm.suspend();
-            logger.fine("Suspending transaction " + t);
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine("Suspending transaction " + t);
+            }
         } catch (SystemException e) {
             throw new RuntimeException(e);
         }
@@ -80,13 +94,22 @@ public class JtaContextProvider implements ThreadContextProvider {
         try {
             return tm.getTransaction();
         } catch (SystemException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Failed to capture current transaction", e);
             return null;
         }
     }
 
     private TransactionManager tm() {
-        return CDI.current().select(TransactionManager.class).get();
+        TransactionManager tm = this.transactionManager;
+        if (tm != null) {
+            return tm;
+        }
+        //no need to guard against double assignment
+        Instance<LifecycleManager> lifecycleManagers = CDI.current().select(LifecycleManager.class);
+        if (lifecycleManagers.isResolvable()) {
+            lifecycleManagers.get().setProvider(this);
+        }
+        return this.transactionManager = CDI.current().select(TransactionManager.class).get();
     }
 
     @Override
@@ -123,11 +146,38 @@ public class JtaContextProvider implements ThreadContextProvider {
      * @return true if CDI can be used, false otherwise
      */
     private boolean isCdiUnavailable() {
+        if (transactionManager != null) {
+            //we looked this up from CDI, so we know it is fine
+            return false;
+        }
         try {
             return CDI.current() == null;
         } catch (IllegalStateException e) {
             // no CDI provider found, CDI isn't available
             return true;
+        }
+    }
+
+    /**
+     * bean used to clear the cached TM when the container shuts down
+     */
+    @ApplicationScoped
+    public static class LifecycleManager {
+
+        private volatile JtaContextProvider provider;
+
+        public JtaContextProvider getProvider() {
+            return provider;
+        }
+
+        public LifecycleManager setProvider(JtaContextProvider provider) {
+            this.provider = provider;
+            return this;
+        }
+
+        @PreDestroy
+        void shutdown() {
+            provider.transactionManager = null;
         }
     }
 }
