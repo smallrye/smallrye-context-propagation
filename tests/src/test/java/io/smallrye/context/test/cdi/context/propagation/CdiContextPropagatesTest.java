@@ -10,9 +10,12 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import io.smallrye.context.test.JTAUtils;
 
 public class CdiContextPropagatesTest {
 
@@ -20,10 +23,16 @@ public class CdiContextPropagatesTest {
 
     @BeforeClass
     public static void init() {
+        JTAUtils.startJTATM();
         // with smallrye-conc-cdi on CP, the CDI thread context provider gets
         // discovered
         weld = new Weld();
         weld.addBeanClasses(MyReqScopedBean.class);
+    }
+
+    @AfterClass
+    public static void stop() {
+        JTAUtils.stop();
     }
 
     @Test

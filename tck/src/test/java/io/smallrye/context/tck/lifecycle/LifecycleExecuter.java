@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -20,13 +20,18 @@ package io.smallrye.context.tck.lifecycle;
 import java.lang.reflect.Method;
 
 import org.jboss.arquillian.container.spi.event.container.AfterDeploy;
+import org.jboss.arquillian.container.spi.event.container.BeforeDeploy;
 import org.jboss.arquillian.container.spi.event.container.BeforeUnDeploy;
 import org.jboss.arquillian.core.api.annotation.Observes;
 import org.jboss.arquillian.test.spi.TestClass;
+import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.container.ClassContainer;
 import org.jnp.server.NamingBeanImpl;
 
 import com.arjuna.ats.arjuna.common.arjPropertyManager;
 import com.arjuna.ats.jta.utils.JNDIManager;
+
+import io.smallrye.context.jta.context.propagation.JtaContextProvider;
 
 /**
  * LifecycleExecuter
@@ -54,11 +59,12 @@ public class LifecycleExecuter {
         namingBean.stop();
     }
 
-    /*
-     * public void executeBeforeDeploy(@Observes BeforeDeploy event, TestClass testClass) {
-     * execute(testClass.getMethods(io.smallrye.context.tck.lifecycle.api.BeforeDeploy.class));
-     * }
-     */
+    public void executeBeforeDeploy(@Observes BeforeDeploy event, TestClass testClass) {
+        Archive<?> jar = event.getDeployment().getArchive();
+        if (jar instanceof ClassContainer<?>) {
+            ((ClassContainer<?>) jar).addClass(JtaContextProvider.LifecycleManager.class);
+        }
+    }
 
     public void executeAfterDeploy(@Observes AfterDeploy event, TestClass testClass) throws Exception {
         registerJTA();

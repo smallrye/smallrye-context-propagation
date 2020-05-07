@@ -15,39 +15,21 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
-import org.jnp.server.NamingBeanImpl;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.arjuna.ats.arjuna.common.arjPropertyManager;
-import com.arjuna.ats.jta.utils.JNDIManager;
-
 import io.smallrye.context.inject.TransactionServicesImpl;
 import io.smallrye.context.test.jta.TransactionalService;
 
 public class JTATest {
-    private static final String txnStoreLocation = "target/tx-object-store";
-    private static NamingBeanImpl namingBean;
     private static Weld weld;
-
-    static void initJTATM() throws Exception {
-        // Start a JNDI server
-        namingBean = new NamingBeanImpl();
-        namingBean.start();
-
-        // Bind the JTA implementation to the correct JNDI contexts
-        JNDIManager.bindJTAImplementation();
-
-        // Set object store location
-        arjPropertyManager.getObjectStoreEnvironmentBean().setObjectStoreDir(txnStoreLocation);
-    }
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        initJTATM(); // initialise a transaction manager
+        JTAUtils.startJTATM(); // initialise a transaction manager
 
         weld = new Weld(); // CDI implementation
         weld.addServices(new TransactionServicesImpl());
@@ -55,7 +37,7 @@ public class JTATest {
 
     @AfterClass
     public static void afterClass() {
-        namingBean.stop();
+        JTAUtils.stop();
     }
 
     @After
