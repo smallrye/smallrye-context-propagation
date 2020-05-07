@@ -26,7 +26,6 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.weld.context.bound.BoundRequestContext;
 import org.jboss.weld.environment.se.Weld;
-import org.jnp.server.NamingBeanImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +43,6 @@ public class FullStackTest {
         }
     }
 
-    private NamingBeanImpl namingBean = new NamingBeanImpl();
     private MyVertxJaxrsServer vertxJaxrsServer;
     private Weld weld;
 
@@ -55,11 +53,7 @@ public class FullStackTest {
         weld = new Weld();
         weld.initialize();
 
-        try {
-            JTATest.initJTATM();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        JTAUtils.startJTATM();
 
         ResteasyCdiExtension cdiExtension = CDI.current().select(ResteasyCdiExtension.class).get();
         deployment.setActualResourceClasses(cdiExtension.getResources());
@@ -176,7 +170,7 @@ public class FullStackTest {
     public void after() {
         weld.shutdown();
         vertxJaxrsServer.stop();
-        namingBean.stop();
+        JTAUtils.stop();
     }
 
     @Test
