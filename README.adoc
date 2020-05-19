@@ -1,10 +1,25 @@
 :microprofile-context: https://github.com/eclipse/microprofile-context-propagation/
+:ci: https://github.com/smallrye/smallrye-context-propagation/actions?query=workflow%3A%22SmallRye+Build%22
+:sonar: https://sonarcloud.io/dashboard?id=smallrye_smallrye-context-propagation
 
-image:https://semaphoreci.com/api/v1/smallrye/smallrye-context-propagation/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-context-propagation"]
-image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-context-propagation&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-context-propagation"]
+image:https://github.com/smallrye/smallrye-context-propagation/workflows/SmallRye%20Build/badge.svg?branch=master[link={ci}]
+image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-context-propagation&metric=alert_status["Quality Gate Status", link={sonar}]
 image:https://img.shields.io/github/license/thorntail/thorntail.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
 = SmallRye Context Propagation 
+
+== Instructions
+
+Compile and test the project:
+
+[source,bash]
+----
+mvn verify
+----
+
+=== Contributing
+
+Please refer to our Wiki for the https://github.com/smallrye/smallrye-parent/wiki[Contribution Guidelines].
 
 === Links
 
