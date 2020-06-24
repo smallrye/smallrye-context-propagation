@@ -108,6 +108,7 @@
         <module>tests</module>
         <module>tck</module>
         <module>api</module>
+        <module>storage</module>
     </modules>
 
     <repositories>
