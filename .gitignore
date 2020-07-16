@@ -30,3 +30,7 @@ target
 # ignore intellij files
 .idea
 *.iml
+
+# Probably Eclipse files
+.cache
+.factorypath
