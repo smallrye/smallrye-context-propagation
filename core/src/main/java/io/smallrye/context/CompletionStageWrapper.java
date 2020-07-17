@@ -8,11 +8,13 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-final class CompletionStageWrapper<T> implements CompletionStage<T> {
+import io.smallrye.context.impl.Contextualized;
+
+public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextualized {
     private final CompletionStage<T> f;
     private final SmallRyeThreadContext context;
 
-    CompletionStageWrapper(SmallRyeThreadContext context, CompletionStage<T> f) {
+    public CompletionStageWrapper(SmallRyeThreadContext context, CompletionStage<T> f) {
         this.context = context;
         this.f = f;
     }
