@@ -7,6 +7,8 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 public class MyThreadContextProvider implements ThreadContextProvider {
 
+    public static final String MY_CONTEXT_TYPE = "MyContext";
+
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
         MyContext capturedContext = MyContext.get();
@@ -35,7 +37,7 @@ public class MyThreadContextProvider implements ThreadContextProvider {
 
     @Override
     public String getThreadContextType() {
-        return "MyContext";
+        return MY_CONTEXT_TYPE;
     }
 
 }

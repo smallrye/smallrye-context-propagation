@@ -13,20 +13,22 @@ import io.smallrye.context.impl.Contextualized;
 public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextualized {
     private final CompletionStage<T> f;
     private final SmallRyeThreadContext context;
+    private final Executor executor;
 
-    public CompletionStageWrapper(SmallRyeThreadContext context, CompletionStage<T> f) {
+    public CompletionStageWrapper(SmallRyeThreadContext context, CompletionStage<T> f, Executor executor) {
         this.context = context;
         this.f = f;
+        this.executor = executor;
     }
 
     private void checkDefaultExecutor() {
-        throw new UnsupportedOperationException("Async methods not supported when no executor is specified");
+        if (executor == null)
+            throw new UnsupportedOperationException("Async methods not supported when no executor is specified");
     }
 
     @Override
     public CompletableFuture<T> toCompletableFuture() {
-        // FIXME: propagate an executor too here?
-        return context.withContextCapture(f.toCompletableFuture(), null);
+        return context.withContextCapture(f.toCompletableFuture(), executor);
     }
 
     @Override
@@ -42,7 +44,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public <U> CompletionStage<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.handleAsync(context.contextualFunctionUnlessContextualized(fn)));
+        return context.withContextCapture(f.handleAsync(context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -58,7 +60,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public <U> CompletionStage<U> thenApplyAsync(Function<? super T, ? extends U> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenApplyAsync(context.contextualFunctionUnlessContextualized(fn)));
+        return context.withContextCapture(f.thenApplyAsync(context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -74,7 +76,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public CompletionStage<Void> thenAcceptAsync(Consumer<? super T> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenAcceptAsync(context.contextualConsumerUnlessContextualized(action)));
+        return context.withContextCapture(f.thenAcceptAsync(context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override
@@ -90,7 +92,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public CompletionStage<Void> thenRunAsync(Runnable action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenRunAsync(context.contextualRunnableUnlessContextualized(action)));
+        return context.withContextCapture(f.thenRunAsync(context.contextualRunnableUnlessContextualized(action), executor));
     }
 
     @Override
@@ -108,7 +110,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     public <U, V> CompletionStage<V> thenCombineAsync(CompletionStage<? extends U> other,
             BiFunction<? super T, ? super U, ? extends V> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn)));
+        return context
+                .withContextCapture(f.thenCombineAsync(other, context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -128,7 +131,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     public <U> CompletionStage<Void> thenAcceptBothAsync(CompletionStage<? extends U> other,
             BiConsumer<? super T, ? super U> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action)));
+        return context.withContextCapture(
+                f.thenAcceptBothAsync(other, context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override
@@ -146,7 +150,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public CompletionStage<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action)));
+        return context.withContextCapture(
+                f.runAfterBothAsync(other, context.contextualRunnableUnlessContextualized(action), executor));
     }
 
     @Override
@@ -163,7 +168,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public <U> CompletionStage<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn)));
+        return context
+                .withContextCapture(f.applyToEitherAsync(other, context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -181,7 +187,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public CompletionStage<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action)));
+        return context.withContextCapture(
+                f.acceptEitherAsync(other, context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override
@@ -199,7 +206,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public CompletionStage<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action)));
+        return context.withContextCapture(
+                f.runAfterEitherAsync(other, context.contextualRunnableUnlessContextualized(action), executor));
     }
 
     @Override
@@ -216,7 +224,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public <U> CompletionStage<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.thenComposeAsync(context.contextualFunctionUnlessContextualized(fn)));
+        return context.withContextCapture(f.thenComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor));
     }
 
     @Override
@@ -233,7 +241,8 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     @Override
     public CompletionStage<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action) {
         checkDefaultExecutor();
-        return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action)));
+        return context
+                .withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor));
     }
 
     @Override

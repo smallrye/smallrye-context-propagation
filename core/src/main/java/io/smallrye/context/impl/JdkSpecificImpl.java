@@ -13,8 +13,8 @@ public class JdkSpecificImpl implements JdkSpecific.Contract {
 
     @Override
     public <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
-            CompletionStage<T> future) {
-        return new CompletionStageWrapper<>(threadContext, future);
+            CompletionStage<T> future, Executor executor) {
+        return new CompletionStageWrapper<>(threadContext, future, executor);
     }
 
     @Override

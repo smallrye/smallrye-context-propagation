@@ -230,6 +230,87 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         return SmallRyeContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder();
     }
 
+    //
+    // Extras
+
+    /**
+     * <p>
+     * Returns a new <code>CompletableFuture</code> that is completed by the completion of the
+     * specified stage.
+     * </p>
+     *
+     * <p>
+     * The new completable future is backed by the ManagedExecutor upon which copy is invoked,
+     * which serves as the default asynchronous execution facility
+     * for the new stage and all dependent stages created from it, and so forth.
+     * </p>
+     *
+     * <p>
+     * When dependent stages are created from the new completable future, thread context is captured
+     * and/or cleared by the ManagedExecutor. This guarantees that the action
+     * performed by each stage always runs under the thread context of the code that creates the stage,
+     * unless the user explicitly overrides by supplying a pre-contextualized action.
+     * </p>
+     *
+     * <p>
+     * Invocation of this method does not impact thread context propagation for the supplied
+     * completable future or any dependent stages created from it, other than the new dependent
+     * completable future that is created by this method.
+     * </p>
+     *
+     * @param <T> completable future result type.
+     * @param stage a completable future whose completion triggers completion of the new completable
+     *        future that is created by this method.
+     * @return the new completable future.
+     */
+    public <T> CompletableFuture<T> copy(CompletableFuture<T> stage) {
+        return threadContext.withContextCapture(stage, this);
+    }
+
+    /**
+     * <p>
+     * Returns a new <code>CompletionStage</code> that is completed by the completion of the
+     * specified stage.
+     * </p>
+     *
+     * <p>
+     * The new completable future is backed by the ManagedExecutor upon which copy is invoked,
+     * which serves as the default asynchronous execution facility
+     * for the new stage and all dependent stages created from it, and so forth.
+     * </p>
+     *
+     * <p>
+     * When dependent stages are created from the new completable future, thread context is captured
+     * and/or cleared by the ManagedExecutor. This guarantees that the action
+     * performed by each stage always runs under the thread context of the code that creates the stage,
+     * unless the user explicitly overrides by supplying a pre-contextualized action.
+     * </p>
+     *
+     * <p>
+     * Invocation of this method does not impact thread context propagation for the supplied
+     * stage or any dependent stages created from it, other than the new dependent
+     * completion stage that is created by this method.
+     * </p>
+     *
+     * @param <T> completion stage result type.
+     * @param stage a completion stage whose completion triggers completion of the new stage
+     *        that is created by this method.
+     * @return the new completion stage.
+     */
+    public <T> CompletionStage<T> copy(CompletionStage<T> stage) {
+        return threadContext.withContextCapture(stage, this);
+    }
+
+    /**
+     * Returns a <code>ThreadContext</code> which has the same propagation settings as this <code>ManagedExecutor</code>,
+     * which uses this <code>ManagedExecutor</code> as its default executor.
+     * 
+     * @return a ThreadContext with the same propagation settings as this ManagedExecutor.
+     */
+    public SmallRyeThreadContext getThreadContext() {
+        return threadContext;
+    }
+
     public static class Builder implements ManagedExecutor.Builder {
 
         private SmallRyeContextManager manager;
@@ -258,7 +339,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
             else
                 executor = SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued);
             return new SmallRyeManagedExecutor(maxAsync, maxQueued,
-                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared),
+                    new SmallRyeThreadContext(manager, propagated, SmallRyeContextManager.NO_STRING, cleared, null, executor),
                     executor, injectionPointName);
         }
 
