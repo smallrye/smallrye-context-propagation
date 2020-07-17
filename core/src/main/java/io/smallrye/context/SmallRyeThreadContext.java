@@ -186,6 +186,13 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     //
+    // Extras
+
+    public static Builder builder() {
+        return SmallRyeContextManagerProvider.instance().getContextManager().newThreadContextBuilder();
+    }
+    
+    //
     // Wrappers
 
     @Override
@@ -395,5 +402,4 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
 
     }
-
 }

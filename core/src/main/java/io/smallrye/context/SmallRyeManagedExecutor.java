@@ -226,6 +226,10 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         return injectionPointName;
     }
 
+    public static Builder builder() {
+        return SmallRyeContextManagerProvider.instance().getContextManager().newManagedExecutorBuilder();
+    }
+
     public static class Builder implements ManagedExecutor.Builder {
 
         private SmallRyeContextManager manager;

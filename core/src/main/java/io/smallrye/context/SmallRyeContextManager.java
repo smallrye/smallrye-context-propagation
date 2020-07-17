@@ -10,7 +10,6 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
@@ -150,12 +149,12 @@ public class SmallRyeContextManager implements ContextManager {
     }
 
     @Override
-    public ManagedExecutor.Builder newManagedExecutorBuilder() {
+    public SmallRyeManagedExecutor.Builder newManagedExecutorBuilder() {
         return new SmallRyeManagedExecutor.Builder(this);
     }
 
     @Override
-    public ThreadContext.Builder newThreadContextBuilder() {
+    public SmallRyeThreadContext.Builder newThreadContextBuilder() {
         return new SmallRyeThreadContext.Builder(this);
     }
 
