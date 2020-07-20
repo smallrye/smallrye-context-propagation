@@ -4,12 +4,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
 import io.smallrye.context.impl.ActiveContextState;
@@ -163,17 +165,14 @@ public class SmallRyeThreadContext implements ThreadContext {
     private final SmallRyeContextManager manager;
     private final ThreadContextProviderPlan plan;
     private final String injectionPointName;
+    private final ExecutorService defaultExecutor;
 
     public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
-            String[] cleared) {
-        this(manager, propagated, unchanged, cleared, null);
-    }
-
-    public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
-            String[] cleared, String injectionPointName) {
+            String[] cleared, String injectionPointName, ExecutorService defaultExecutor) {
         this.manager = manager;
         this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
         this.injectionPointName = injectionPointName;
+        this.defaultExecutor = defaultExecutor;
     }
 
     private void checkPrecontextualized(Object action) {
@@ -186,23 +185,109 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     //
+    // Extras
+
+    public ExecutorService getDefaultExecutor() {
+        return defaultExecutor;
+    }
+
+    public static Builder builder() {
+        return SmallRyeContextManagerProvider.instance().getContextManager().newThreadContextBuilder();
+    }
+
+    //
     // Wrappers
 
+    /**
+     * <p>
+     * Returns a new <code>CompletableFuture</code> that is completed by the completion of the
+     * specified stage.
+     * </p>
+     *
+     * <p>
+     * The new completable future will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * 
+     * If this thread context has no default executor, the new stage and all dependent stages created from it, and so forth,
+     * have no default asynchronous execution facility and must raise {@link java.lang.UnsupportedOperationException}
+     * for all <code>*Async</code> methods that do not specify an executor. For example,
+     * {@link java.util.concurrent.CompletionStage#thenRunAsync(Runnable) thenRunAsync(Runnable)}.
+     * </p>
+     *
+     * <p>
+     * When dependent stages are created from the new completable future, thread context is captured
+     * and/or cleared as described in the documentation of the {@link ManagedExecutor} class, except that
+     * this ThreadContext instance takes the place of the default asynchronous execution facility in
+     * supplying the configuration of cleared/propagated context types. This guarantees that the action
+     * performed by each stage always runs under the thread context of the code that creates the stage,
+     * unless the user explicitly overrides by supplying a pre-contextualized action.
+     * </p>
+     *
+     * <p>
+     * Invocation of this method does not impact thread context propagation for the supplied
+     * completable future or any dependent stages created from it, other than the new dependent
+     * completable future that is created by this method.
+     * </p>
+     *
+     * @param <T> completable future result type.
+     * @param stage a completable future whose completion triggers completion of the new completable
+     *        future that is created by this method.
+     * @return the new completable future.
+     */
     @Override
     public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future) {
-        return withContextCapture(future, null);
+        return withContextCapture(future, defaultExecutor);
     }
 
     public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor) {
         return JdkSpecific.newCompletableFutureWrapper(this, future, executor, false);
     }
 
+    /**
+     * <p>
+     * Returns a new <code>CompletionStage</code> that is completed by the completion of the
+     * specified stage.
+     * </p>
+     *
+     * <p>
+     * The new completion stage will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * 
+     * If this thread context has no default executor, the new stage and all dependent stages created from it, and so forth,
+     * and/or cleared as described in the documentation of the {@link ManagedExecutor} class, except that
+     * this ThreadContext instance takes the place of the default asynchronous execution facility in
+     * supplying the configuration of cleared/propagated context types. This guarantees that the action
+     * performed by each stage always runs under the thread context of the code that creates the stage,
+     * unless the user explicitly overrides by supplying a pre-contextualized action.
+     * </p>
+     *
+     * <p>
+     * Invocation of this method does not impact thread context propagation for the supplied
+     * stage or any dependent stages created from it, other than the new dependent
+     * completion stage that is created by this method.
+     * </p>
+     *
+     * @param <T> completion stage result type.
+     * @param stage a completion stage whose completion triggers completion of the new stage
+     *        that is created by this method.
+     * @return the new completion stage.
+     */
     @Override
-    public <T> CompletionStage<T> withContextCapture(CompletionStage<T> future) {
-        if (future instanceof CompletableFuture)
+    public <T> CompletionStage<T> withContextCapture(CompletionStage<T> stage) {
+        return withContextCapture(stage, defaultExecutor);
+    }
+
+    public <T> CompletionStage<T> withContextCapture(CompletionStage<T> stage, Executor executor) {
+        if (stage instanceof CompletableFuture)
             // the MP-CP TCK insists we cannot complete instances returned by this API
-            return JdkSpecific.newCompletableFutureWrapper(this, (CompletableFuture<T>) future, null, true);
-        return JdkSpecific.newCompletionStageWrapper(this, future);
+            return JdkSpecific.newCompletableFutureWrapper(this, (CompletableFuture<T>) stage, executor, true);
+        return JdkSpecific.newCompletionStageWrapper(this, stage, executor);
     }
 
     @Override
@@ -365,7 +450,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public SmallRyeThreadContext build() {
-            return new SmallRyeThreadContext(manager, propagated, unchanged, cleared, injectionPointName);
+            return new SmallRyeThreadContext(manager, propagated, unchanged, cleared, injectionPointName,
+                    manager.getDefaultExecutorService());
         }
 
         @Override
@@ -395,5 +481,4 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
 
     }
-
 }

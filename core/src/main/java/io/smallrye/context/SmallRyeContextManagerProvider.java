@@ -30,16 +30,16 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
         registration = null;
     }
 
-    private Map<ClassLoader, ContextManager> contextManagersForClassLoader = new HashMap<>();
+    private Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new HashMap<>();
 
     @Override
-    public ContextManager getContextManager() {
+    public SmallRyeContextManager getContextManager() {
         return getContextManager(Thread.currentThread().getContextClassLoader());
     }
 
     @Override
-    public ContextManager getContextManager(ClassLoader classLoader) {
-        ContextManager config = contextManagersForClassLoader.get(classLoader);
+    public SmallRyeContextManager getContextManager(ClassLoader classLoader) {
+        SmallRyeContextManager config = contextManagersForClassLoader.get(classLoader);
         if (config == null) {
             synchronized (this) {
                 config = contextManagersForClassLoader.get(classLoader);
@@ -60,18 +60,21 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
 
     @Override
     public void registerContextManager(ContextManager manager, ClassLoader classLoader) {
+        if (manager instanceof SmallRyeContextManager == false) {
+            throw new IllegalArgumentException("Only instances of SmallRyeContextManager are supported: " + manager);
+        }
         synchronized (this) {
-            contextManagersForClassLoader.put(classLoader, manager);
+            contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
         }
     }
 
     @Override
     public void releaseContextManager(ContextManager manager) {
         synchronized (this) {
-            Iterator<Map.Entry<ClassLoader, ContextManager>> iterator = contextManagersForClassLoader.entrySet()
+            Iterator<Map.Entry<ClassLoader, SmallRyeContextManager>> iterator = contextManagersForClassLoader.entrySet()
                     .iterator();
             while (iterator.hasNext()) {
-                Map.Entry<ClassLoader, ContextManager> entry = iterator.next();
+                Map.Entry<ClassLoader, SmallRyeContextManager> entry = iterator.next();
                 if (entry.getValue() == manager) {
                     iterator.remove();
                     return;
@@ -80,7 +83,11 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
         }
     }
 
-    static public SmallRyeContextManager getManager() {
-        return (SmallRyeContextManager) ContextManagerProvider.instance().getContextManager();
+    public static SmallRyeContextManager getManager() {
+        return instance().getContextManager();
+    }
+
+    public static SmallRyeContextManagerProvider instance() {
+        return (SmallRyeContextManagerProvider) ContextManagerProvider.instance();
     }
 }

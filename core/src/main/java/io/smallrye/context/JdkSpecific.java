@@ -12,15 +12,15 @@ public class JdkSpecific {
 
     public interface Contract {
         public <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
-                CompletionStage<T> future);
+                CompletionStage<T> future, Executor executor);
 
         public <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
                 CompletableFuture<T> future, Executor executor, boolean minimal);
     }
 
     public static <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
-            CompletionStage<T> future) {
-        return impl.newCompletionStageWrapper(threadContext, future);
+            CompletionStage<T> future, Executor executor) {
+        return impl.newCompletionStageWrapper(threadContext, future, executor);
     }
 
     public static <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,

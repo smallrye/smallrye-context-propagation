@@ -8,21 +8,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.smallrye.context.SmallRyeManagedExecutor;
+import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.impl.Contextualized;
+import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class CompletableFutureTest {
 
-    private ManagedExecutor managedExecutor;
+    private SmallRyeManagedExecutor managedExecutor;
 
     @Before
     public void before() {
-        managedExecutor = ManagedExecutor.builder().build();
+        managedExecutor = SmallRyeManagedExecutor.builder().propagated(MyThreadContextProvider.MY_CONTEXT_TYPE)
+                .cleared(ThreadContext.ALL_REMAINING).build();
         MyContext.clear();
     }
 
@@ -174,5 +178,77 @@ public class CompletableFutureTest {
         timeoutCF = managedExecutor.newIncompleteFuture().completeOnTimeout(null, 100, TimeUnit.MILLISECONDS);
         Assert.assertTrue(timeoutCF instanceof Contextualized);
         Assert.assertNull(timeoutCF.get());
+    }
+
+    @Test
+    public void testExistingCFWrapping() throws InterruptedException, ExecutionException {
+        CompletableFuture<String> cf = new CompletableFuture<>();
+        CompletableFuture<String> copy = managedExecutor.copy(cf);
+        Assert.assertFalse(cf.isDone());
+        Assert.assertFalse(copy.isDone());
+
+        MyContext ctx = new MyContext();
+        MyContext.set(ctx);
+        CompletableFuture<String> cfNoContext = cf.thenApplyAsync(v -> {
+            // no context prop on new thread
+            Assert.assertNull(MyContext.get());
+            return v;
+        });
+        CompletableFuture<String> copyThisContext = copy.thenApplyAsync(v -> {
+            // context prop
+            Assert.assertEquals(ctx, MyContext.get());
+            return v;
+        });
+        // change the context to verify that we get the old context
+        MyContext ctx2 = new MyContext();
+        MyContext.set(ctx2);
+
+        // check that completing cf completes both
+        cf.complete("OK");
+        Assert.assertEquals("OK", cfNoContext.get());
+        Assert.assertEquals("OK", copyThisContext.get());
+
+        // make sure it has the same contexts
+        SmallRyeThreadContext threadContext = managedExecutor.getThreadContext();
+        Assert.assertNotNull(threadContext);
+        ThreadContextProviderPlan plan = threadContext.getPlan();
+        Assert.assertEquals(3, plan.clearedProviders.size());
+        Assert.assertTrue(plan.unchangedProviders.isEmpty());
+        Assert.assertEquals(1, plan.propagatedProviders.size());
+
+        // now make sure ThreadContext can also copy those
+        CompletableFuture<String> cf2 = new CompletableFuture<>();
+        CompletableFuture<String> cf3 = new CompletableFuture<>();
+        CompletableFuture<String> cf2Copy = threadContext.withContextCapture(cf2);
+        // make it pass for a CS
+        CompletionStage<String> cf3Copy = threadContext.withContextCapture((CompletionStage<String>) cf3);
+        Assert.assertFalse(cf2.isDone());
+        Assert.assertFalse(cf2Copy.isDone());
+
+        MyContext.set(ctx);
+        CompletableFuture<String> cf2NoContext = cf2.thenApplyAsync(v -> {
+            // no context prop on new thread
+            Assert.assertNull(MyContext.get());
+            return v;
+        });
+        CompletableFuture<String> cf2CopyThisContext = cf2Copy.thenApplyAsync(v -> {
+            // context prop
+            Assert.assertEquals(ctx, MyContext.get());
+            return v;
+        });
+        CompletionStage<String> cf3CopyThisContext = cf3Copy.thenApplyAsync(v -> {
+            // context prop
+            Assert.assertEquals(ctx, MyContext.get());
+            return v;
+        });
+        // change the context to verify that we get the old context
+        MyContext.set(ctx2);
+
+        // check that completing cf completes both
+        cf2.complete("OK");
+        cf3.complete("OK");
+        Assert.assertEquals("OK", cf2NoContext.get());
+        Assert.assertEquals("OK", cf2CopyThisContext.get());
+        Assert.assertEquals("OK", cf3CopyThisContext.toCompletableFuture().get());
     }
 }
