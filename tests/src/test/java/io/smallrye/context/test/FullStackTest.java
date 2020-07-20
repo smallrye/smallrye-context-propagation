@@ -86,6 +86,7 @@ public class FullStackTest {
 
                 boolean success = false;
                 try {
+                    Thread.currentThread().setContextClassLoader(new CPClassLoader());
                     super.invoke(req, response);
                     success = true;
                 } finally {

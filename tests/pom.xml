@@ -60,6 +60,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>smallrye-context-propagation-application</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>smallrye-context-propagation-jta</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

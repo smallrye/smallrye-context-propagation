@@ -212,7 +212,7 @@ public class CompletableFutureTest {
         SmallRyeThreadContext threadContext = managedExecutor.getThreadContext();
         Assert.assertNotNull(threadContext);
         ThreadContextProviderPlan plan = threadContext.getPlan();
-        Assert.assertEquals(3, plan.clearedProviders.size());
+        Assert.assertEquals(4, plan.clearedProviders.size());
         Assert.assertTrue(plan.unchangedProviders.isEmpty());
         Assert.assertEquals(1, plan.propagatedProviders.size());
 

@@ -2,6 +2,7 @@ package io.smallrye.context.test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
 
 import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
@@ -50,6 +51,7 @@ public class FullStackResource {
         testCdiContext();
         testTransactionalContext();
         testResteasyContext(uriInfo);
+        testTCCL();
 
         testJpa1();
         testJpa2();
@@ -71,11 +73,22 @@ public class FullStackResource {
             testCdiContext();
             testTransactionalContext();
             testResteasyContext(uriInfo);
+            testTCCL();
 
             return "OK";
         });
 
-        return ret2;
+        CompletableFuture<String> ret3 = ret2.thenApplyAsync(body -> {
+            // no JPA test, we already deleted the item
+            testCdiContext();
+            testTransactionalContext();
+            testResteasyContext(uriInfo);
+            testTCCL();
+
+            return "OK";
+        }, Executors.newSingleThreadExecutor());
+
+        return ret3;
     }
 
     @Path("async-working")
@@ -93,14 +106,30 @@ public class FullStackResource {
             testCdiContext();
             testTransactionalContext();
             testResteasyContext(uriInfo);
+            testTCCL();
 
             return "OK";
         });
 
-        return ret3;
+        CompletableFuture<String> ret4 = ret3.thenApplyAsync(body -> {
+            // no JPA test, we already deleted the item
+            testCdiContext();
+            testTransactionalContext();
+            testResteasyContext(uriInfo);
+            testTCCL();
+
+            return "OK";
+        }, Executors.newSingleThreadExecutor());
+
+        return ret4;
     }
 
     // Test kitchen
+
+    private void testTCCL() {
+        if (Thread.currentThread().getContextClassLoader() instanceof CPClassLoader == false)
+            throw new WebApplicationException("TCCL is not propagated");
+    }
 
     private void testJpa2() {
         Long count = (Long) entityManager.createQuery("SELECT COUNT(*) FROM MyEntity").getResultList().get(0);
