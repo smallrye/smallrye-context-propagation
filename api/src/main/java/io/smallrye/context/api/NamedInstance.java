@@ -82,6 +82,8 @@ import org.eclipse.microprofile.context.ThreadContext;
 public @interface NamedInstance {
     /**
      * Unique name that qualifies a {@link ManagedExecutor} or {@link ThreadContext}.
+     *
+     * @return the name that qualifies a {@link ManagedExecutor} or {@link ThreadContext}.
      */
     String value();
 
