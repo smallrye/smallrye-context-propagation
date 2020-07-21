@@ -233,7 +233,7 @@ public class SmallRyeThreadContext implements ThreadContext {
      * </p>
      *
      * @param <T> completable future result type.
-     * @param stage a completable future whose completion triggers completion of the new completable
+     * @param future a completable future whose completion triggers completion of the new completable
      *        future that is created by this method.
      * @return the new completable future.
      */
