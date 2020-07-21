@@ -38,7 +38,7 @@ jobs:
           java-version: 8
 
       - name: build with maven
-        run: JAVA_HOME=$JAVA_HOME_11_X64 mvn -B formatter:validate verify --file pom.xml -Djava8.home=$JAVA_HOME_8_X64
+        run: JAVA_HOME=$JAVA_HOME_11_X64 mvn -B formatter:validate verify --file pom.xml -Djava8.home=$JAVA_HOME_8_X64 javadoc:javadoc
 
   quality:
     needs: [build]
