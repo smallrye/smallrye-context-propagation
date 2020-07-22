@@ -122,6 +122,8 @@ public @interface ThreadContextConfig {
      * or if the {@link #propagated} and/or {@link #unchanged} set
      * includes one or more of the same types as this set.
      * </p>
+     *
+     * @return an array of strings of thread context types to clear.
      */
     String[] cleared() default {};
 
@@ -160,6 +162,8 @@ public @interface ThreadContextConfig {
      * or if the {@link #cleared} and/or {@link #unchanged} set
      * includes one or more of the same types as this set.
      * </p>
+     *
+     * @return an array of strings of thread context types to propagate.
      */
     String[] propagated() default { ThreadContext.ALL_REMAINING };
 
@@ -211,6 +215,8 @@ public @interface ThreadContextConfig {
      * or if the {@link #cleared} and/or {@link #propagated} set
      * includes one or more of the same types as this set.
      * </p>
+     *
+     * @return an array of strings of thread context types to be ignored.
      */
     String[] unchanged() default {};
 

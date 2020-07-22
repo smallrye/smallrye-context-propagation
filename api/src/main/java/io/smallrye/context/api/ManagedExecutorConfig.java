@@ -123,6 +123,8 @@ public @interface ManagedExecutorConfig {
      * or if the {@link #propagated} set includes one or more of the
      * same types as this set.
      * </p>
+     *
+     * @return an array of strings of thread context types to clear.
      */
     String[] cleared() default {};
 
@@ -161,6 +163,8 @@ public @interface ManagedExecutorConfig {
      * or if the {@link #cleared} set includes one or more of the
      * same types as this set.
      * </p>
+     *
+     * @return an array of strings of thread context types to propagate.
      */
     String[] propagated() default { ThreadContext.ALL_REMAINING };
 
@@ -182,6 +186,8 @@ public @interface ManagedExecutorConfig {
      * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup, if the
      * <code>maxAsync</code> value is 0 or less than -1.
+     *
+     * @return an int with the upper bound of actions and tasks that can be running.
      */
     int maxAsync() default -1;
 
@@ -202,6 +208,8 @@ public @interface ManagedExecutorConfig {
      * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup, if the
      * <code>maxQueued</code> value is 0 or less than -1.
+     *
+     * @return an int with the upper bound of actions and tasks that can be queued.
      */
     int maxQueued() default -1;
 

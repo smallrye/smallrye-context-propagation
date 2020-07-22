@@ -360,9 +360,7 @@ public class SmallryeContextCdiExtension implements Extension {
         }
     }
 
-    /**
-     * cleans all the metadata we gathered during bootstrap
-     */
+    // cleans all the metadata we gathered during bootstrap
     public void cleanup(@Observes AfterDeploymentValidation adv) {
         // clear() all the collections we operated on
         this.unconfiguredContextIPs.clear();

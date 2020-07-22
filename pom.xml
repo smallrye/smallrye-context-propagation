@@ -55,6 +55,8 @@
         <version.hamcrest>2.2</version.hamcrest>
 
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+
+        <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
     </properties>
 
 	<developers>
