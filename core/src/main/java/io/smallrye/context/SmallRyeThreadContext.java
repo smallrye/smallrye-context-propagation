@@ -167,6 +167,16 @@ public class SmallRyeThreadContext implements ThreadContext {
     private final String injectionPointName;
     private final ExecutorService defaultExecutor;
 
+    /**
+     * DO NOT USE: for CDI.
+     */
+    SmallRyeThreadContext() {
+        this.manager = null;
+        this.plan = null;
+        this.injectionPointName = null;
+        this.defaultExecutor = null;
+    }
+
     public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
             String[] cleared, String injectionPointName, ExecutorService defaultExecutor) {
         this.manager = manager;

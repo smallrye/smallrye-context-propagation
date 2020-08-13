@@ -50,6 +50,17 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         return exec;
     }
 
+    /**
+     * DO NOT USE: for CDI.
+     */
+    SmallRyeManagedExecutor() {
+        this.threadContext = null;
+        this.maxAsync = 0;
+        this.maxQueued = 0;
+        this.injectionPointName = null;
+        this.executor = null;
+    }
+
     public SmallRyeManagedExecutor(int maxAsync, int maxQueued, SmallRyeThreadContext threadContext, ExecutorService executor,
             String injectionPointName) {
         this.threadContext = threadContext;
