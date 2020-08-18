@@ -239,11 +239,11 @@ public class SmallRyeThreadContext implements ThreadContext {
      */
     @Override
     public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future) {
-        return withContextCapture(future, defaultExecutor);
+        return withContextCapture(future, defaultExecutor, CompletableFutureWrapper.FLAG_DEPENDENT);
     }
 
-    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor) {
-        return JdkSpecific.newCompletableFutureWrapper(this, future, executor, false);
+    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor, int flags) {
+        return JdkSpecific.newCompletableFutureWrapper(this, future, executor, flags);
     }
 
     /**
@@ -286,7 +286,8 @@ public class SmallRyeThreadContext implements ThreadContext {
     public <T> CompletionStage<T> withContextCapture(CompletionStage<T> stage, Executor executor) {
         if (stage instanceof CompletableFuture)
             // the MP-CP TCK insists we cannot complete instances returned by this API
-            return JdkSpecific.newCompletableFutureWrapper(this, (CompletableFuture<T>) stage, executor, true);
+            return JdkSpecific.newCompletableFutureWrapper(this, (CompletableFuture<T>) stage, executor,
+                    CompletableFutureWrapper.FLAG_MINIMAL | CompletableFutureWrapper.FLAG_DEPENDENT);
         return JdkSpecific.newCompletionStageWrapper(this, stage, executor);
     }
 

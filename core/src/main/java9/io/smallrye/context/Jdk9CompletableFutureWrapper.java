@@ -9,14 +9,14 @@ import java.util.function.Supplier;
 public class Jdk9CompletableFutureWrapper<T> extends CompletableFutureWrapper<T> {
 
     public Jdk9CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor,
-            boolean minimal) {
-        super(context, f, executor, minimal);
+            int flags) {
+        super(context, f, executor, flags);
     }
 
     @Override
     public <U> CompletableFuture<U> newIncompleteFuture() {
         CompletableFuture<U> ret = new CompletableFuture<>();
-        return context.withContextCapture(ret, executor);
+        return context.withContextCapture(ret, executor, flags);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class Jdk9CompletableFutureWrapper<T> extends CompletableFutureWrapper<T>
 
     @Override
     public CompletableFuture<T> copy() {
-        return context.withContextCapture(f.copy(), executor);
+        return context.withContextCapture(f.copy(), executor, flags);
     }
 
     @Override
@@ -39,25 +39,25 @@ public class Jdk9CompletableFutureWrapper<T> extends CompletableFutureWrapper<T>
     public CompletableFuture<T> completeAsync(Supplier<? extends T> supplier) {
         // just forward 
         return context.withContextCapture(f.completeAsync(context.contextualSupplierUnlessContextualized(supplier), executor),
-                executor);
+                executor, flags);
     }
 
     @Override
     public CompletableFuture<T> completeAsync(Supplier<? extends T> supplier, Executor executor) {
         // just forward 
         return context.withContextCapture(f.completeAsync(context.contextualSupplierUnlessContextualized(supplier), executor),
-                this.executor);
+                this.executor, flags);
     }
 
     @Override
     public CompletableFuture<T> orTimeout(long timeout, TimeUnit unit) {
         // just forward 
-        return context.withContextCapture(f.orTimeout(timeout, unit), executor);
+        return context.withContextCapture(f.orTimeout(timeout, unit), executor, flags);
     }
 
     @Override
     public CompletableFuture<T> completeOnTimeout(T value, long timeout, TimeUnit unit) {
         // just forward 
-        return context.withContextCapture(f.completeOnTimeout(value, timeout, unit), executor);
+        return context.withContextCapture(f.completeOnTimeout(value, timeout, unit), executor, flags);
     }
 }
