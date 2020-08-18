@@ -329,6 +329,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
             this.cleared = defaultValues.getExecutorCleared();
             this.maxAsync = defaultValues.getExecutorAsync();
             this.maxQueued = defaultValues.getExecutorQueue();
+            this.executorService = manager.getDefaultExecutorService();
         }
 
         @Override
