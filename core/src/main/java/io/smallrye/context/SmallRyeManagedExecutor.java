@@ -336,7 +336,11 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         public SmallRyeManagedExecutor build() {
             ExecutorService executor;
             if (executorService != null)
-                executor = ViewExecutor.builder(executorService).setMaxSize(maxAsync).setQueueLimit(maxQueued).build();
+                executor = ViewExecutor.builder(executorService)
+                        // this is the current max in the implementation (uses short instead of int)
+                        .setMaxSize(maxAsync == -1 ? Short.MAX_VALUE : maxAsync)
+                        .setQueueLimit(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued)
+                        .build();
             else
                 executor = SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued);
             return new SmallRyeManagedExecutor(maxAsync, maxQueued,
