@@ -19,7 +19,7 @@ public class JdkSpecificImpl implements JdkSpecific.Contract {
 
     @Override
     public <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
-            CompletableFuture<T> future, Executor executor, boolean minimal) {
-        return new CompletableFutureWrapper<>(threadContext, future, executor, minimal);
+            CompletableFuture<T> future, Executor executor, int flags) {
+        return new CompletableFutureWrapper<>(threadContext, future, executor, flags);
     }
 }

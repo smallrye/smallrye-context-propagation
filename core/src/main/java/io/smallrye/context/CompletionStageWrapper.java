@@ -28,7 +28,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
 
     @Override
     public CompletableFuture<T> toCompletableFuture() {
-        return context.withContextCapture(f.toCompletableFuture(), executor);
+        return context.withContextCapture(f.toCompletableFuture(), executor, CompletableFutureWrapper.FLAG_DEPENDENT);
     }
 
     @Override

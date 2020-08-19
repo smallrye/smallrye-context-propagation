@@ -15,7 +15,7 @@ public class JdkSpecific {
                 CompletionStage<T> future, Executor executor);
 
         public <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
-                CompletableFuture<T> future, Executor executor, boolean minimal);
+                CompletableFuture<T> future, Executor executor, int flags);
     }
 
     public static <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
@@ -24,7 +24,7 @@ public class JdkSpecific {
     }
 
     public static <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
-            CompletableFuture<T> future, Executor executor, boolean minimal) {
-        return impl.newCompletableFutureWrapper(threadContext, future, executor, minimal);
+            CompletableFuture<T> future, Executor executor, int flags) {
+        return impl.newCompletableFutureWrapper(threadContext, future, executor, flags);
     }
 }

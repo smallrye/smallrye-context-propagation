@@ -148,7 +148,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
 
     @Override
     public <U> CompletableFuture<U> completedFuture(U value) {
-        return threadContext.withContextCapture(CompletableFuture.completedFuture(value), this);
+        return threadContext.withContextCapture(CompletableFuture.completedFuture(value), this, 0);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
     public <U> CompletableFuture<U> failedFuture(Throwable ex) {
         CompletableFuture<U> ret = new CompletableFuture<>();
         ret.completeExceptionally(ex);
-        return threadContext.withContextCapture(ret, this);
+        return threadContext.withContextCapture(ret, this, 0);
     }
 
     @Override
@@ -175,7 +175,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         // if we contextualise the function it passes to execute(), then our begin/endContext calls will run outside
         // of any thread synchronisation such as join() and it would be all sorts of wrong
         return threadContext.withContextCapture(CompletableFuture
-                .runAsync(threadContext.contextualRunnableUnlessContextualized(runnable), noPropagationExecutor), this);
+                .runAsync(threadContext.contextualRunnableUnlessContextualized(runnable), noPropagationExecutor), this, 0);
     }
 
     @Override
@@ -185,13 +185,13 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
         // if we contextualise the function it passes to execute(), then our begin/endContext calls will run outside
         // of any thread synchronisation such as join() and it would be all sorts of wrong
         return threadContext.withContextCapture(CompletableFuture
-                .supplyAsync(threadContext.contextualSupplierUnlessContextualized(supplier), noPropagationExecutor), this);
+                .supplyAsync(threadContext.contextualSupplierUnlessContextualized(supplier), noPropagationExecutor), this, 0);
     }
 
     @Override
     public <U> CompletableFuture<U> newIncompleteFuture() {
         CompletableFuture<U> ret = new CompletableFuture<>();
-        return threadContext.withContextCapture(ret, this);
+        return threadContext.withContextCapture(ret, this, 0);
     }
 
     @Override
@@ -264,7 +264,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
      * @return the new completable future.
      */
     public <T> CompletableFuture<T> copy(CompletableFuture<T> stage) {
-        return threadContext.withContextCapture(stage, this);
+        return threadContext.withContextCapture(stage, this, 0);
     }
 
     /**
@@ -329,13 +329,18 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
             this.cleared = defaultValues.getExecutorCleared();
             this.maxAsync = defaultValues.getExecutorAsync();
             this.maxQueued = defaultValues.getExecutorQueue();
+            this.executorService = manager.getDefaultExecutorService();
         }
 
         @Override
         public SmallRyeManagedExecutor build() {
             ExecutorService executor;
             if (executorService != null)
-                executor = ViewExecutor.builder(executorService).setMaxSize(maxAsync).setQueueLimit(maxQueued).build();
+                executor = ViewExecutor.builder(executorService)
+                        // this is the current max in the implementation (uses short instead of int)
+                        .setMaxSize(maxAsync == -1 ? Short.MAX_VALUE : maxAsync)
+                        .setQueueLimit(maxQueued == -1 ? Integer.MAX_VALUE : maxQueued)
+                        .build();
             else
                 executor = SmallRyeManagedExecutor.newThreadPoolExecutor(maxAsync, maxQueued);
             return new SmallRyeManagedExecutor(maxAsync, maxQueued,
