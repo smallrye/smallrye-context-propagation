@@ -40,6 +40,8 @@
 		<version.microprofile.context-propagation>1.0.2</version.microprofile.context-propagation>
 		<version.microprofile.config>1.4</version.microprofile.config>
 		<version.smallrye.config>1.7.0</version.smallrye.config>
+        <version.jboss.logging>3.4.1.Final</version.jboss.logging>
+        <version.jboss.logging.tools>2.2.1.Final</version.jboss.logging.tools>
         <version.jboss.threads>3.1.1.Final</version.jboss.threads>
         <version.jta>1.3</version.jta>
         <version.narayana>5.10.4.Final</version.narayana>
@@ -82,6 +84,26 @@
                 <groupId>org.eclipse.microprofile.context-propagation</groupId>
                 <artifactId>microprofile-context-propagation-tck</artifactId>
                 <version>${version.microprofile.context-propagation}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>${version.jboss.logging}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-annotations</artifactId>
+                <scope>provided</scope>
+                <version>${version.jboss.logging.tools}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging-processor</artifactId>
+                <scope>provided</scope>
+                <version>${version.jboss.logging.tools}</version>
             </dependency>
 
             <dependency>
