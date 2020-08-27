@@ -33,11 +33,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R get() {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return supplier.get();
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -53,11 +50,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void run() {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 runnable.run();
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -73,11 +67,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R apply(T t) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return function.apply(t);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -93,11 +84,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void accept(T t) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 consumer.accept(t);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -113,11 +101,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R call() throws Exception {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return callable.call();
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -133,11 +118,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R apply(T t, U u) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return function.apply(t, u);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -153,11 +135,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void accept(T t, U u) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 consumer.accept(t, u);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -298,11 +277,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     Executor withContext(CapturedContextState state) {
         return (runnable) -> {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 runnable.run();
-            } finally {
-                activeState.endContext();
             }
         };
     }

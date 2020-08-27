@@ -8,7 +8,7 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 import io.smallrye.context.SmallRyeContextManager;
 
-public class ActiveContextState {
+public class ActiveContextState implements AutoCloseable {
 
     private List<ThreadContextController> activeContext;
 
@@ -19,7 +19,7 @@ public class ActiveContextState {
         }
     }
 
-    public void endContext() {
+    public void close() {
         // restore in reverse order
         for (int i = activeContext.size() - 1; i >= 0; i--) {
             activeContext.get(i).endContext();
