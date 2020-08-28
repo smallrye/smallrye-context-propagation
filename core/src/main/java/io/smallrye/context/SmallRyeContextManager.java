@@ -32,6 +32,9 @@ public class SmallRyeContextManager implements ContextManager {
     private DefaultValues defaultValues;
     private ExecutorService defaultExecutorService;
 
+    private SmallRyeThreadContext allPropagatedThreadContext;
+    private SmallRyeThreadContext allClearedThreadContext;
+
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
             ExecutorService defaultExecutorService) {
         this.defaultExecutorService = defaultExecutorService;
@@ -58,9 +61,9 @@ public class SmallRyeContextManager implements ContextManager {
         return allProviderTypes;
     }
 
-    public CapturedContextState captureContext(ThreadContextProviderPlan plan) {
+    public CapturedContextState captureContext(SmallRyeThreadContext context) {
         Map<String, String> props = Collections.emptyMap();
-        return new CapturedContextState(this, plan, props);
+        return new CapturedContextState(context, context.getPlan(), props);
     }
 
     // for tests
@@ -169,6 +172,43 @@ public class SmallRyeContextManager implements ContextManager {
 
     public DefaultValues getDefaultValues() {
         return defaultValues;
+    }
+
+    //
+    // Extras
+
+    /**
+     * Returns a {@link SmallRyeThreadContext} instance which propagates all thread contexts.
+     * 
+     * @return a {@link SmallRyeThreadContext} instance which propagates all thread contexts.
+     */
+    public SmallRyeThreadContext allPropagatedThreadContext() {
+        // double parallel instantiation is not an issue
+        if (allPropagatedThreadContext == null) {
+            allPropagatedThreadContext = newThreadContextBuilder()
+                    .propagated(ThreadContext.ALL_REMAINING)
+                    .cleared()
+                    .unchanged()
+                    .build();
+        }
+        return allPropagatedThreadContext;
+    }
+
+    /**
+     * Returns a {@link SmallRyeThreadContext} instance which clears all thread contexts.
+     * 
+     * @return a {@link SmallRyeThreadContext} instance which clears all thread contexts.
+     */
+    public SmallRyeThreadContext allClearedThreadContext() {
+        // double parallel instantiation is not an issue
+        if (allClearedThreadContext == null) {
+            allClearedThreadContext = newThreadContextBuilder()
+                    .propagated()
+                    .cleared(ThreadContext.ALL_REMAINING)
+                    .unchanged()
+                    .build();
+        }
+        return allClearedThreadContext;
     }
 
     public static class Builder implements ContextManager.Builder {
