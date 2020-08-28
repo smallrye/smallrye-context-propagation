@@ -43,6 +43,7 @@ public @interface CurrentThreadContext {
     /**
      * Defines that the current thread context should be removed. This is mutually exclusive
      * with the other settings.
+     * @return a boolean indicating if the current thread context should be removed. Defaults to false.
      */
     @Nonbinding
     public boolean remove() default false;
