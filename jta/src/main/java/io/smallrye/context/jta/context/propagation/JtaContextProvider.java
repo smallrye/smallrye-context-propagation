@@ -32,6 +32,10 @@ public class JtaContextProvider implements ThreadContextProvider {
             return null;
         }
         TransactionManager tm = tm();
+        if (tm == null) {
+            //return null as per docs to state that propagation of this context is not supported
+            return null;
+        }
         Transaction capturedTransaction = currentTransaction(tm);
         return () -> {
             // Thread
@@ -137,6 +141,10 @@ public class JtaContextProvider implements ThreadContextProvider {
         }
 
         TransactionManager tm = tm();
+        if (tm == null) {
+            //return null as per docs to state that propagation of this context is not supported
+            return null;
+        }
         return () -> {
             // remove/restore current transaction
             Transaction currentTransaction = currentTransaction(tm);
