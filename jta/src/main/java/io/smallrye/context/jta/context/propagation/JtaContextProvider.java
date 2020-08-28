@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
 import javax.transaction.InvalidTransactionException;
@@ -21,6 +22,8 @@ public class JtaContextProvider implements ThreadContextProvider {
     private static final Logger logger = Logger.getLogger(JtaContextProvider.class.getName());
 
     private volatile TransactionManager transactionManager;
+    // this allows us to cache null values
+    private volatile boolean transactionManagerNotAvailable;
 
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
@@ -101,7 +104,8 @@ public class JtaContextProvider implements ThreadContextProvider {
 
     private TransactionManager tm() {
         TransactionManager tm = this.transactionManager;
-        if (tm != null) {
+        // this allows us to cache null values
+        if (tm != null || transactionManagerNotAvailable) {
             return tm;
         }
         //no need to guard against double assignment
@@ -109,7 +113,20 @@ public class JtaContextProvider implements ThreadContextProvider {
         if (lifecycleManagers.isResolvable()) {
             lifecycleManagers.get().setProvider(this);
         }
-        return this.transactionManager = CDI.current().select(TransactionManager.class).get();
+        tm = CDI.current().select(TransactionManager.class).get();
+        if (tm != null) {
+            // validate it, because it can be an empty proxy
+            try {
+                tm.getStatus();
+            } catch (CreationException | SystemException x) {
+                x.printStackTrace();
+                // not really there
+                transactionManagerNotAvailable = true;
+                return null;
+            }
+        }
+        // save it for later
+        return this.transactionManager = tm;
     }
 
     @Override
@@ -178,6 +195,7 @@ public class JtaContextProvider implements ThreadContextProvider {
         @PreDestroy
         void shutdown() {
             provider.transactionManager = null;
+            provider.transactionManagerNotAvailable = false;
         }
     }
 }
