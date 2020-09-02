@@ -386,10 +386,35 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
             return this;
         }
 
+        /**
+         * Delegate execution to the given executor service instead of the default set by
+         * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)}. Set to <code>null</code> to
+         * disable delegation
+         * and force creating a new executor service.
+         * 
+         * @param executorService the executor service to delegate to, or <code>null</code> to force creating a new executor
+         *        service.
+         * @return this builder
+         * @see #withNewExecutorService()
+         * @see SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)
+         */
         public Builder withExecutorService(ExecutorService executorService) {
             this.executorService = executorService;
             return this;
         }
 
+        /**
+         * Forces the creation of a new executor service. This is has the same effect as calling
+         * {@link #withExecutorService(ExecutorService)} with
+         * <code>null</code>.
+         * 
+         * @return this builder
+         * @see #withExecutorService(ExecutorService)
+         * @see SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)
+         */
+        public Builder withNewExecutorService() {
+            this.executorService = null;
+            return this;
+        }
     }
 }

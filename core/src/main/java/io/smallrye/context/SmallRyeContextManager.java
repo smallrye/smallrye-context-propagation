@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 
 import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
@@ -290,6 +293,19 @@ public class SmallRyeContextManager implements ContextManager {
         //
         // Extras
 
+        /**
+         * Make all created {@link SmallRyeManagedExecutor} forward to the given executor service by default instead of
+         * creating new executor services to back them. This can be overridden with
+         * {@link SmallRyeManagedExecutor.Builder#withExecutorService(ExecutorService)} and
+         * {@link SmallRyeManagedExecutor.Builder#withNewExecutorService()}. Also serves as the default executor to use
+         * by all {@link CompletionStage} and {@link CompletableFuture} wrapped by {@link ThreadContext}.
+         * 
+         * @param executorService the executor service to delegate to. If <code>null</code>, all created {@link ManagedExecutor}
+         *        will create new backing executor services, and all <code>*Async</code> methods of the
+         *        {@link CompletionStage} and {@link CompletableFuture} wrapped by {@link ThreadContext} will throw due to a
+         *        lack of executor.
+         * @return this builder.
+         */
         public Builder withDefaultExecutorService(ExecutorService executorService) {
             this.defaultExecutorService = executorService;
             return this;
