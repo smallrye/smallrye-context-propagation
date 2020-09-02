@@ -1,6 +1,7 @@
 package io.smallrye.context;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -86,7 +87,8 @@ public class SmallRyeContextManager implements ContextManager {
                 || clearedSet.removeAll(propagatedSet) || clearedSet.removeAll(unchangedSet)
                 || unchangedSet.removeAll(propagatedSet) || unchangedSet.removeAll(clearedSet)) {
             throw new IllegalStateException(
-                    "Cannot use ALL_REMAINING in more than one of propagated, cleared, unchanged");
+                    "Cannot use the same context in more than one of propagated (" + Arrays.toString(propagated)
+                            + "), cleared (" + Arrays.toString(cleared) + "), unchanged (" + Arrays.toString(unchanged) + ")");
         }
 
         // expand ALL_REMAINING
