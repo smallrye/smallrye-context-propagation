@@ -74,7 +74,7 @@ public @interface CurrentThreadContext {
      * </p>
      *
      * <p>
-     * A <code>ThreadContext</code> must fail to inject, raising
+     * A <code>CurrentThreadContext</code> must fail to initialise, raising
      * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
@@ -115,7 +115,7 @@ public @interface CurrentThreadContext {
      * </p>
      *
      * <p>
-     * A <code>ThreadContext</code> must fail to inject, raising
+     * A <code>CurrentThreadContext</code> must fail to initialise, raising
      * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
@@ -170,7 +170,7 @@ public @interface CurrentThreadContext {
      * </pre>
      *
      * <p>
-     * A <code>ThreadContext</code> must fail to inject, raising
+     * A <code>CurrentThreadContext</code> must fail to initialise, raising
      * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
