@@ -1,4 +1,4 @@
-package io.smallrye.context.inject;
+package io.smallrye.context.impl.cdi;
 
 import java.util.Collection;
 
