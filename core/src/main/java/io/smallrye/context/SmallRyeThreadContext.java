@@ -22,6 +22,80 @@ import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
+    private final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = new ThreadLocal<>();
+
+    /**
+     * Updates the current @{link SmallRyeThreadContext} in use by the current thread, and returns an
+     * object suitable for use in try-with-resource to restore the previous value.
+     * 
+     * @param threadContext the @{link SmallRyeThreadContext} to use
+     * @return an object suitable for use in try-with-resource to restore the previous value.
+     */
+    public static CleanAutoCloseable withThreadContext(SmallRyeThreadContext threadContext) {
+        SmallRyeThreadContext oldValue = currentThreadContext.get();
+        currentThreadContext.set(threadContext);
+        return () -> {
+            currentThreadContext.set(oldValue);
+        };
+    }
+
+    /**
+     * Invokes the given @{link Runnable} with the current @{link SmallRyeThreadContext} updated to the given value
+     * for the current thread.
+     * 
+     * @param threadContext the @{link SmallRyeThreadContext} to use
+     * @param f the @{link Runnable} to invoke
+     */
+    public static void withThreadContext(SmallRyeThreadContext threadContext, Runnable f) {
+        try (CleanAutoCloseable foo = withThreadContext(threadContext)) {
+            f.run();
+        }
+    }
+
+    /**
+     * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
+     * which propagates all contexts.
+     * 
+     * @return the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
+     *         which propagates all contexts.
+     */
+    public static SmallRyeThreadContext getCurrentThreadContextOrPropagatedContexts() {
+        return getCurrentThreadContext(SmallRyeContextManagerProvider.getManager().allPropagatedThreadContext());
+    }
+
+    /**
+     * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
+     * which clears all contexts.
+     * 
+     * @return the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
+     *         which clears all contexts.
+     */
+    public static SmallRyeThreadContext getCurrentThreadContextOrClearedContexts() {
+        return getCurrentThreadContext(SmallRyeContextManagerProvider.getManager().allClearedThreadContext());
+    }
+
+    /**
+     * Returns the current thread's @{link SmallRyeThreadContext} if set, or the given @{link SmallRyeThreadContext}
+     * default value.
+     * 
+     * @param defaultValue the default value to use
+     * @return the current thread's @{link SmallRyeThreadContext} if set, or the given @{link SmallRyeThreadContext}
+     *         default value.
+     */
+    public static SmallRyeThreadContext getCurrentThreadContext(SmallRyeThreadContext defaultValue) {
+        SmallRyeThreadContext threadContext = currentThreadContext.get();
+        return threadContext != null ? threadContext : defaultValue;
+    }
+
+    /**
+     * Returns the current thread's @{link SmallRyeThreadContext} if set, or null.
+     * 
+     * @return the current thread's @{link SmallRyeThreadContext} if set, or null.
+     */
+    public static SmallRyeThreadContext getCurrentThreadContext() {
+        return getCurrentThreadContext(null);
+    }
+
     private final class ContextualSupplier<R> implements Supplier<R>, Contextualized {
         private final CapturedContextState state;
         private final Supplier<R> supplier;
@@ -33,11 +107,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R get() {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return supplier.get();
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -53,11 +124,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void run() {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 runnable.run();
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -73,11 +141,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R apply(T t) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return function.apply(t);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -93,11 +158,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void accept(T t) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 consumer.accept(t);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -113,11 +175,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R call() throws Exception {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return callable.call();
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -133,11 +192,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R apply(T t, U u) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 return function.apply(t, u);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -153,11 +209,8 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void accept(T t, U u) {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 consumer.accept(t, u);
-            } finally {
-                activeState.endContext();
             }
         }
     }
@@ -293,23 +346,20 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public Executor currentContextExecutor() {
-        return withContext(manager.captureContext(plan));
+        return withContext(manager.captureContext(this));
     }
 
     Executor withContext(CapturedContextState state) {
         return (runnable) -> {
-            ActiveContextState activeState = state.begin();
-            try {
+            try (ActiveContextState activeState = state.begin()) {
                 runnable.run();
-            } finally {
-                activeState.endContext();
             }
         };
     }
 
     @Override
     public <T, U> BiConsumer<T, U> contextualConsumer(BiConsumer<T, U> consumer) {
-        return contextualConsumer(manager.captureContext(plan), consumer);
+        return contextualConsumer(manager.captureContext(this), consumer);
     }
 
     <T, U> BiConsumer<T, U> contextualConsumerUnlessContextualized(BiConsumer<T, U> consumer) {
@@ -325,7 +375,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public <T, U, R> BiFunction<T, U, R> contextualFunction(BiFunction<T, U, R> function) {
-        return contextualFunction(manager.captureContext(plan), function);
+        return contextualFunction(manager.captureContext(this), function);
     }
 
     <T, U, R> BiFunction<T, U, R> contextualFunctionUnlessContextualized(BiFunction<T, U, R> function) {
@@ -341,7 +391,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public <R> Callable<R> contextualCallable(Callable<R> callable) {
-        return contextualCallable(manager.captureContext(plan), callable);
+        return contextualCallable(manager.captureContext(this), callable);
     }
 
     <R> Callable<R> contextualCallableUnlessContextualized(Callable<R> callable) {
@@ -357,7 +407,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public <T> Consumer<T> contextualConsumer(Consumer<T> consumer) {
-        return contextualConsumer(manager.captureContext(plan), consumer);
+        return contextualConsumer(manager.captureContext(this), consumer);
     }
 
     <T> Consumer<T> contextualConsumerUnlessContextualized(Consumer<T> consumer) {
@@ -373,7 +423,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public <T, R> Function<T, R> contextualFunction(Function<T, R> function) {
-        return contextualFunction(manager.captureContext(plan), function);
+        return contextualFunction(manager.captureContext(this), function);
     }
 
     <T, R> Function<T, R> contextualFunctionUnlessContextualized(Function<T, R> function) {
@@ -389,7 +439,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public Runnable contextualRunnable(Runnable runnable) {
-        return contextualRunnable(manager.captureContext(plan), runnable);
+        return contextualRunnable(manager.captureContext(this), runnable);
     }
 
     Runnable contextualRunnableUnlessContextualized(Runnable runnable) {
@@ -405,7 +455,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public <R> Supplier<R> contextualSupplier(Supplier<R> supplier) {
-        return contextualSupplier(manager.captureContext(plan), supplier);
+        return contextualSupplier(manager.captureContext(this), supplier);
     }
 
     <R> Supplier<R> contextualSupplierUnlessContextualized(Supplier<R> supplier) {
