@@ -13,7 +13,7 @@ import io.smallrye.context.api.CurrentThreadContext;
 
 @CurrentThreadContext
 @Interceptor
-@Priority(0)
+@Priority(Interceptor.Priority.PLATFORM_BEFORE)
 public class SmallRyeCurrentThreadContextInterceptor {
 
     @AroundInvoke
