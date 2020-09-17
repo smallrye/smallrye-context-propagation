@@ -344,6 +344,181 @@ public class SmallRyeThreadContext implements ThreadContext {
         return JdkSpecific.newCompletionStageWrapper(this, stage, executor);
     }
 
+    /**
+     * <p>
+     * Returns a new CompletableFuture that is already completed with the specified value.
+     * </p>
+     *
+     * <p>
+     * The new completable future will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * </p>
+     *
+     * @param value result with which the completable future is completed.
+     * @param <U> result type of the completable future.
+     * @return the new completable future.
+     */
+    public <U> CompletableFuture<U> completedFuture(U value) {
+        return withContextCapture(CompletableFuture.completedFuture(value), defaultExecutor, 0);
+    }
+
+    /**
+     * <p>
+     * Returns a new CompletionStage that is already completed with the specified value.
+     * </p>
+     *
+     * <p>
+     * The new completion stage will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * </p>
+     *
+     * @param value result with which the completable future is completed.
+     * @param <U> result type of the completion stage.
+     * @return the new completion stage.
+     */
+    public <U> CompletionStage<U> completedStage(U value) {
+        return completedFuture(value);
+    }
+
+    /**
+     * <p>
+     * Returns a new CompletableFuture that is already exceptionally completed with the specified Throwable.
+     * </p>
+     *
+     * <p>
+     * The new completable future will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * </p>
+     *
+     * @param ex exception or error with which the completable future is completed.
+     * @param <U> result type of the completable future.
+     * @return the new completable future.
+     */
+    public <U> CompletableFuture<U> failedFuture(Throwable ex) {
+        CompletableFuture<U> ret = new CompletableFuture<>();
+        ret.completeExceptionally(ex);
+        return withContextCapture(ret, defaultExecutor, 0);
+    }
+
+    /**
+     * <p>
+     * Returns a new CompletionStage that is already exceptionally completed with the specified Throwable.
+     * </p>
+     *
+     * <p>
+     * The new completion stage will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * </p>
+     *
+     * @param ex exception or error with which the stage is completed.
+     * @param <U> result type of the completion stage.
+     * @return the new completion stage.
+     */
+    public <U> CompletionStage<U> failedStage(Throwable ex) {
+        return failedFuture(ex);
+    }
+
+    /**
+     * <p>
+     * Returns a new incomplete <code>CompletableFuture</code>.
+     * </p>
+     *
+     * <p>
+     * The new completable future will use the same default executor as this ThreadContext,
+     * which can be a ManagedExecutor if this ThreadContext was obtained by {@link SmallRyeManagedExecutor#getThreadContext()}
+     * or the default executor service as set by
+     * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
+     * or otherwise have no default executor.
+     * </p>
+     *
+     * @param <U> result type of the completion stage.
+     * @return the new completion stage.
+     */
+    public <U> CompletableFuture<U> newIncompleteFuture() {
+        CompletableFuture<U> ret = new CompletableFuture<>();
+        return withContextCapture(ret, defaultExecutor, 0);
+    }
+
+    /**
+     * <p>
+     * Returns a new <code>CompletableFuture</code> that is completed by the completion of the
+     * specified stage.
+     * </p>
+     *
+     * <p>
+     * The new completable future is backed by the ManagedExecutor upon which copy is invoked,
+     * which serves as the default asynchronous execution facility
+     * for the new stage and all dependent stages created from it, and so forth.
+     * </p>
+     *
+     * <p>
+     * When dependent stages are created from the new completable future, thread context is captured
+     * and/or cleared by the ManagedExecutor. This guarantees that the action
+     * performed by each stage always runs under the thread context of the code that creates the stage,
+     * unless the user explicitly overrides by supplying a pre-contextualized action.
+     * </p>
+     *
+     * <p>
+     * Invocation of this method does not impact thread context propagation for the supplied
+     * completable future or any dependent stages created from it, other than the new dependent
+     * completable future that is created by this method.
+     * </p>
+     *
+     * @param <T> completable future result type.
+     * @param stage a completable future whose completion triggers completion of the new completable
+     *        future that is created by this method.
+     * @return the new completable future.
+     */
+    public <T> CompletableFuture<T> copy(CompletableFuture<T> stage) {
+        return withContextCapture(stage, defaultExecutor, 0);
+    }
+
+    /**
+     * <p>
+     * Returns a new <code>CompletionStage</code> that is completed by the completion of the
+     * specified stage.
+     * </p>
+     *
+     * <p>
+     * The new completable future is backed by the ManagedExecutor upon which copy is invoked,
+     * which serves as the default asynchronous execution facility
+     * for the new stage and all dependent stages created from it, and so forth.
+     * </p>
+     *
+     * <p>
+     * When dependent stages are created from the new completable future, thread context is captured
+     * and/or cleared by the ManagedExecutor. This guarantees that the action
+     * performed by each stage always runs under the thread context of the code that creates the stage,
+     * unless the user explicitly overrides by supplying a pre-contextualized action.
+     * </p>
+     *
+     * <p>
+     * Invocation of this method does not impact thread context propagation for the supplied
+     * stage or any dependent stages created from it, other than the new dependent
+     * completion stage that is created by this method.
+     * </p>
+     *
+     * @param <T> completion stage result type.
+     * @param stage a completion stage whose completion triggers completion of the new stage
+     *        that is created by this method.
+     * @return the new completion stage.
+     */
+    public <T> CompletionStage<T> copy(CompletionStage<T> stage) {
+        return withContextCapture(stage, defaultExecutor);
+    }
+
     @Override
     public Executor currentContextExecutor() {
         return withContext(manager.captureContext(this));
