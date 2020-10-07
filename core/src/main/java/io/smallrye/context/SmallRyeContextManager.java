@@ -13,8 +13,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 
-import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
@@ -24,6 +24,9 @@ import io.smallrye.context.impl.DefaultValues;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeContextManager implements ContextManager {
+
+    // newer version of MP config has to specify empty configuration by using a "None" string instead of empty string
+    public static final String NONE = "None";
 
     public static final String[] NO_STRING = new String[0];
 
@@ -75,15 +78,38 @@ public class SmallRyeContextManager implements ContextManager {
         return getProviderPlan(allProviderTypes, NO_STRING, NO_STRING);
     }
 
+    /**
+     * Converts an array of context types into a set.
+     * In the process it erases all occurrences of "None", treating them as empty String.
+     * It also verifies that when "None" was used, no other context was specified.
+     *
+     * @param arrayOfContexts String array of contexts to be checked and transformed into a set
+     * @return set of Strings representing contexts
+     */
+    private Set<String> createContextSetFromStringArray(String[] arrayOfContexts) {
+        Set<String> result = new HashSet<>();
+        boolean noneUsed = false;
+        for (String context : arrayOfContexts) {
+            if (context.equals(NONE)) {
+                noneUsed = true;
+                continue;
+            } else {
+                result.add(context);
+            }
+        }
+        if (noneUsed && result.size() > 0) {
+            throw new IllegalStateException("Cannot use 'None' in conjunction with any other contexts, the offending " +
+                    "context declaration used: " + Arrays.toString(arrayOfContexts));
+        }
+        return result;
+    }
+
     public ThreadContextProviderPlan getProviderPlan(String[] propagated, String[] unchanged, String[] cleared) {
-        Set<String> propagatedSet = new HashSet<>();
-        Collections.addAll(propagatedSet, propagated);
+        Set<String> propagatedSet = createContextSetFromStringArray(propagated);
 
-        Set<String> clearedSet = new HashSet<>();
-        Collections.addAll(clearedSet, cleared);
+        Set<String> clearedSet = createContextSetFromStringArray(cleared);
 
-        Set<String> unchangedSet = new HashSet<>();
-        Collections.addAll(unchangedSet, unchanged);
+        Set<String> unchangedSet = createContextSetFromStringArray(unchanged);
 
         // check for duplicates
         if (propagatedSet.removeAll(unchangedSet) || propagatedSet.removeAll(clearedSet)
