@@ -83,6 +83,17 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
         }
     }
 
+    /**
+     * Looks for any context manager registered for a particular class loader. If not found
+     * it will not throw an error, unlike {@link #getContextManager(ClassLoader)}.
+     *
+     * @param classLoader The class loader
+     * @return The context manager for the class loader, or {@code null} if none could be found
+     */
+    public ContextManager findContextManager(ClassLoader classLoader) {
+        return contextManagersForClassLoader.get(classLoader);
+    }
+
     public static SmallRyeContextManager getManager() {
         return instance().getContextManager();
     }
