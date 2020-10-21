@@ -18,6 +18,16 @@ Compile and test the project:
 mvn verify
 ----
 
+=== Releasing
+
+- Make a `release-<version>` branch
+- Modify `.github/project.yml` as seen in https://github.com/smallrye/smallrye-context-propagation/pull/196/files to bump the release number
+- Push that branch on the `origin` repository (not your personal fork)
+- Make a PR for it
+- Get someone to review it
+- Merge it
+- The rest should be automated and it will hit Maven Central
+
 === Contributing
 
 Please refer to our Wiki for the https://github.com/smallrye/smallrye-parent/wiki[Contribution Guidelines].
