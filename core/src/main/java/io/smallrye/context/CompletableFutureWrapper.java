@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.smallrye.context.impl.Contextualized;
 
@@ -428,6 +429,52 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> implements
     @Override
     public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action, Executor executor) {
         return context.withContextCapture(f.whenCompleteAsync(context.contextualConsumerUnlessContextualized(action), executor),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> completeAsync(Supplier<? extends T> action) {
+        checkDefaultExecutor();
+        return context.withContextCapture(f.completeAsync(context.contextualSupplierUnlessContextualized(action)),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> completeAsync(Supplier<? extends T> action, Executor executor) {
+        return context.withContextCapture(f.completeAsync(context.contextualSupplierUnlessContextualized(action)),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyComposeAsync(Function<Throwable, ? extends CompletionStage<T>> action) {
+        checkDefaultExecutor();
+        return context.withContextCapture(f.exceptionallyComposeAsync(context.contextualFunctionUnlessContextualized(action)),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyComposeAsync(Function<Throwable, ? extends CompletionStage<T>> action,
+            Executor executor) {
+        return context.withContextCapture(f.exceptionallyComposeAsync(context.contextualFunctionUnlessContextualized(action)),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyCompose(Function<Throwable, ? extends CompletionStage<T>> action) {
+        return context.withContextCapture(f.exceptionallyCompose(context.contextualFunctionUnlessContextualized(action)),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyAsync(Function<Throwable, ? extends T> action) {
+        checkDefaultExecutor();
+        return context.withContextCapture(f.exceptionallyAsync(context.contextualFunctionUnlessContextualized(action)),
+                this.executor, flags);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyAsync(Function<Throwable, ? extends T> action, Executor executor) {
+        return context.withContextCapture(f.exceptionallyAsync(context.contextualFunctionUnlessContextualized(action)),
                 this.executor, flags);
     }
 

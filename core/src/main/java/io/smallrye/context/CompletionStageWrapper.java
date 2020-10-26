@@ -252,6 +252,42 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
     }
 
     @Override
+    public CompletionStage<T> exceptionallyComposeAsync(Function<Throwable, ? extends CompletionStage<T>> action) {
+        checkDefaultExecutor();
+        return context
+                .withContextCapture(
+                        f.exceptionallyComposeAsync(context.contextualFunctionUnlessContextualized(action), executor));
+    }
+
+    @Override
+    public CompletionStage<T> exceptionallyComposeAsync(Function<Throwable, ? extends CompletionStage<T>> action,
+            Executor executor) {
+        return context
+                .withContextCapture(
+                        f.exceptionallyComposeAsync(context.contextualFunctionUnlessContextualized(action), executor));
+    }
+
+    @Override
+    public CompletionStage<T> exceptionallyCompose(Function<Throwable, ? extends CompletionStage<T>> action) {
+        checkDefaultExecutor();
+        return context
+                .withContextCapture(f.exceptionallyCompose(context.contextualFunctionUnlessContextualized(action)));
+    }
+
+    @Override
+    public CompletionStage<T> exceptionallyAsync(Function<Throwable, ? extends T> action) {
+        checkDefaultExecutor();
+        return context
+                .withContextCapture(f.exceptionallyAsync(context.contextualFunctionUnlessContextualized(action), executor));
+    }
+
+    @Override
+    public CompletionStage<T> exceptionallyAsync(Function<Throwable, ? extends T> action, Executor executor) {
+        return context
+                .withContextCapture(f.exceptionallyAsync(context.contextualFunctionUnlessContextualized(action), executor));
+    }
+
+    @Override
     public String toString() {
         return f.toString();
     }
