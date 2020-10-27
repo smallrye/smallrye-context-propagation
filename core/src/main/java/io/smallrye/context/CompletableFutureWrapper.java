@@ -42,7 +42,7 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> implements
         this.flags = flags;
     }
 
-    private void checkDefaultExecutor() {
+    protected void checkDefaultExecutor() {
         if (executor == null)
             throw new UnsupportedOperationException("Async methods not supported when no executor is specified");
     }

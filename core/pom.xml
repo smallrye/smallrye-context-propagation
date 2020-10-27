@@ -10,7 +10,7 @@
     <name>smallrye-context-propagation</name>
 
     <properties>
-        <jdk.min.version>9</jdk.min.version>
+        <jdk.min.version>12</jdk.min.version>
     </properties>
 
     <dependencies>

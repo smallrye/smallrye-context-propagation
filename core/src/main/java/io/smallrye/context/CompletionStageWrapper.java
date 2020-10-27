@@ -11,9 +11,9 @@ import java.util.function.Function;
 import io.smallrye.context.impl.Contextualized;
 
 public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextualized {
-    private final CompletionStage<T> f;
-    private final SmallRyeThreadContext context;
-    private final Executor executor;
+    protected final CompletionStage<T> f;
+    protected final SmallRyeThreadContext context;
+    protected final Executor executor;
 
     public CompletionStageWrapper(SmallRyeThreadContext context, CompletionStage<T> f, Executor executor) {
         this.context = context;
@@ -21,7 +21,7 @@ public class CompletionStageWrapper<T> implements CompletionStage<T>, Contextual
         this.executor = executor;
     }
 
-    private void checkDefaultExecutor() {
+    protected void checkDefaultExecutor() {
         if (executor == null)
             throw new UnsupportedOperationException("Async methods not supported when no executor is specified");
     }
