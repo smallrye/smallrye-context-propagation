@@ -21,6 +21,7 @@ package io.smallrye.context.test.classloading;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import javax.annotation.Priority;
 import javax.enterprise.util.AnnotationLiteral;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -38,6 +39,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
 import org.junit.Test;
 
+import io.smallrye.common.function.Functions;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigProviderResolver;
 import io.smallrye.context.SmallRyeContextManagerProvider;
@@ -118,7 +120,10 @@ public class MultiClassloadingTest {
                 .addPackages(true, ConfigProvider.class.getPackage().getName())
                 .addPackages(true, SmallRyeConfig.class.getPackage().getName())
                 .addPackages(true, Logger.class.getPackage().getName())
+                .addPackages(true, Functions.class.getPackage().getName())
                 .addPackage(AnnotationLiteral.class.getPackage().getName())
+                .addPackage(Priority.class.getPackage().getName())
+                .addPackage(io.smallrye.common.constraint.Assert.class.getPackage().getName())
                 // dont use addPackages for Smallrye-Context because it
                 // would include test packages
                 .addPackage(SmallRyeContextManagerProvider.class.getPackage().getName())

@@ -92,6 +92,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.smallrye.common</groupId>
+            <artifactId>smallrye-common-function</artifactId>
+            <version>${version.smallrye.common}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-core</artifactId>
             <version>${version.resteasy}</version>
