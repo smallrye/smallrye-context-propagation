@@ -189,6 +189,82 @@ public class CompletableFutureTest {
     }
 
     @Test
+    public void testJava12Methods() throws InterruptedException, ExecutionException {
+        // only run on JDK >= 12 which has that method
+        try {
+            CompletionStage.class.getDeclaredMethod("exceptionallyCompose");
+        } catch (NoSuchMethodException | SecurityException e) {
+            Assume.assumeTrue(false);
+        }
+
+        Throwable t = new Throwable();
+        CompletableFuture<Object> cf = managedExecutor.newIncompleteFuture();
+
+        MyContext ctx = new MyContext();
+        MyContext.set(ctx);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            CompletableFuture<Object> exceptionallyCompose = cf.exceptionallyCompose(ex -> {
+                Assert.assertEquals(t, ex);
+                Assert.assertEquals(ctx, MyContext.get());
+                // make sure we contextualise even non-contextualised compositions
+                return new CompletableFuture<>();
+            });
+            Assert.assertTrue(exceptionallyCompose instanceof Contextualized);
+
+            CompletableFuture<Object> exceptionallyComposeAsync1 = cf.exceptionallyComposeAsync(ex -> {
+                Assert.assertEquals(t, ex);
+                Assert.assertEquals(ctx, MyContext.get());
+                // make sure we contextualise even non-contextualised compositions
+                return new CompletableFuture<>();
+            });
+            Assert.assertTrue(exceptionallyComposeAsync1 instanceof Contextualized);
+
+            CompletableFuture<Object> exceptionallyComposeAsync2 = cf.exceptionallyComposeAsync(ex -> {
+                Assert.assertEquals(t, ex);
+                Assert.assertEquals(ctx, MyContext.get());
+                // make sure we contextualise even non-contextualised compositions
+                return new CompletableFuture<>();
+            }, executor);
+            Assert.assertTrue(exceptionallyComposeAsync2 instanceof Contextualized);
+
+            CompletableFuture<Object> exceptionally = cf.exceptionally(ex -> {
+                Assert.assertEquals(t, ex);
+                Assert.assertEquals(ctx, MyContext.get());
+                return null;
+            });
+            Assert.assertTrue(exceptionally instanceof Contextualized);
+
+            CompletableFuture<Object> exceptionallyAsync1 = cf.exceptionallyAsync(ex -> {
+                Assert.assertEquals(t, ex);
+                Assert.assertEquals(ctx, MyContext.get());
+                return null;
+            });
+            Assert.assertTrue(exceptionallyAsync1 instanceof Contextualized);
+
+            CompletableFuture<Object> exceptionallyAsync2 = cf.exceptionallyAsync(ex -> {
+                Assert.assertEquals(t, ex);
+                Assert.assertEquals(ctx, MyContext.get());
+                return null;
+            }, executor);
+            Assert.assertTrue(exceptionallyAsync1 instanceof Contextualized);
+
+            // now clear the context to simulate a change and make sure they all already captured it
+            MyContext.clear();
+
+            Assert.assertNull(exceptionally.get());
+            Assert.assertNull(exceptionallyAsync1.get());
+            Assert.assertNull(exceptionallyAsync2.get());
+            Assert.assertNull(exceptionallyCompose.get());
+            Assert.assertNull(exceptionallyComposeAsync1.get());
+            Assert.assertNull(exceptionallyComposeAsync2.get());
+
+        } finally {
+            MyContext.clear();
+        }
+    }
+
+    @Test
     public void testExistingCFWrapping() throws InterruptedException, ExecutionException {
         CompletableFuture<String> cf = new CompletableFuture<>();
         CompletableFuture<String> copy = managedExecutor.copy(cf);
