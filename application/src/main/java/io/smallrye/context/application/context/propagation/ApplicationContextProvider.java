@@ -1,5 +1,7 @@
 package io.smallrye.context.application.context.propagation;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 import org.eclipse.microprofile.context.ThreadContext;
@@ -7,6 +9,28 @@ import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 public class ApplicationContextProvider implements ThreadContextProvider {
+
+    static final ClassLoader SYSTEM_CL;
+
+    static {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            SYSTEM_CL = AccessController
+                    .doPrivileged((PrivilegedAction<ClassLoader>) ApplicationContextProvider::calculateSystemClassLoader);
+        } else {
+            SYSTEM_CL = calculateSystemClassLoader();
+        }
+    }
+
+    private static ClassLoader calculateSystemClassLoader() {
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        if (cl == null) {
+            // non-null ref that delegates to the system
+            cl = new ClassLoader(null) {
+            };
+        }
+        return cl;
+    }
 
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
@@ -24,7 +48,7 @@ public class ApplicationContextProvider implements ThreadContextProvider {
 
     @Override
     public ThreadContextSnapshot clearedContext(Map<String, String> props) {
-        ClassLoader capturedTCCL = null;
+        ClassLoader capturedTCCL = SYSTEM_CL;
         return () -> {
             ClassLoader movedTCCL = Thread.currentThread().getContextClassLoader();
             if (capturedTCCL != movedTCCL)
