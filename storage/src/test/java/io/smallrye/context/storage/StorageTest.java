@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.context.storage.spi.StorageManagerProvider;
+import io.smallrye.context.storage.spi.StorageManagerProviderRegistration;
+
 public class StorageTest {
 
     private static StorageManagerProviderRegistration registration;

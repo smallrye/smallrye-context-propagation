@@ -1,9 +1,11 @@
-package io.smallrye.context.storage;
+package io.smallrye.context.storage.spi;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.smallrye.context.storage.impl.DefaultStorageManagerProvider;
 
 /**
  * This is where Quarkus registers it has a StorageManager.
@@ -54,9 +56,4 @@ public interface StorageManagerProvider {
     public default void releaseStorageManager(StorageManager manager) {
         throw new UnsupportedOperationException();
     }
-
-    public default StorageManager.Builder getStorageManagerBuilder() {
-        throw new UnsupportedOperationException();
-    }
-
 }

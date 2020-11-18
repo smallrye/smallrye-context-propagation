@@ -17,13 +17,13 @@ public class QuarkusThreadContextImpl implements QuarkusThreadContext {
         ret.resteasy = this.resteasy;
         return ret;
     }
-     
+
     public static class Factory implements QuarkusThreadContext.Factory {
 
         @Override
         public QuarkusThreadContext newContext() {
             return new QuarkusThreadContextImpl();
         }
-        
+
     }
 }

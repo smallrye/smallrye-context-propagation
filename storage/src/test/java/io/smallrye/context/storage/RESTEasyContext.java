@@ -11,9 +11,8 @@ import java.util.Map;
  */
 class RESTEasyContext {
 
-    // this gives us storage for our List<Map<Class<?>, Object>> which we declared in RESTEasyContextStorage
-    static final Storage<List<Map<Class<?>, Object>>> context = StorageManagerProvider.instance().getStorageManager()
-            .allocateStorage(RESTEasyContextStorageRequirement.class);
+    static final ThreadLocalStorage<List<Map<Class<?>, Object>>> context = new ThreadLocalStorage<List<Map<Class<?>, Object>>>() {
+    };
 
     static <T> T getContext(Class<T> klass) {
         Map<Class<?>, Object> context = getContext();

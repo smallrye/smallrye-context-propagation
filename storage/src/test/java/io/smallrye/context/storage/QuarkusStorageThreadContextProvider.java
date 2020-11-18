@@ -11,7 +11,7 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
  */
 class QuarkusStorageThreadContextProvider implements ThreadContextProvider {
 
-    private final ThreadLocal<QuarkusThreadContext> fallbackThreadLocal = new ThreadLocal<>() {
+    private final ThreadLocal<QuarkusThreadContext> fallbackThreadLocal = new ThreadLocal<QuarkusThreadContext>() {
         @Override
         protected QuarkusThreadContext initialValue() {
             // this is generated somehow

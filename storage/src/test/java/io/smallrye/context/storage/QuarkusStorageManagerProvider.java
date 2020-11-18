@@ -1,5 +1,8 @@
 package io.smallrye.context.storage;
 
+import io.smallrye.context.storage.spi.StorageManager;
+import io.smallrye.context.storage.spi.StorageManagerProvider;
+
 /**
  * To be implemented in Quarkus
  */

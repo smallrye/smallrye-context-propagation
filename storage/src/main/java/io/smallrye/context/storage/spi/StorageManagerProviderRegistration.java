@@ -1,4 +1,4 @@
-package io.smallrye.context.storage;
+package io.smallrye.context.storage.spi;
 
 public class StorageManagerProviderRegistration {
     private final StorageManagerProvider provider;

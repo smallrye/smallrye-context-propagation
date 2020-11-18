@@ -3,10 +3,12 @@ package io.smallrye.context.storage;
 import java.util.List;
 import java.util.Map;
 
+import io.smallrye.context.storage.spi.ThreadLocalStorageSlot;
+
 /**
  * This class is generated based on the discovery of RESTEasyContextStorageRequirement
  */
-class RESTEasy_QuarkusStorage extends ThreadLocalStorage<List<Map<Class<?>, Object>>> {
+class RESTEasy_QuarkusStorage extends ThreadLocalStorageSlot<List<Map<Class<?>, Object>>> {
 
     @Override
     public List<Map<Class<?>, Object>> get() {

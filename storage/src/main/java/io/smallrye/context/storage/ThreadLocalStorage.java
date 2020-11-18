@@ -1,25 +1,26 @@
 package io.smallrye.context.storage;
 
-/**
- * Storage class used when there's no StorageManager, delegates to a ThreadLocal
- */
-public class ThreadLocalStorage<T> implements Storage<T> {
+import io.smallrye.context.storage.spi.StorageManager;
+import io.smallrye.context.storage.spi.StorageSlot;
 
-    protected final ThreadLocal<T> threadLocal = new ThreadLocal<>();
+public abstract class ThreadLocalStorage<T> {
 
-    @Override
+    private StorageSlot<T> slot;
+
+    public ThreadLocalStorage() {
+        StorageManager sm = StorageManager.instance();
+        this.slot = sm.allocateStorageSlot(getClass());
+    }
+
     public T get() {
-        return threadLocal.get();
+        return slot.get();
     }
 
-    @Override
     public void set(T t) {
-        threadLocal.set(t);
+        slot.set(t);
     }
 
-    @Override
     public void remove() {
-        threadLocal.remove();
+        slot.remove();
     }
-
 }
