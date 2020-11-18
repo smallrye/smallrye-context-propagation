@@ -11,32 +11,32 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
  */
 class QuarkusStorageThreadContextProvider implements ThreadContextProvider {
 
-    private final ThreadLocal<QuarkusContexts> fallbackThreadLocal = new ThreadLocal() {
+    private final ThreadLocal<QuarkusThreadContext> fallbackThreadLocal = new ThreadLocal<>() {
         @Override
-        protected Object initialValue() {
+        protected QuarkusThreadContext initialValue() {
             // this is generated somehow
-            return new QuarkusContextsImpl();
+            return new QuarkusThreadContextImpl();
         }
     };
 
-    private QuarkusContexts getContexts() {
+    private QuarkusThreadContext getContexts() {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            System.err.println("Capturing context from QT: " + ((QuarkusThread) currentThread).contexts);
-            return ((QuarkusThread) currentThread).contexts;
+            System.err.println("Capturing context from QT: " + ((QuarkusThread) currentThread).getQuarkusThreadContext());
+            return ((QuarkusThread) currentThread).getQuarkusThreadContext();
         } else {
             System.err.println("Capturing context from TL: " + fallbackThreadLocal.get());
             return fallbackThreadLocal.get();
         }
     }
 
-    private QuarkusContexts setContexts(QuarkusContexts capturedContexts) {
+    private QuarkusThreadContext setContexts(QuarkusThreadContext capturedContexts) {
         Thread currentThread = Thread.currentThread();
-        QuarkusContexts ret;
+        QuarkusThreadContext ret;
         if (currentThread instanceof QuarkusThread) {
             System.err.println("Setting context from QT: " + capturedContexts);
-            ret = ((QuarkusThread) currentThread).contexts;
-            ((QuarkusThread) currentThread).contexts = capturedContexts;
+            ret = ((QuarkusThread) currentThread).getQuarkusThreadContext();
+            ((QuarkusThread) currentThread).setQuarkusThreadContext(capturedContexts);
         } else {
             System.err.println("Setting context from TL: " + capturedContexts);
             ret = fallbackThreadLocal.get();
@@ -48,18 +48,18 @@ class QuarkusStorageThreadContextProvider implements ThreadContextProvider {
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
         // need to copy the context value because it's mutable
-        QuarkusContexts contexts = getContexts().copy();
+        QuarkusThreadContext contexts = getContexts().copy();
         return () -> {
-            QuarkusContexts preservedContexts = setContexts(contexts);
+            QuarkusThreadContext preservedContexts = setContexts(contexts);
             return () -> setContexts(preservedContexts);
         };
     }
 
     @Override
     public ThreadContextSnapshot clearedContext(Map<String, String> props) {
-        QuarkusContexts contexts = new QuarkusContextsImpl();
+        QuarkusThreadContext contexts = new QuarkusThreadContextImpl();
         return () -> {
-            QuarkusContexts preservedContexts = setContexts(contexts);
+            QuarkusThreadContext preservedContexts = setContexts(contexts);
             return () -> setContexts(preservedContexts);
         };
     }

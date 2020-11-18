@@ -15,4 +15,11 @@ class QuarkusStorageManager implements StorageManager {
         throw new IllegalArgumentException("Storage user nor registered: " + klass);
     }
 
+    public static QuarkusStorageManager instance() {
+        return (QuarkusStorageManager) StorageManager.instance();
+    }
+
+    public QuarkusThreadContext newContext() {
+        return new QuarkusThreadContextImpl();
+    }
 }

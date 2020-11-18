@@ -1,13 +1,12 @@
 package io.smallrye.context.storage;
 
 /**
- * Base class for all Quarkus thread pools
+ * Base class for all Quarkus threads
  */
-class QuarkusThread extends Thread {
-    // this RHS is generated somehow
-    public QuarkusContexts contexts = new QuarkusContextsImpl();
+interface QuarkusThread {
 
-    public QuarkusThread(Runnable r) {
-        super(r);
-    }
+    QuarkusThreadContext getQuarkusThreadContext();
+
+    // Experimental
+    void setQuarkusThreadContext(QuarkusThreadContext context);
 }

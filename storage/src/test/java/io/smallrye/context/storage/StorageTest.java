@@ -33,7 +33,7 @@ public class StorageTest {
 
         @Override
         public Thread newThread(Runnable r) {
-            return new QuarkusThread(r);
+            return new QuarkusThreadImpl(r);
         }
 
     }
