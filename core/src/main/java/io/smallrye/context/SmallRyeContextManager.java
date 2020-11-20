@@ -42,7 +42,7 @@ public class SmallRyeContextManager implements ContextManager {
     private SmallRyeThreadContext allClearedThreadContext;
 
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
-            ExecutorService defaultExecutorService) {
+            ExecutorService defaultExecutorService, boolean registerOnProvider, ClassLoader registrationClassLoader) {
         this.defaultExecutorService = defaultExecutorService;
         List<ThreadContextProvider> providersCopy = new ArrayList<>(providers);
         providersByType = new HashMap<>();
@@ -57,6 +57,10 @@ public class SmallRyeContextManager implements ContextManager {
         allProviderTypes = providersByType.keySet().toArray(new String[providersCopy.size()]);
         this.extensions = new ArrayList<>(extensions);
         this.defaultValues = new DefaultValues();
+        // if our intention is to register on the provider, let's do it before we setup the extensions which may need us to be registered
+        if (registerOnProvider) {
+            SmallRyeContextManagerProvider.instance().registerContextManager(this, registrationClassLoader);
+        }
         // Extensions may call our methods, so do all init before we call this
         for (ContextManagerExtension extension : extensions) {
             extension.setup(this);
@@ -248,6 +252,7 @@ public class SmallRyeContextManager implements ContextManager {
         private final List<ThreadContextProvider> contextProviders = new ArrayList<>();
         private final List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
         private ExecutorService defaultExecutorService;
+        private boolean registerOnProvider;
 
         @Override
         public Builder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -311,11 +316,22 @@ public class SmallRyeContextManager implements ContextManager {
             if (addDiscoveredContextManagerExtensions)
                 contextManagerExtensions.addAll(discoverContextManagerExtensions());
 
-            return new SmallRyeContextManager(contextProviders, contextManagerExtensions, defaultExecutorService);
+            return new SmallRyeContextManager(contextProviders, contextManagerExtensions, defaultExecutorService,
+                    registerOnProvider, classLoader);
         }
 
         //
         // Extras
+
+        /**
+         * Registers the built instance to the current {@link SmallRyeContextManagerProvider} before any extensions
+         * are loaded. This is useful because the extensions might require the built {@link SmallRyeContextManager}
+         * to be registered on the current class loader in order to use it, so this prevents building two.
+         */
+        public Builder registerOnProvider() {
+            this.registerOnProvider = true;
+            return this;
+        }
 
         /**
          * Make all created {@link SmallRyeManagedExecutor} forward to the given executor service by default instead of
