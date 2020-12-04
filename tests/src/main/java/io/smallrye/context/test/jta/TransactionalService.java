@@ -2,11 +2,13 @@ package io.smallrye.context.test.jta;
 
 import java.util.concurrent.CompletableFuture;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 
+@Dependent
 public class TransactionalService {
     @Inject
     private TransactionalBean bean;
