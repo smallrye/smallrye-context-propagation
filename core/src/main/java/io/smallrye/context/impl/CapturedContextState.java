@@ -1,6 +1,6 @@
 package io.smallrye.context.impl;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +11,13 @@ import io.smallrye.context.SmallRyeThreadContext;
 
 public class CapturedContextState {
 
-    private List<ThreadContextSnapshot> threadContextSnapshots = new LinkedList<>();
+    private List<ThreadContextSnapshot> threadContextSnapshots;
     private SmallRyeThreadContext threadContext;
 
     public CapturedContextState(SmallRyeThreadContext threadContext, ThreadContextProviderPlan plan,
             Map<String, String> props) {
         this.threadContext = threadContext;
+        this.threadContextSnapshots = new ArrayList<>(plan.propagatedProviders.size() + plan.clearedProviders.size());
         for (ThreadContextProvider provider : plan.propagatedProviders) {
             ThreadContextSnapshot snapshot = provider.currentContext(props);
             if (snapshot != null) {
