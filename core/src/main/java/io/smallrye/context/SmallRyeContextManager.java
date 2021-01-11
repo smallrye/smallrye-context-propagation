@@ -69,8 +69,7 @@ public class SmallRyeContextManager implements ContextManager {
     }
 
     public CapturedContextState captureContext(SmallRyeThreadContext context) {
-        Map<String, String> props = Collections.emptyMap();
-        return new CapturedContextState(context, context.getPlan(), props);
+        return new CapturedContextState(context, context.getPlan());
     }
 
     // for tests
