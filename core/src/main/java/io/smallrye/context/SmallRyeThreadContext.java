@@ -62,8 +62,16 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @param f the @{link Runnable} to invoke
      */
     public static void withThreadContext(SmallRyeThreadContext threadContext, Runnable f) {
-        try (CleanAutoCloseable foo = withThreadContext(threadContext)) {
+        final SmallRyeThreadContext oldValue = currentThreadContext.get();
+        currentThreadContext.set(threadContext);
+        try {
             f.run();
+        } finally {
+            if (oldValue == null) {
+                currentThreadContext.remove();
+            } else {
+                currentThreadContext.set(oldValue);
+            }
         }
     }
 
