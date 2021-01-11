@@ -1,5 +1,6 @@
 package io.smallrye.context.impl;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
@@ -12,8 +13,8 @@ public class ThreadContextProviderPlan {
 
     public ThreadContextProviderPlan(Set<ThreadContextProvider> propagatedSet, Set<ThreadContextProvider> unchangedSet,
             Set<ThreadContextProvider> clearedSet) {
-        this.propagatedProviders = propagatedSet;
-        this.unchangedProviders = unchangedSet;
-        this.clearedProviders = clearedSet;
+        this.propagatedProviders = Collections.unmodifiableSet(propagatedSet);
+        this.unchangedProviders = Collections.unmodifiableSet(unchangedSet);
+        this.clearedProviders = Collections.unmodifiableSet(clearedSet);
     }
 }
