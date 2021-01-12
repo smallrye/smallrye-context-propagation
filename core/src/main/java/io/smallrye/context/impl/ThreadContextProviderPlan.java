@@ -37,6 +37,8 @@ public class ThreadContextProviderPlan {
      * This helps to optimise construction of CapturedContextState
      * without exposing too many implementation details.
      * Only useful for snapshots with an empty property set.
+     * 
+     * @return a list of snapshots
      */
     public List<ThreadContextSnapshot> takeThreadContextSnapshots() {
         List<ThreadContextSnapshot> threadContextSnapshots = new ArrayList<>(snapshotInitialSize);
