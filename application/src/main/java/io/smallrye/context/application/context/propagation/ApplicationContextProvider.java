@@ -5,6 +5,7 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 
 import org.eclipse.microprofile.context.ThreadContext;
+import org.eclipse.microprofile.context.spi.ThreadContextController;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
@@ -35,28 +36,40 @@ public class ApplicationContextProvider implements ThreadContextProvider {
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
         ClassLoader capturedTCCL = Thread.currentThread().getContextClassLoader();
-        return () -> {
-            ClassLoader movedTCCL = Thread.currentThread().getContextClassLoader();
-            if (capturedTCCL != movedTCCL)
-                Thread.currentThread().setContextClassLoader(capturedTCCL);
-            return () -> {
-                if (Thread.currentThread().getContextClassLoader() != movedTCCL)
-                    Thread.currentThread().setContextClassLoader(movedTCCL);
-            };
+        return new ThreadContextSnapshot() {
+            @Override
+            public ThreadContextController begin() {
+                ClassLoader movedTCCL = Thread.currentThread().getContextClassLoader();
+                if (capturedTCCL != movedTCCL)
+                    Thread.currentThread().setContextClassLoader(capturedTCCL);
+                return new ThreadContextController() {
+                    @Override
+                    public void endContext() throws IllegalStateException {
+                        if (Thread.currentThread().getContextClassLoader() != movedTCCL)
+                            Thread.currentThread().setContextClassLoader(movedTCCL);
+                    }
+                };
+            }
         };
     }
 
     @Override
     public ThreadContextSnapshot clearedContext(Map<String, String> props) {
         ClassLoader capturedTCCL = SYSTEM_CL;
-        return () -> {
-            ClassLoader movedTCCL = Thread.currentThread().getContextClassLoader();
-            if (capturedTCCL != movedTCCL)
-                Thread.currentThread().setContextClassLoader(capturedTCCL);
-            return () -> {
-                if (Thread.currentThread().getContextClassLoader() != movedTCCL)
-                    Thread.currentThread().setContextClassLoader(movedTCCL);
-            };
+        return new ThreadContextSnapshot() {
+            @Override
+            public ThreadContextController begin() {
+                ClassLoader movedTCCL = Thread.currentThread().getContextClassLoader();
+                if (capturedTCCL != movedTCCL)
+                    Thread.currentThread().setContextClassLoader(capturedTCCL);
+                return new ThreadContextController() {
+                    @Override
+                    public void endContext() throws IllegalStateException {
+                        if (Thread.currentThread().getContextClassLoader() != movedTCCL)
+                            Thread.currentThread().setContextClassLoader(movedTCCL);
+                    }
+                };
+            }
         };
     }
 

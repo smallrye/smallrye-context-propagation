@@ -23,6 +23,12 @@ import io.smallrye.context.impl.ThreadContextProviderPlan;
 public class SmallRyeThreadContext implements ThreadContext {
 
     private final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = new ThreadLocal<>();
+    private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
+        @Override
+        public void close() {
+            currentThreadContext.remove();
+        }
+    };
 
     /**
      * Updates the current @{link SmallRyeThreadContext} in use by the current thread, and returns an
@@ -34,9 +40,18 @@ public class SmallRyeThreadContext implements ThreadContext {
     public static CleanAutoCloseable withThreadContext(SmallRyeThreadContext threadContext) {
         SmallRyeThreadContext oldValue = currentThreadContext.get();
         currentThreadContext.set(threadContext);
-        return () -> {
-            currentThreadContext.set(oldValue);
-        };
+        if (oldValue == null) {
+            //For restoring null values we can optimise this a little:
+            return NULL_THREAD_STATE;
+        } else {
+            return new CleanAutoCloseable() {
+                @Override
+                public void close() {
+                    currentThreadContext.set(oldValue);
+                }
+            };
+        }
+
     }
 
     /**
@@ -47,8 +62,16 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @param f the @{link Runnable} to invoke
      */
     public static void withThreadContext(SmallRyeThreadContext threadContext, Runnable f) {
-        try (CleanAutoCloseable foo = withThreadContext(threadContext)) {
+        final SmallRyeThreadContext oldValue = currentThreadContext.get();
+        currentThreadContext.set(threadContext);
+        try {
             f.run();
+        } finally {
+            if (oldValue == null) {
+                currentThreadContext.remove();
+            } else {
+                currentThreadContext.set(oldValue);
+            }
         }
     }
 
