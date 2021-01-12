@@ -24,7 +24,7 @@ public class ContextPropagatorOnMaybeCreateAction implements BiFunction<Maybe, M
         return new ContextCapturerMaybe<>(maybe, observer, threadContext.currentContextExecutor());
     }
 
-    public class ContextCapturerMaybe<T> implements MaybeObserver<T> {
+    public static class ContextCapturerMaybe<T> implements MaybeObserver<T> {
 
         private final MaybeObserver<T> source;
 

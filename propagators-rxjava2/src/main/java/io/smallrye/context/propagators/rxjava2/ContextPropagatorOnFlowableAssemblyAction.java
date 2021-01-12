@@ -23,9 +23,9 @@ public class ContextPropagatorOnFlowableAssemblyAction implements Function<Flowa
         return new ContextPropagatorFlowable(t, threadContext.currentContextExecutor());
     }
 
-    public class ContextPropagatorFlowable<T> extends Flowable<T> {
+    public static class ContextPropagatorFlowable<T> extends Flowable<T> {
 
-        private Flowable<T> source;
+        private final Flowable<T> source;
 
         private final Executor contextExecutor;
 

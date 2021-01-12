@@ -23,9 +23,9 @@ public class ContextPropagatorOnObservableAssemblyAction implements Function<Obs
         return new ContextPropagatorObservable(t, threadContext.currentContextExecutor());
     }
 
-    public class ContextPropagatorObservable<T> extends Observable<T> {
+    public static class ContextPropagatorObservable<T> extends Observable<T> {
 
-        private Observable<T> source;
+        private final Observable<T> source;
 
         private final Executor contextExecutor;
 
