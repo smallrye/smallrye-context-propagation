@@ -24,7 +24,7 @@ public class ContextPropagatorOnObservableCreateAction implements BiFunction<Obs
         return new ContextCapturerObservable(observable, observer, threadContext.currentContextExecutor());
     }
 
-    public class ContextCapturerObservable<T> implements Observer<T> {
+    public static class ContextCapturerObservable<T> implements Observer<T> {
 
         private final Observer<T> source;
 

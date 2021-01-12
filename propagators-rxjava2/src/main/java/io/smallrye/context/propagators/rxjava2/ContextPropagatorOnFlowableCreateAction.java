@@ -24,7 +24,7 @@ public class ContextPropagatorOnFlowableCreateAction implements BiFunction<Flowa
         return new ContextCapturerFlowable<>(flowable, observer, threadContext.currentContextExecutor());
     }
 
-    public class ContextCapturerFlowable<T> implements Subscriber<T> {
+    public static class ContextCapturerFlowable<T> implements Subscriber<T> {
 
         private final Subscriber<T> source;
 

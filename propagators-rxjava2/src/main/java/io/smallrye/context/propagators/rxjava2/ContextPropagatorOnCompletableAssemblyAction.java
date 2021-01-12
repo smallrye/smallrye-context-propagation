@@ -21,11 +21,11 @@ public class ContextPropagatorOnCompletableAssemblyAction implements Function<Co
         return new ContextPropagatorCompletable(t, threadContext.currentContextExecutor());
     }
 
-    public class ContextPropagatorCompletable extends Completable {
+    public static class ContextPropagatorCompletable extends Completable {
 
-        private Completable source;
+        private final Completable source;
 
-        private Executor contextExecutor;
+        private final Executor contextExecutor;
 
         public ContextPropagatorCompletable(Completable t, Executor contextExecutor) {
             this.source = t;

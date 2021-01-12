@@ -23,9 +23,9 @@ public class ContextPropagatorOnSingleAssemblyAction implements Function<Single,
         return new ContextPropagatorSingle(t, threadContext.currentContextExecutor());
     }
 
-    public class ContextPropagatorSingle<T> extends Single<T> {
+    public static class ContextPropagatorSingle<T> extends Single<T> {
 
-        private Single<T> source;
+        private final Single<T> source;
 
         private final Executor contextExecutor;
 

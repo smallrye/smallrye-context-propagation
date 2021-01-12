@@ -23,9 +23,9 @@ public class ContextPropagatorOnMaybeAssemblyAction implements Function<Maybe, M
         return new ContextPropagatorMaybe(t, threadContext.currentContextExecutor());
     }
 
-    public class ContextPropagatorMaybe<T> extends Maybe<T> {
+    public static class ContextPropagatorMaybe<T> extends Maybe<T> {
 
-        private Maybe<T> source;
+        private final Maybe<T> source;
 
         private final Executor contextExecutor;
 
