@@ -279,22 +279,26 @@ public class SmallRyeThreadContext implements ThreadContext {
         return getPlan().takeThreadContextSnapshotsFast(this, currentThreadContext);
     }
 
-    public void applyContext(Object[] context) {
-        for (int i = 0; i < context.length; i += 3) {
+    public Object[] applyContext(Object[] context) {
+        Object[] moved = new Object[context.length / 2];
+        for (int i = 0, m = 0; i < context.length; i += 2, m++) {
             @SuppressWarnings("unchecked")
             ThreadLocal<Object> tl = (ThreadLocal<Object>) context[i];
-            context[i + 2] = tl.get();
+            // get the current value
+            moved[m] = tl.get();
+            // set our captured value
             tl.set(context[i + 1]);
         }
+        return moved;
     }
 
-    public void restoreContext(Object[] context) {
+    public void restoreContext(Object[] context, Object[] moved) {
         // reversed
-        for (int i = context.length - 3; i >= 0; i -= 3) {
+        for (int i = context.length - 2, m = moved.length - 1; i >= 0; i -= 2, m--) {
             @SuppressWarnings("unchecked")
             ThreadLocal<Object> tl = (ThreadLocal<Object>) context[i];
-            context[i + 2] = tl.get();
-            tl.set(context[i + 1]);
+            // restore the moved value
+            tl.set(moved[m]);
         }
     }
 

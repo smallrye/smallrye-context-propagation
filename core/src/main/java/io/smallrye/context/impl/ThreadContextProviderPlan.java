@@ -83,25 +83,22 @@ public class ThreadContextProviderPlan {
         if (!fast)
             throw new IllegalStateException("This ThreadContext includes non-fast providers: " + this.clearedProviders + " and "
                     + this.propagatedProviders);
-        // layout is [TL, capturedValue, movedValue]*
-        Object[] threadContextSnapshots = new Object[(snapshotInitialSize + 1) * 3];
+        // layout is [TL, capturedValue]*
+        Object[] threadContextSnapshots = new Object[(snapshotInitialSize + 1) * 2];
         final Map<String, String> props = Collections.emptyMap();
         int i = 0;
         for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
             ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
             threadContextSnapshots[i++] = tl;
             threadContextSnapshots[i++] = tl.get();
-            threadContextSnapshots[i++] = null;
         }
         for (ThreadContextProvider provider : clearedProvidersFastIterable) {
             ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
             threadContextSnapshots[i++] = tl;
             threadContextSnapshots[i++] = ((FastThreadContextProvider) provider).clearedValue(props);
-            threadContextSnapshots[i++] = null;
         }
         threadContextSnapshots[i++] = tcTl;
         threadContextSnapshots[i++] = threadContext;
-        threadContextSnapshots[i++] = null;
         return threadContextSnapshots;
     }
 }

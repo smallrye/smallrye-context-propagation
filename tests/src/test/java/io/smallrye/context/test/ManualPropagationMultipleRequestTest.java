@@ -91,24 +91,24 @@ public class ManualPropagationMultipleRequestTest {
         newRequest("req 1");
         Object[] ctx1 = minimalThreadContext.captureContext();
         Future<?> task1 = executor.submit(() -> {
-            minimalThreadContext.applyContext(ctx1);
+            Object[] moved = minimalThreadContext.applyContext(ctx1);
             try {
                 checkContextCaptured("req 1");
                 endOfRequest();
             } finally {
-                minimalThreadContext.restoreContext(ctx1);
+                minimalThreadContext.restoreContext(ctx1, moved);
             }
         });
 
         newRequest("req 2");
         Object[] ctx2 = minimalThreadContext.captureContext();
         Future<?> task2 = executor.submit(() -> {
-            minimalThreadContext.applyContext(ctx2);
+            Object[] moved = minimalThreadContext.applyContext(ctx2);
             try {
                 checkContextCaptured("req 2");
                 endOfRequest();
             } finally {
-                minimalThreadContext.restoreContext(ctx2);
+                minimalThreadContext.restoreContext(ctx2, moved);
             }
         });
 
