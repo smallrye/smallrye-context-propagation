@@ -12,7 +12,7 @@ class RESTEasy_QuarkusStorage extends ThreadLocal<List<Map<Class<?>, Object>>> {
     public List<Map<Class<?>, Object>> get() {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            return ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).resteasy;
+            return (List<Map<Class<?>, Object>>) ((QuarkusThread) currentThread).getQuarkusThreadContext()[0];
         } else {
             return super.get();
         }
@@ -22,7 +22,7 @@ class RESTEasy_QuarkusStorage extends ThreadLocal<List<Map<Class<?>, Object>>> {
     public void set(List<Map<Class<?>, Object>> t) {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).resteasy = t;
+            ((QuarkusThread) currentThread).getQuarkusThreadContext()[0] = t;
         } else {
             super.set(t);
         }
@@ -32,7 +32,7 @@ class RESTEasy_QuarkusStorage extends ThreadLocal<List<Map<Class<?>, Object>>> {
     public void remove() {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).resteasy = null;
+            ((QuarkusThread) currentThread).getQuarkusThreadContext()[0] = null;
         } else {
             super.remove();
         }

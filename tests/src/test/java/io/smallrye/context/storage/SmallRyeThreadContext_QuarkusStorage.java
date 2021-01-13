@@ -11,7 +11,7 @@ class SmallRyeThreadContext_QuarkusStorage extends ThreadLocal<SmallRyeThreadCon
     public SmallRyeThreadContext get() {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            return ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).smallRyeThreadContext;
+            return (SmallRyeThreadContext) ((QuarkusThread) currentThread).getQuarkusThreadContext()[1];
         } else {
             return super.get();
         }
@@ -21,7 +21,7 @@ class SmallRyeThreadContext_QuarkusStorage extends ThreadLocal<SmallRyeThreadCon
     public void set(SmallRyeThreadContext t) {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).smallRyeThreadContext = t;
+            ((QuarkusThread) currentThread).getQuarkusThreadContext()[1] = t;
         } else {
             super.set(t);
         }
@@ -31,7 +31,7 @@ class SmallRyeThreadContext_QuarkusStorage extends ThreadLocal<SmallRyeThreadCon
     public void remove() {
         Thread currentThread = Thread.currentThread();
         if (currentThread instanceof QuarkusThread) {
-            ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).smallRyeThreadContext = null;
+            ((QuarkusThread) currentThread).getQuarkusThreadContext()[1] = null;
         } else {
             super.remove();
         }

@@ -5,8 +5,8 @@ package io.smallrye.context.storage;
  */
 interface QuarkusThread {
 
-    QuarkusThreadContext getQuarkusThreadContext();
+    Object[] getQuarkusThreadContext();
 
     // Experimental
-    void setQuarkusThreadContext(QuarkusThreadContext context);
+    //    void setQuarkusThreadContext(QuarkusThreadContext context);
 }

@@ -25,7 +25,7 @@ class QuarkusStorageManager implements StorageManager {
         return (QuarkusStorageManager) StorageManager.instance();
     }
 
-    public QuarkusThreadContext newContext() {
-        return new QuarkusThreadContextImpl();
+    public Object[] newContext() {
+        return new Object[2];
     }
 }
