@@ -9,10 +9,10 @@ import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManager.Builder;
 import org.eclipse.microprofile.context.spi.ContextManagerProvider;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import io.smallrye.context.storage.spi.StorageManagerProvider;
 import io.smallrye.context.storage.spi.StorageManagerProviderRegistration;
@@ -21,12 +21,12 @@ public class StorageTest {
 
     private static StorageManagerProviderRegistration registration;
 
-    @BeforeAll
+    @BeforeClass
     public static void beforeAll() {
         registration = StorageManagerProvider.register(new QuarkusStorageManagerProvider());
     }
 
-    @AfterAll
+    @AfterClass
     public static void afterAll() {
         registration.unregister();
         registration = null;
@@ -62,9 +62,9 @@ public class StorageTest {
 
     private void testContext(ThreadContext tc) {
         // make sure we have no context
-        Assertions.assertNull(RESTEasyContext.getContext(Integer.class));
+        Assert.assertNull(RESTEasyContext.getContext(Integer.class));
         // make sure we can capture the lack of context
-        Runnable noContext = tc.contextualRunnable(() -> Assertions.assertNull(RESTEasyContext.getContext(Integer.class)));
+        Runnable noContext = tc.contextualRunnable(() -> Assert.assertNull(RESTEasyContext.getContext(Integer.class)));
         Runnable withContext;
 
         // add a new context level
@@ -72,14 +72,15 @@ public class StorageTest {
             // put some context
             RESTEasyContext.pushContext(Integer.class, 42);
             // make sure we have context
-            Assertions.assertEquals(42, RESTEasyContext.getContext(Integer.class));
+            Assert.assertEquals((Integer) 42, RESTEasyContext.getContext(Integer.class));
             // make sure we can capture this context
-            withContext = tc.contextualRunnable(() -> Assertions.assertEquals(42, RESTEasyContext.getContext(Integer.class)));
+            withContext = tc
+                    .contextualRunnable(() -> Assert.assertEquals((Integer) 42, RESTEasyContext.getContext(Integer.class)));
             // make sure we have no context when running this
             noContext.run();
         }
         // make sure the context is gone
-        Assertions.assertNull(RESTEasyContext.getContext(Integer.class));
+        Assert.assertNull(RESTEasyContext.getContext(Integer.class));
         // make sure we have context when running this
         withContext.run();
     }

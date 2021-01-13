@@ -3,12 +3,10 @@ package io.smallrye.context.storage;
 import java.util.List;
 import java.util.Map;
 
-import io.smallrye.context.storage.spi.ThreadLocalStorageSlot;
-
 /**
  * This class is generated based on the discovery of RESTEasyContextStorageRequirement
  */
-class RESTEasy_QuarkusStorage extends ThreadLocalStorageSlot<List<Map<Class<?>, Object>>> {
+class RESTEasy_QuarkusStorage extends ThreadLocal<List<Map<Class<?>, Object>>> {
 
     @Override
     public List<Map<Class<?>, Object>> get() {
@@ -16,7 +14,7 @@ class RESTEasy_QuarkusStorage extends ThreadLocalStorageSlot<List<Map<Class<?>, 
         if (currentThread instanceof QuarkusThread) {
             return ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).resteasy;
         } else {
-            return threadLocal.get();
+            return super.get();
         }
     }
 
@@ -26,7 +24,7 @@ class RESTEasy_QuarkusStorage extends ThreadLocalStorageSlot<List<Map<Class<?>, 
         if (currentThread instanceof QuarkusThread) {
             ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).resteasy = t;
         } else {
-            threadLocal.set(t);
+            super.set(t);
         }
     }
 
@@ -36,7 +34,7 @@ class RESTEasy_QuarkusStorage extends ThreadLocalStorageSlot<List<Map<Class<?>, 
         if (currentThread instanceof QuarkusThread) {
             ((QuarkusThreadContextImpl) ((QuarkusThread) currentThread).getQuarkusThreadContext()).resteasy = null;
         } else {
-            threadLocal.remove();
+            super.remove();
         }
     }
 }

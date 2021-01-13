@@ -18,12 +18,15 @@ import io.smallrye.context.impl.ActiveContextState;
 import io.smallrye.context.impl.CapturedContextState;
 import io.smallrye.context.impl.Contextualized;
 import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.impl.SmallRyeThreadContextStorageDeclaration;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
+import io.smallrye.context.storage.spi.StorageManager;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
-    // FIXME: don't make this public
-    public final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = new ThreadLocal<>();
+    private final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = StorageManager
+            .threadLocal(SmallRyeThreadContextStorageDeclaration.class);
+
     private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
         @Override
         public void close() {
@@ -273,7 +276,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     public Object[] captureContext() {
-        return getPlan().takeThreadContextSnapshotsFast(this);
+        return getPlan().takeThreadContextSnapshotsFast(this, currentThreadContext);
     }
 
     public void applyContext(Object[] context) {

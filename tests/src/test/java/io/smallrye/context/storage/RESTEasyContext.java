@@ -5,14 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.smallrye.context.storage.spi.StorageManager;
+
 /**
  * This is a fake version of ResteasyContext from RESTEasy, where it stores its ThreadLocal Stack of Map contexts.
  * I use this to validate our API without modifying RESTEasy for now.
  */
 class RESTEasyContext {
 
-    static final ThreadLocalStorage<List<Map<Class<?>, Object>>> context = new ThreadLocalStorage<List<Map<Class<?>, Object>>>() {
-    };
+    static final ThreadLocal<List<Map<Class<?>, Object>>> context = StorageManager
+            .threadLocal(RESTEasyStorageDeclaration.class);
 
     static <T> T getContext(Class<T> klass) {
         Map<Class<?>, Object> context = getContext();

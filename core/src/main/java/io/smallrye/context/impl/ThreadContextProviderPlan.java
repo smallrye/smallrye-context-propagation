@@ -78,7 +78,8 @@ public class ThreadContextProviderPlan {
         return threadContextSnapshots;
     }
 
-    public Object[] takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext) {
+    public Object[] takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
+            ThreadLocal<SmallRyeThreadContext> tcTl) {
         if (!fast)
             throw new IllegalStateException("This ThreadContext includes non-fast providers: " + this.clearedProviders + " and "
                     + this.propagatedProviders);
@@ -98,8 +99,7 @@ public class ThreadContextProviderPlan {
             threadContextSnapshots[i++] = ((FastThreadContextProvider) provider).clearedValue(props);
             threadContextSnapshots[i++] = null;
         }
-        // FIXME: this should not be public
-        threadContextSnapshots[i++] = SmallRyeThreadContext.currentThreadContext;
+        threadContextSnapshots[i++] = tcTl;
         threadContextSnapshots[i++] = threadContext;
         threadContextSnapshots[i++] = null;
         return threadContextSnapshots;
