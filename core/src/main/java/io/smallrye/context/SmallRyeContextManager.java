@@ -32,12 +32,11 @@ public class SmallRyeContextManager implements ContextManager {
 
     public static final String[] ALL_REMAINING_ARRAY = new String[] { ThreadContext.ALL_REMAINING };
 
-    private List<ThreadContextProvider> providers;
-    private List<ContextManagerExtension> extensions;
-    private Map<String, ThreadContextProvider> providersByType;
-    private String[] allProviderTypes;
-    private DefaultValues defaultValues;
-    private ExecutorService defaultExecutorService;
+    private final List<ContextManagerExtension> extensions;
+    private final Map<String, ThreadContextProvider> providersByType;
+    private final String[] allProviderTypes;
+    private final DefaultValues defaultValues;
+    private final ExecutorService defaultExecutorService;
 
     private SmallRyeThreadContext allPropagatedThreadContext;
     private SmallRyeThreadContext allClearedThreadContext;
@@ -45,7 +44,7 @@ public class SmallRyeContextManager implements ContextManager {
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
             ExecutorService defaultExecutorService) {
         this.defaultExecutorService = defaultExecutorService;
-        this.providers = new ArrayList<ThreadContextProvider>(providers);
+        List<ThreadContextProvider> providersCopy = new ArrayList<>(providers);
         providersByType = new HashMap<>();
         for (ThreadContextProvider provider : providers) {
             String type = provider.getThreadContextType();
@@ -55,8 +54,8 @@ public class SmallRyeContextManager implements ContextManager {
                         + " first instance: " + providersByType.get(type) + ", second instance: " + provider);
             providersByType.put(type, provider);
         }
-        allProviderTypes = providersByType.keySet().toArray(new String[this.providers.size()]);
-        this.extensions = new ArrayList<ContextManagerExtension>(extensions);
+        allProviderTypes = providersByType.keySet().toArray(new String[providersCopy.size()]);
+        this.extensions = new ArrayList<>(extensions);
         this.defaultValues = new DefaultValues();
         // Extensions may call our methods, so do all init before we call this
         for (ContextManagerExtension extension : extensions) {
@@ -246,8 +245,8 @@ public class SmallRyeContextManager implements ContextManager {
         private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         private boolean addDiscoveredThreadContextProviders;
         private boolean addDiscoveredContextManagerExtensions;
-        private List<ThreadContextProvider> contextProviders = new ArrayList<>();
-        private List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
+        private final List<ThreadContextProvider> contextProviders = new ArrayList<>();
+        private final List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
         private ExecutorService defaultExecutorService;
 
         @Override
