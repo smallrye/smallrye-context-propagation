@@ -2,7 +2,7 @@ package io.smallrye.context.test;
 
 public class MyContext {
 
-    private static ThreadLocal<MyContext> context = new ThreadLocal<MyContext>();
+    static ThreadLocal<MyContext> context = new ThreadLocal<MyContext>();
 
     public static void init() {
         context.set(new MyContext());

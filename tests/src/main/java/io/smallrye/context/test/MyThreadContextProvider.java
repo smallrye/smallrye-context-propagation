@@ -2,10 +2,11 @@ package io.smallrye.context.test;
 
 import java.util.Map;
 
-import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
-public class MyThreadContextProvider implements ThreadContextProvider {
+import io.smallrye.context.FastThreadContextProvider;
+
+public class MyThreadContextProvider implements FastThreadContextProvider {
 
     public static final String MY_CONTEXT_TYPE = "MyContext";
 
@@ -38,6 +39,16 @@ public class MyThreadContextProvider implements ThreadContextProvider {
     @Override
     public String getThreadContextType() {
         return MY_CONTEXT_TYPE;
+    }
+
+    @Override
+    public ThreadLocal<?> threadLocal(Map<String, String> props) {
+        return MyContext.context;
+    }
+
+    @Override
+    public Object clearedValue(Map<String, String> props) {
+        return null;
     }
 
 }

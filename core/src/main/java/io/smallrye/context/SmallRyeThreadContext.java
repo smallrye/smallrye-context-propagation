@@ -22,7 +22,8 @@ import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
-    private final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = new ThreadLocal<>();
+    // FIXME: don't make this public
+    public final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = new ThreadLocal<>();
     private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
         @Override
         public void close() {
@@ -269,6 +270,29 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     public static Builder builder() {
         return SmallRyeContextManagerProvider.instance().getContextManager().newThreadContextBuilder();
+    }
+
+    public Object[] captureContext() {
+        return getPlan().takeThreadContextSnapshotsFast(this);
+    }
+
+    public void applyContext(Object[] context) {
+        for (int i = 0; i < context.length; i += 3) {
+            @SuppressWarnings("unchecked")
+            ThreadLocal<Object> tl = (ThreadLocal<Object>) context[i];
+            context[i + 2] = tl.get();
+            tl.set(context[i + 1]);
+        }
+    }
+
+    public void restoreContext(Object[] context) {
+        // reversed
+        for (int i = context.length - 3; i >= 0; i -= 3) {
+            @SuppressWarnings("unchecked")
+            ThreadLocal<Object> tl = (ThreadLocal<Object>) context[i];
+            context[i + 2] = tl.get();
+            tl.set(context[i + 1]);
+        }
     }
 
     //

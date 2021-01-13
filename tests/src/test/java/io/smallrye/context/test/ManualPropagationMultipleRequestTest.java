@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ContextManagerProvider;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -18,11 +19,17 @@ import io.smallrye.context.SmallRyeThreadContext;
 public class ManualPropagationMultipleRequestTest {
 
     private static SmallRyeThreadContext threadContext;
+    private static SmallRyeThreadContext minimalThreadContext;
 
     @BeforeClass
     public static void init() {
         SmallRyeContextManagerProvider.getManager();
         threadContext = (SmallRyeThreadContext) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder()
+                .build();
+        minimalThreadContext = (SmallRyeThreadContext) ContextManagerProvider.instance().getContextManager()
+                .newThreadContextBuilder()
+                .propagated(MyThreadContextProvider.MY_CONTEXT_TYPE)
+                .unchanged(ThreadContext.ALL_REMAINING)
                 .build();
     }
 
@@ -59,6 +66,51 @@ public class ManualPropagationMultipleRequestTest {
             checkContextCaptured("req 2");
             endOfRequest();
         }));
+
+        task1.get();
+        task2.get();
+        executor.shutdown();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testFastContextWithSlowProviders() throws Throwable {
+        threadContext.captureContext();
+    }
+
+    @Test
+    public void testFastRunnableOnSingleWorkerThread() throws Throwable {
+        testFastRunnable(Executors.newFixedThreadPool(1));
+    }
+
+    @Test
+    public void testFastRunnableOnTwoWorkerThread() throws Throwable {
+        testFastRunnable(Executors.newFixedThreadPool(2));
+    }
+
+    private void testFastRunnable(ExecutorService executor) throws Throwable {
+        newRequest("req 1");
+        Object[] ctx1 = minimalThreadContext.captureContext();
+        Future<?> task1 = executor.submit(() -> {
+            minimalThreadContext.applyContext(ctx1);
+            try {
+                checkContextCaptured("req 1");
+                endOfRequest();
+            } finally {
+                minimalThreadContext.restoreContext(ctx1);
+            }
+        });
+
+        newRequest("req 2");
+        Object[] ctx2 = minimalThreadContext.captureContext();
+        Future<?> task2 = executor.submit(() -> {
+            minimalThreadContext.applyContext(ctx2);
+            try {
+                checkContextCaptured("req 2");
+                endOfRequest();
+            } finally {
+                minimalThreadContext.restoreContext(ctx2);
+            }
+        });
 
         task1.get();
         task2.get();

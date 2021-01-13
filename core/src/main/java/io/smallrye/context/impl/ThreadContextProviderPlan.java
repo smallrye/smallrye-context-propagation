@@ -9,6 +9,9 @@ import java.util.Set;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
+import io.smallrye.context.FastThreadContextProvider;
+import io.smallrye.context.SmallRyeThreadContext;
+
 public class ThreadContextProviderPlan {
 
     public final Set<ThreadContextProvider> propagatedProviders;
@@ -22,6 +25,7 @@ public class ThreadContextProviderPlan {
     private final int snapshotInitialSize;
     private final ThreadContextProvider[] propagatedProvidersFastIterable;
     private final ThreadContextProvider[] clearedProvidersFastIterable;
+    private boolean fast;
 
     public ThreadContextProviderPlan(Set<ThreadContextProvider> propagatedSet, Set<ThreadContextProvider> unchangedSet,
             Set<ThreadContextProvider> clearedSet) {
@@ -31,6 +35,22 @@ public class ThreadContextProviderPlan {
         this.snapshotInitialSize = propagatedProviders.size() + clearedProviders.size();
         this.propagatedProvidersFastIterable = propagatedProviders.toArray(new ThreadContextProvider[0]);
         this.clearedProvidersFastIterable = clearedProviders.toArray(new ThreadContextProvider[0]);
+        boolean fast = true;
+        for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
+            if (provider instanceof FastThreadContextProvider == false) {
+                fast = false;
+                break;
+            }
+        }
+        if (fast) {
+            for (ThreadContextProvider provider : clearedProvidersFastIterable) {
+                if (provider instanceof FastThreadContextProvider == false) {
+                    fast = false;
+                    break;
+                }
+            }
+        }
+        this.fast = fast;
     }
 
     /**
@@ -55,6 +75,33 @@ public class ThreadContextProviderPlan {
                 threadContextSnapshots.add(snapshot);
             }
         }
+        return threadContextSnapshots;
+    }
+
+    public Object[] takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext) {
+        if (!fast)
+            throw new IllegalStateException("This ThreadContext includes non-fast providers: " + this.clearedProviders + " and "
+                    + this.propagatedProviders);
+        // layout is [TL, capturedValue, movedValue]*
+        Object[] threadContextSnapshots = new Object[(snapshotInitialSize + 1) * 3];
+        final Map<String, String> props = Collections.emptyMap();
+        int i = 0;
+        for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
+            ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
+            threadContextSnapshots[i++] = tl;
+            threadContextSnapshots[i++] = tl.get();
+            threadContextSnapshots[i++] = null;
+        }
+        for (ThreadContextProvider provider : clearedProvidersFastIterable) {
+            ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
+            threadContextSnapshots[i++] = tl;
+            threadContextSnapshots[i++] = ((FastThreadContextProvider) provider).clearedValue(props);
+            threadContextSnapshots[i++] = null;
+        }
+        // FIXME: this should not be public
+        threadContextSnapshots[i++] = SmallRyeThreadContext.currentThreadContext;
+        threadContextSnapshots[i++] = threadContext;
+        threadContextSnapshots[i++] = null;
         return threadContextSnapshots;
     }
 }

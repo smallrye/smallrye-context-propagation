@@ -6,12 +6,29 @@ import java.util.Map;
 
 import org.eclipse.microprofile.context.ThreadContext;
 import org.eclipse.microprofile.context.spi.ThreadContextController;
-import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
-public class ApplicationContextProvider implements ThreadContextProvider {
+import io.smallrye.context.FastThreadContextProvider;
+
+public class ApplicationContextProvider implements FastThreadContextProvider {
 
     static final ClassLoader SYSTEM_CL;
+    static final ThreadLocal<ClassLoader> PRETEND_TL = new ThreadLocal<ClassLoader>() {
+        @Override
+        public ClassLoader get() {
+            return Thread.currentThread().getContextClassLoader();
+        }
+
+        @Override
+        public void set(ClassLoader value) {
+            Thread.currentThread().setContextClassLoader(value);
+        }
+
+        @Override
+        public void remove() {
+            Thread.currentThread().setContextClassLoader(SYSTEM_CL);
+        }
+    };
 
     static {
         final SecurityManager sm = System.getSecurityManager();
@@ -76,5 +93,15 @@ public class ApplicationContextProvider implements ThreadContextProvider {
     @Override
     public String getThreadContextType() {
         return ThreadContext.APPLICATION;
+    }
+
+    @Override
+    public ThreadLocal<?> threadLocal(Map<String, String> props) {
+        return PRETEND_TL;
+    }
+
+    @Override
+    public Object clearedValue(Map<String, String> props) {
+        return SYSTEM_CL;
     }
 }
