@@ -119,7 +119,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         return getCurrentThreadContext(null);
     }
 
-    private final class ContextualSupplier<R> implements Supplier<R>, Contextualized {
+    private static final class ContextualSupplier<R> implements Supplier<R>, Contextualized {
         private final CapturedContextState state;
         private final Supplier<R> supplier;
 
@@ -136,7 +136,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
     }
 
-    private final class ContextualRunnable implements Runnable, Contextualized {
+    private static final class ContextualRunnable implements Runnable, Contextualized {
         private final Runnable runnable;
         private final CapturedContextState state;
 
@@ -153,7 +153,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
     }
 
-    private final class ContextualFunction<T, R> implements Function<T, R>, Contextualized {
+    private static final class ContextualFunction<T, R> implements Function<T, R>, Contextualized {
         private final CapturedContextState state;
         private final Function<T, R> function;
 
@@ -170,7 +170,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
     }
 
-    private final class ContextualConsumer<T> implements Consumer<T>, Contextualized {
+    private static final class ContextualConsumer<T> implements Consumer<T>, Contextualized {
         private final CapturedContextState state;
         private final Consumer<T> consumer;
 
@@ -187,7 +187,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
     }
 
-    private final class ContextualCallable<R> implements Callable<R>, Contextualized {
+    private static final class ContextualCallable<R> implements Callable<R>, Contextualized {
         private final CapturedContextState state;
         private final Callable<R> callable;
 
@@ -204,7 +204,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
     }
 
-    private final class ContextualBiFunction<T, U, R> implements BiFunction<T, U, R>, Contextualized {
+    private static final class ContextualBiFunction<T, U, R> implements BiFunction<T, U, R>, Contextualized {
         private final CapturedContextState state;
         private final BiFunction<T, U, R> function;
 
@@ -221,7 +221,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         }
     }
 
-    private final class ContextualBiConsumer<T, U> implements BiConsumer<T, U>, Contextualized {
+    private static final class ContextualBiConsumer<T, U> implements BiConsumer<T, U>, Contextualized {
         private final BiConsumer<T, U> consumer;
         private final CapturedContextState state;
 
@@ -686,7 +686,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         private String[] propagated;
         private String[] unchanged;
         private String[] cleared;
-        private SmallRyeContextManager manager;
+        private final SmallRyeContextManager manager;
         private String injectionPointName = null;
 
         public Builder(SmallRyeContextManager manager) {

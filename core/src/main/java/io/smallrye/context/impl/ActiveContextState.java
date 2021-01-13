@@ -10,8 +10,8 @@ import io.smallrye.context.SmallRyeThreadContext;
 
 public class ActiveContextState implements AutoCloseable {
 
-    private ThreadContextController[] activeContext;
-    private CleanAutoCloseable activeThreadContext;
+    private final ThreadContextController[] activeContext;
+    private final CleanAutoCloseable activeThreadContext;
 
     public ActiveContextState(SmallRyeThreadContext threadContext, List<ThreadContextSnapshot> threadContextSnapshots) {
         activeContext = new ThreadContextController[threadContextSnapshots.size()];
