@@ -8,12 +8,12 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 import io.smallrye.context.CleanAutoCloseable;
 import io.smallrye.context.SmallRyeThreadContext;
 
-public class ActiveContextState implements AutoCloseable {
+public class SlowActiveContextState implements CleanAutoCloseable {
 
     private final ThreadContextController[] activeContext;
     private final CleanAutoCloseable activeThreadContext;
 
-    public ActiveContextState(SmallRyeThreadContext threadContext, List<ThreadContextSnapshot> threadContextSnapshots) {
+    public SlowActiveContextState(SmallRyeThreadContext threadContext, List<ThreadContextSnapshot> threadContextSnapshots) {
         activeContext = new ThreadContextController[threadContextSnapshots.size()];
         int i = 0;
         for (ThreadContextSnapshot threadContextSnapshot : threadContextSnapshots) {
@@ -22,6 +22,7 @@ public class ActiveContextState implements AutoCloseable {
         activeThreadContext = SmallRyeThreadContext.withThreadContext(threadContext);
     }
 
+    @Override
     public void close() {
         // restore in reverse order
         for (int i = activeContext.length - 1; i >= 0; i--) {

@@ -5,8 +5,9 @@ import io.smallrye.context.storage.spi.StorageManager;
 
 public class MyContext {
 
-    static class Declaration implements StorageDeclaration<MyContext> {}
-    
+    static class Declaration implements StorageDeclaration<MyContext> {
+    }
+
     static ThreadLocal<MyContext> context = StorageManager.threadLocal(Declaration.class);
 
     public static void init() {

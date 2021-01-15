@@ -11,7 +11,7 @@ class QuarkusStorageManager implements StorageManager {
 
     private final static ThreadLocal<?> resteasyStorage = new RESTEasy_QuarkusStorage();
     private final static ThreadLocal<?> threadContextStorage = new SmallRyeThreadContext_QuarkusStorage();
-    
+
     /**
      * This part will be generated depending on the discovered StorageUsers
      */

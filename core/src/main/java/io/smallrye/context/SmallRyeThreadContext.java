@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
-import io.smallrye.context.impl.ActiveContextState;
 import io.smallrye.context.impl.CapturedContextState;
 import io.smallrye.context.impl.Contextualized;
 import io.smallrye.context.impl.DefaultValues;
@@ -24,7 +23,7 @@ import io.smallrye.context.storage.spi.StorageManager;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
-    private final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = StorageManager
+    final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = StorageManager
             .threadLocal(SmallRyeThreadContextStorageDeclaration.class);
 
     private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
@@ -134,7 +133,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R get() {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 return supplier.get();
             }
         }
@@ -151,7 +150,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void run() {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 runnable.run();
             }
         }
@@ -168,7 +167,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R apply(T t) {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 return function.apply(t);
             }
         }
@@ -185,7 +184,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void accept(T t) {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 consumer.accept(t);
             }
         }
@@ -202,7 +201,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R call() throws Exception {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 return callable.call();
             }
         }
@@ -219,7 +218,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public R apply(T t, U u) {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 return function.apply(t, u);
             }
         }
@@ -236,7 +235,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
         @Override
         public void accept(T t, U u) {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 consumer.accept(t, u);
             }
         }
@@ -580,7 +579,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     Executor withContext(CapturedContextState state) {
         return (runnable) -> {
-            try (ActiveContextState activeState = state.begin()) {
+            try (CleanAutoCloseable activeState = state.begin()) {
                 runnable.run();
             }
         };

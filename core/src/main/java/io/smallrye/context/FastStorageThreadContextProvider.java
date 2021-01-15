@@ -9,8 +9,8 @@ public interface FastStorageThreadContextProvider<Declaration extends StorageDec
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public default ThreadLocal<?> threadLocal(Map<String, String> props){
-        return StorageManager.threadLocal((Class)getStorageDeclaration());
+    public default ThreadLocal<?> threadLocal(Map<String, String> props) {
+        return StorageManager.threadLocal((Class) getStorageDeclaration());
     }
 
     Class<Declaration> getStorageDeclaration();

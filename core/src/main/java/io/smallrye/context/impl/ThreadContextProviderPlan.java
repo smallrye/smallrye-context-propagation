@@ -78,6 +78,10 @@ public class ThreadContextProviderPlan {
         return threadContextSnapshots;
     }
 
+    public boolean isFast() {
+        return fast;
+    }
+
     public Object[] takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
             ThreadLocal<SmallRyeThreadContext> tcTl) {
         if (!fast)
