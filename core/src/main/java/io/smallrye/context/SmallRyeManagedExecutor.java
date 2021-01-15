@@ -24,6 +24,8 @@ import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeManagedExecutor implements ManagedExecutor {
 
+    private static final String UNI_APPLY = "java.util.concurrent.CompletableFuture$UniApply";
+
     private final SmallRyeThreadContext threadContext;
     private final int maxAsync;
     private final int maxQueued;
@@ -139,6 +141,12 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
 
     @Override
     public void execute(Runnable command) {
+        if (UNI_APPLY.equals(command.getClass().getName())) {
+            // no need to contextualize this case as this class can only be created internally by the JDK
+            // not by the user. It is created when a completeableFuture.thenApplyAsync is used
+            executeWithoutPropagation(command);
+            return;
+        }
         executor.execute(threadContext.contextualRunnableUnlessContextualized(command));
     }
 
