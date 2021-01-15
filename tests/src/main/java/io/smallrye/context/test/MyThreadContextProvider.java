@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
-import io.smallrye.context.FastThreadContextProvider;
+import io.smallrye.context.FastStorageThreadContextProvider;
 
-public class MyThreadContextProvider implements FastThreadContextProvider {
+public class MyThreadContextProvider implements FastStorageThreadContextProvider<MyContext.Declaration> {
 
     public static final String MY_CONTEXT_TYPE = "MyContext";
 
@@ -42,13 +42,13 @@ public class MyThreadContextProvider implements FastThreadContextProvider {
     }
 
     @Override
-    public ThreadLocal<?> threadLocal(Map<String, String> props) {
-        return MyContext.context;
+    public Object clearedValue(Map<String, String> props) {
+        return null;
     }
 
     @Override
-    public Object clearedValue(Map<String, String> props) {
-        return null;
+    public Class<MyContext.Declaration> getStorageDeclaration() {
+        return MyContext.Declaration.class;
     }
 
 }

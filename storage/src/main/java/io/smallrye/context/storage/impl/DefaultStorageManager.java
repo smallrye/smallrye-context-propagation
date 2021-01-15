@@ -1,12 +1,17 @@
 package io.smallrye.context.storage.impl;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.smallrye.context.storage.spi.StorageDeclaration;
 import io.smallrye.context.storage.spi.StorageManager;
 
 public class DefaultStorageManager implements StorageManager {
 
+    private final Map<Class<?>, ThreadLocal<?>> threadLocals = new ConcurrentHashMap<>();
+
     @Override
-    public <T extends StorageDeclaration<X>, X> ThreadLocal<X> allocateThreadLocal(Class<T> klass) {
-        return new ThreadLocal<>();
+    public <T extends StorageDeclaration<X>, X> ThreadLocal<X> getThreadLocal(Class<T> klass) {
+        return (ThreadLocal<X>) threadLocals.computeIfAbsent(klass, v -> new ThreadLocal<>());
     }
 }
