@@ -82,27 +82,34 @@ public class ThreadContextProviderPlan {
         return fast;
     }
 
-    public Object[] takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
-            ThreadLocal<SmallRyeThreadContext> tcTl) {
+    public void takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
+            ThreadLocal<SmallRyeThreadContext> tcTl,
+            ContextHolder contextHolder) {
         if (!fast)
             throw new IllegalStateException("This ThreadContext includes non-fast providers: " + this.clearedProviders + " and "
                     + this.propagatedProviders);
-        // layout is [TL, capturedValue]*
-        Object[] threadContextSnapshots = new Object[(snapshotInitialSize + 1) * 2];
+        if (snapshotInitialSize == 0)
+            throw new IllegalStateException("Don't capture empty context plans");
         final Map<String, String> props = Collections.emptyMap();
         int i = 0;
         for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
             ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
-            threadContextSnapshots[i++] = tl;
-            threadContextSnapshots[i++] = tl.get();
+            contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl, tl.get());
         }
         for (ThreadContextProvider provider : clearedProvidersFastIterable) {
             ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
-            threadContextSnapshots[i++] = tl;
-            threadContextSnapshots[i++] = ((FastThreadContextProvider) provider).clearedValue(props);
+            contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl,
+                    ((FastThreadContextProvider) provider).clearedValue(props));
         }
-        threadContextSnapshots[i++] = tcTl;
-        threadContextSnapshots[i++] = threadContext;
-        return threadContextSnapshots;
+        contextHolder.captureThreadLocal(i++, (ThreadLocal) tcTl, threadContext);
+    }
+
+    public boolean isEmpty() {
+        return snapshotInitialSize == 0;
+    }
+
+    public int size() {
+        // +1 for our own ThreadLocal<ThreadContext>
+        return snapshotInitialSize + 1;
     }
 }

@@ -72,11 +72,6 @@ public class ManualPropagationMultipleRequestTest {
         executor.shutdown();
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testFastContextWithSlowProviders() throws Throwable {
-        threadContext.captureContext();
-    }
-
     @Test
     public void testFastRunnableOnSingleWorkerThread() throws Throwable {
         testFastRunnable(Executors.newFixedThreadPool(1));
@@ -89,28 +84,16 @@ public class ManualPropagationMultipleRequestTest {
 
     private void testFastRunnable(ExecutorService executor) throws Throwable {
         newRequest("req 1");
-        Object[] ctx1 = minimalThreadContext.captureContext();
-        Future<?> task1 = executor.submit(() -> {
-            Object[] moved = minimalThreadContext.applyContext(ctx1);
-            try {
-                checkContextCaptured("req 1");
-                endOfRequest();
-            } finally {
-                minimalThreadContext.restoreContext(ctx1, moved);
-            }
-        });
+        Future<?> task1 = executor.submit(minimalThreadContext.contextualRunnable(() -> {
+            checkContextCaptured("req 1");
+            endOfRequest();
+        }));
 
         newRequest("req 2");
-        Object[] ctx2 = minimalThreadContext.captureContext();
-        Future<?> task2 = executor.submit(() -> {
-            Object[] moved = minimalThreadContext.applyContext(ctx2);
-            try {
-                checkContextCaptured("req 2");
-                endOfRequest();
-            } finally {
-                minimalThreadContext.restoreContext(ctx2, moved);
-            }
-        });
+        Future<?> task2 = executor.submit(minimalThreadContext.contextualRunnable(() -> {
+            checkContextCaptured("req 2");
+            endOfRequest();
+        }));
 
         task1.get();
         task2.get();

@@ -19,10 +19,7 @@ import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
-import io.smallrye.context.impl.CapturedContextState;
 import io.smallrye.context.impl.DefaultValues;
-import io.smallrye.context.impl.FastCapturedContextState;
-import io.smallrye.context.impl.SlowCapturedContextState;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeContextManager implements ContextManager {
@@ -71,12 +68,6 @@ public class SmallRyeContextManager implements ContextManager {
 
     public String[] getAllProviderTypes() {
         return allProviderTypes;
-    }
-
-    public CapturedContextState captureContext(SmallRyeThreadContext context) {
-        if (context.getPlan().isFast())
-            return new FastCapturedContextState(context, SmallRyeThreadContext.currentThreadContext);
-        return new SlowCapturedContextState(context);
     }
 
     // for tests
