@@ -8,12 +8,19 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.smallrye.context.storage.impl.DefaultStorageManagerProvider;
 
 /**
- * This is where Quarkus registers it has a StorageManager.
+ * SPI to register custom StorageManager implementations
  */
 public interface StorageManagerProvider {
 
     static AtomicReference<StorageManagerProvider> INSTANCE = new AtomicReference<StorageManagerProvider>();
 
+    /**
+     * Returns the currently registered StorageManagerProvider. Will attempt to instantiate one based on
+     * the ServiceLoader for StorageManagerProvider if it is not set. Will default to DefaultStorageManagerProvider
+     * otherwise.
+     * 
+     * @return the currently registered StorageManagerProvider, lazily created.
+     */
     public static StorageManagerProvider instance() {
         StorageManagerProvider provider = INSTANCE.get();
         if (provider == null) {
@@ -31,6 +38,13 @@ public interface StorageManagerProvider {
         return provider;
     }
 
+    /**
+     * Registers and existing StorageManagerProvider
+     * 
+     * @param provider the provider to register
+     * @return a registration object allowing you to unregister it
+     * @throws IllegalStateException when there already is a registered provider
+     */
     public static StorageManagerProviderRegistration register(StorageManagerProvider provider) throws IllegalStateException {
         if (INSTANCE.compareAndSet(null, provider)) {
             return new StorageManagerProviderRegistration(provider);
@@ -39,6 +53,9 @@ public interface StorageManagerProvider {
         }
     }
 
+    /**
+     * @return the current StorageManager, for the current TCCL
+     */
     public default StorageManager getStorageManager() {
         ClassLoader loader = System.getSecurityManager() == null
                 ? Thread.currentThread().getContextClassLoader()
@@ -47,13 +64,11 @@ public interface StorageManagerProvider {
         return getStorageManager(loader);
     }
 
+    /**
+     * Obtain the StorageManager registered for the given ClassLoader
+     * 
+     * @param classloader the classloader to use for looking up the StorageManager
+     * @return the StorageManager registered for the given ClassLoader
+     */
     public StorageManager getStorageManager(ClassLoader classloader);
-
-    public default void registerStorageManager(StorageManager manager, ClassLoader classLoader) {
-        throw new UnsupportedOperationException();
-    }
-
-    public default void releaseStorageManager(StorageManager manager) {
-        throw new UnsupportedOperationException();
-    }
 }
