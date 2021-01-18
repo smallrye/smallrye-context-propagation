@@ -322,6 +322,8 @@ public class SmallRyeContextManager implements ContextManager {
          * Registers the built instance to the current {@link SmallRyeContextManagerProvider} before any extensions
          * are loaded. This is useful because the extensions might require the built {@link SmallRyeContextManager}
          * to be registered on the current class loader in order to use it, so this prevents building two.
+         * 
+         * @return this builder
          */
         public Builder registerOnProvider() {
             this.registerOnProvider = true;
