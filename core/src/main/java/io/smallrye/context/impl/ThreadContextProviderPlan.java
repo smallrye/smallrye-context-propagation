@@ -89,6 +89,7 @@ public class ThreadContextProviderPlan {
      * Use this if @{link {@link #isFast()} is true (it will throw otherwise) when you want to capture the current context
      * using the fast-path, and feed the captured context in the given @{link ContextHolder}, which must have a size compatible
      * with @{link {@link #size()}.
+     * 
      * @param threadContext The thread context settings
      * @param tcTl the current ThreadContext thread-local (for contextual settings)
      * @param contextHolder the contextual lambda in which we will capture context
@@ -117,7 +118,7 @@ public class ThreadContextProviderPlan {
 
     /**
      * @return true if there are no captured/cleared contexts (all unchanged). Note: we don't count
-     * the contextual ThreadContext because we never want to capture/restore it if it's the only one.
+     *         the contextual ThreadContext because we never want to capture/restore it if it's the only one.
      */
     public boolean isEmpty() {
         return snapshotInitialSize == 0;

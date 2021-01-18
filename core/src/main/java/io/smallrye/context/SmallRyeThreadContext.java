@@ -36,6 +36,10 @@ import io.smallrye.context.impl.wrappers.ContextualConsumer;
 import io.smallrye.context.impl.wrappers.ContextualConsumer1;
 import io.smallrye.context.impl.wrappers.ContextualConsumer2;
 import io.smallrye.context.impl.wrappers.ContextualConsumerN;
+import io.smallrye.context.impl.wrappers.ContextualExecutor;
+import io.smallrye.context.impl.wrappers.ContextualExecutor1;
+import io.smallrye.context.impl.wrappers.ContextualExecutor2;
+import io.smallrye.context.impl.wrappers.ContextualExecutorN;
 import io.smallrye.context.impl.wrappers.ContextualFunction;
 import io.smallrye.context.impl.wrappers.ContextualFunction1;
 import io.smallrye.context.impl.wrappers.ContextualFunction2;
@@ -52,6 +56,7 @@ import io.smallrye.context.impl.wrappers.SlowContextualBiConsumer;
 import io.smallrye.context.impl.wrappers.SlowContextualBiFunction;
 import io.smallrye.context.impl.wrappers.SlowContextualCallable;
 import io.smallrye.context.impl.wrappers.SlowContextualConsumer;
+import io.smallrye.context.impl.wrappers.SlowContextualExecutor;
 import io.smallrye.context.impl.wrappers.SlowContextualFunction;
 import io.smallrye.context.impl.wrappers.SlowContextualRunnable;
 import io.smallrye.context.impl.wrappers.SlowContextualSupplier;
@@ -66,6 +71,13 @@ public class SmallRyeThreadContext implements ThreadContext {
         @Override
         public void close() {
             currentThreadContext.remove();
+        }
+    };
+
+    private static final Executor PASSTHROUGH_EXECUTOR = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+            command.run();
         }
     };
 
@@ -462,15 +474,25 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public Executor currentContextExecutor() {
-        return withContext(captureContext());
-    }
-
-    Executor withContext(CapturedContextState state) {
-        return (runnable) -> {
-            try (CleanAutoCloseable activeState = state.begin()) {
-                runnable.run();
+        if (plan.isEmpty())
+            return PASSTHROUGH_EXECUTOR;
+        if (plan.isFast()) {
+            ContextualExecutor ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualExecutor1();
+                    break;
+                case 2:
+                    ret = new ContextualExecutor2();
+                    break;
+                default:
+                    ret = new ContextualExecutorN(plan.size());
+                    break;
             }
-        };
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualExecutor(captureContext());
     }
 
     @Override
