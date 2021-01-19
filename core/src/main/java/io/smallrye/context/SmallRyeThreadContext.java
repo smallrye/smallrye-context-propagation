@@ -207,6 +207,16 @@ public class SmallRyeThreadContext implements ThreadContext {
         return plan.isEmpty();
     }
 
+    /**
+     * Returns true if the given lambda instance is already contextualized
+     * 
+     * @param lambda the lambda to test
+     * @return true if the given lambda instance is already contextualized
+     */
+    public boolean isContextualized(Object lambda) {
+        return lambda instanceof Contextualized;
+    }
+
     public static Builder builder() {
         return SmallRyeContextManagerProvider.instance().getContextManager().newThreadContextBuilder();
     }
