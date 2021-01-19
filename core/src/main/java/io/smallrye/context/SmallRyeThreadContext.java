@@ -197,6 +197,16 @@ public class SmallRyeThreadContext implements ThreadContext {
         return defaultExecutor;
     }
 
+    /**
+     * Returns true if this thread context has no context to propagate nor clear, and so
+     * will not contextualise anything.
+     * 
+     * @return true if this thread context has no context to propagate nor clear
+     */
+    public boolean isEmpty() {
+        return plan.isEmpty();
+    }
+
     public static Builder builder() {
         return SmallRyeContextManagerProvider.instance().getContextManager().newThreadContextBuilder();
     }
