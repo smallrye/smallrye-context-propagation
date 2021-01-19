@@ -9,6 +9,9 @@ import java.util.Set;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
+import io.smallrye.context.FastThreadContextProvider;
+import io.smallrye.context.SmallRyeThreadContext;
+
 public class ThreadContextProviderPlan {
 
     public final Set<ThreadContextProvider> propagatedProviders;
@@ -22,15 +25,37 @@ public class ThreadContextProviderPlan {
     private final int snapshotInitialSize;
     private final ThreadContextProvider[] propagatedProvidersFastIterable;
     private final ThreadContextProvider[] clearedProvidersFastIterable;
+    private boolean fast;
 
     public ThreadContextProviderPlan(Set<ThreadContextProvider> propagatedSet, Set<ThreadContextProvider> unchangedSet,
-            Set<ThreadContextProvider> clearedSet) {
+            Set<ThreadContextProvider> clearedSet, boolean enableFastThreadContextProviders) {
         this.propagatedProviders = Collections.unmodifiableSet(propagatedSet);
         this.unchangedProviders = Collections.unmodifiableSet(unchangedSet);
         this.clearedProviders = Collections.unmodifiableSet(clearedSet);
         this.snapshotInitialSize = propagatedProviders.size() + clearedProviders.size();
         this.propagatedProvidersFastIterable = propagatedProviders.toArray(new ThreadContextProvider[0]);
         this.clearedProvidersFastIterable = clearedProviders.toArray(new ThreadContextProvider[0]);
+        // defaults to true
+        boolean fast = enableFastThreadContextProviders;
+        // allow settings to disable fast path
+        if (fast) {
+            // true means check that all providers support it
+            for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
+                if (provider instanceof FastThreadContextProvider == false) {
+                    fast = false;
+                    break;
+                }
+            }
+            if (fast) {
+                for (ThreadContextProvider provider : clearedProvidersFastIterable) {
+                    if (provider instanceof FastThreadContextProvider == false) {
+                        fast = false;
+                        break;
+                    }
+                }
+            }
+        }
+        this.fast = fast;
     }
 
     /**
@@ -56,5 +81,59 @@ public class ThreadContextProviderPlan {
             }
         }
         return threadContextSnapshots;
+    }
+
+    /**
+     * @return true if every ThreadContextProvider of this plan implements @{link FastThreadContextProvider}
+     */
+    public boolean isFast() {
+        return fast;
+    }
+
+    /**
+     * Use this if @{link {@link #isFast()} is true (it will throw otherwise) when you want to capture the current context
+     * using the fast-path, and feed the captured context in the given @{link ContextHolder}, which must have a size compatible
+     * with @{link {@link #size()}.
+     * 
+     * @param threadContext The thread context settings
+     * @param tcTl the current ThreadContext thread-local (for contextual settings)
+     * @param contextHolder the contextual lambda in which we will capture context
+     */
+    public void takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
+            ThreadLocal<SmallRyeThreadContext> tcTl,
+            ContextHolder contextHolder) {
+        if (!fast)
+            throw new IllegalStateException("This ThreadContext includes non-fast providers: " + this.clearedProviders + " and "
+                    + this.propagatedProviders);
+        if (snapshotInitialSize == 0)
+            throw new IllegalStateException("Don't capture empty context plans");
+        final Map<String, String> props = Collections.emptyMap();
+        int i = 0;
+        for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
+            ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
+            contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl, tl.get());
+        }
+        for (ThreadContextProvider provider : clearedProvidersFastIterable) {
+            ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
+            contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl,
+                    ((FastThreadContextProvider) provider).clearedValue(props));
+        }
+        contextHolder.captureThreadLocal(i++, (ThreadLocal) tcTl, threadContext);
+    }
+
+    /**
+     * @return true if there are no captured/cleared contexts (all unchanged). Note: we don't count
+     *         the contextual ThreadContext because we never want to capture/restore it if it's the only one.
+     */
+    public boolean isEmpty() {
+        return snapshotInitialSize == 0;
+    }
+
+    /**
+     * @return the number of captured/cleared contexts (including the contextual ThreadContext)
+     */
+    public int size() {
+        // +1 for our own ThreadLocal<ThreadContext>
+        return snapshotInitialSize + 1;
     }
 }

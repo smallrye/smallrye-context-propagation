@@ -8,12 +8,21 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 import io.smallrye.context.CleanAutoCloseable;
 import io.smallrye.context.SmallRyeThreadContext;
 
-public class ActiveContextState implements AutoCloseable {
+/**
+ * Restores a context and allows you to clean it up (unrestore it).
+ */
+public class SlowActiveContextState implements CleanAutoCloseable {
 
     private final ThreadContextController[] activeContext;
     private final CleanAutoCloseable activeThreadContext;
 
-    public ActiveContextState(SmallRyeThreadContext threadContext, List<ThreadContextSnapshot> threadContextSnapshots) {
+    /**
+     * Restores a previously captured context.
+     * 
+     * @param threadContext the thread context
+     * @param threadContextSnapshots the captured snapshots
+     */
+    public SlowActiveContextState(SmallRyeThreadContext threadContext, List<ThreadContextSnapshot> threadContextSnapshots) {
         activeContext = new ThreadContextController[threadContextSnapshots.size()];
         int i = 0;
         for (ThreadContextSnapshot threadContextSnapshot : threadContextSnapshots) {
@@ -22,6 +31,10 @@ public class ActiveContextState implements AutoCloseable {
         activeThreadContext = SmallRyeThreadContext.withThreadContext(threadContext);
     }
 
+    /**
+     * Unrestores / clean-up a previously restored context.
+     */
+    @Override
     public void close() {
         // restore in reverse order
         for (int i = activeContext.length - 1; i >= 0; i--) {

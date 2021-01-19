@@ -14,19 +14,70 @@ import java.util.function.Supplier;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
-import io.smallrye.context.impl.ActiveContextState;
 import io.smallrye.context.impl.CapturedContextState;
 import io.smallrye.context.impl.Contextualized;
 import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.impl.SlowCapturedContextState;
+import io.smallrye.context.impl.SmallRyeThreadContextStorageDeclaration;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
+import io.smallrye.context.impl.wrappers.ContextualBiConsumer;
+import io.smallrye.context.impl.wrappers.ContextualBiConsumer1;
+import io.smallrye.context.impl.wrappers.ContextualBiConsumer2;
+import io.smallrye.context.impl.wrappers.ContextualBiConsumerN;
+import io.smallrye.context.impl.wrappers.ContextualBiFunction;
+import io.smallrye.context.impl.wrappers.ContextualBiFunction1;
+import io.smallrye.context.impl.wrappers.ContextualBiFunction2;
+import io.smallrye.context.impl.wrappers.ContextualBiFunctionN;
+import io.smallrye.context.impl.wrappers.ContextualCallable;
+import io.smallrye.context.impl.wrappers.ContextualCallable1;
+import io.smallrye.context.impl.wrappers.ContextualCallable2;
+import io.smallrye.context.impl.wrappers.ContextualCallableN;
+import io.smallrye.context.impl.wrappers.ContextualConsumer;
+import io.smallrye.context.impl.wrappers.ContextualConsumer1;
+import io.smallrye.context.impl.wrappers.ContextualConsumer2;
+import io.smallrye.context.impl.wrappers.ContextualConsumerN;
+import io.smallrye.context.impl.wrappers.ContextualExecutor;
+import io.smallrye.context.impl.wrappers.ContextualExecutor1;
+import io.smallrye.context.impl.wrappers.ContextualExecutor2;
+import io.smallrye.context.impl.wrappers.ContextualExecutorN;
+import io.smallrye.context.impl.wrappers.ContextualFunction;
+import io.smallrye.context.impl.wrappers.ContextualFunction1;
+import io.smallrye.context.impl.wrappers.ContextualFunction2;
+import io.smallrye.context.impl.wrappers.ContextualFunctionN;
+import io.smallrye.context.impl.wrappers.ContextualRunnable;
+import io.smallrye.context.impl.wrappers.ContextualRunnable1;
+import io.smallrye.context.impl.wrappers.ContextualRunnable2;
+import io.smallrye.context.impl.wrappers.ContextualRunnableN;
+import io.smallrye.context.impl.wrappers.ContextualSupplier;
+import io.smallrye.context.impl.wrappers.ContextualSupplier1;
+import io.smallrye.context.impl.wrappers.ContextualSupplier2;
+import io.smallrye.context.impl.wrappers.ContextualSupplierN;
+import io.smallrye.context.impl.wrappers.SlowContextualBiConsumer;
+import io.smallrye.context.impl.wrappers.SlowContextualBiFunction;
+import io.smallrye.context.impl.wrappers.SlowContextualCallable;
+import io.smallrye.context.impl.wrappers.SlowContextualConsumer;
+import io.smallrye.context.impl.wrappers.SlowContextualExecutor;
+import io.smallrye.context.impl.wrappers.SlowContextualFunction;
+import io.smallrye.context.impl.wrappers.SlowContextualRunnable;
+import io.smallrye.context.impl.wrappers.SlowContextualSupplier;
+import io.smallrye.context.storage.spi.StorageManager;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
-    private final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = new ThreadLocal<>();
+    final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = StorageManager
+            .threadLocal(SmallRyeThreadContextStorageDeclaration.class);
+
     private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
         @Override
         public void close() {
             currentThreadContext.remove();
+        }
+    };
+
+    private static final Executor PASSTHROUGH_EXECUTOR = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+            command.run();
         }
     };
 
@@ -119,133 +170,12 @@ public class SmallRyeThreadContext implements ThreadContext {
         return getCurrentThreadContext(null);
     }
 
-    private static final class ContextualSupplier<R> implements Supplier<R>, Contextualized {
-        private final CapturedContextState state;
-        private final Supplier<R> supplier;
-
-        private ContextualSupplier(CapturedContextState state, Supplier<R> supplier) {
-            this.state = state;
-            this.supplier = supplier;
-        }
-
-        @Override
-        public R get() {
-            try (ActiveContextState activeState = state.begin()) {
-                return supplier.get();
-            }
-        }
-    }
-
-    private static final class ContextualRunnable implements Runnable, Contextualized {
-        private final Runnable runnable;
-        private final CapturedContextState state;
-
-        private ContextualRunnable(Runnable runnable, CapturedContextState state) {
-            this.runnable = runnable;
-            this.state = state;
-        }
-
-        @Override
-        public void run() {
-            try (ActiveContextState activeState = state.begin()) {
-                runnable.run();
-            }
-        }
-    }
-
-    private static final class ContextualFunction<T, R> implements Function<T, R>, Contextualized {
-        private final CapturedContextState state;
-        private final Function<T, R> function;
-
-        private ContextualFunction(CapturedContextState state, Function<T, R> function) {
-            this.state = state;
-            this.function = function;
-        }
-
-        @Override
-        public R apply(T t) {
-            try (ActiveContextState activeState = state.begin()) {
-                return function.apply(t);
-            }
-        }
-    }
-
-    private static final class ContextualConsumer<T> implements Consumer<T>, Contextualized {
-        private final CapturedContextState state;
-        private final Consumer<T> consumer;
-
-        private ContextualConsumer(CapturedContextState state, Consumer<T> consumer) {
-            this.state = state;
-            this.consumer = consumer;
-        }
-
-        @Override
-        public void accept(T t) {
-            try (ActiveContextState activeState = state.begin()) {
-                consumer.accept(t);
-            }
-        }
-    }
-
-    private static final class ContextualCallable<R> implements Callable<R>, Contextualized {
-        private final CapturedContextState state;
-        private final Callable<R> callable;
-
-        private ContextualCallable(CapturedContextState state, Callable<R> callable) {
-            this.state = state;
-            this.callable = callable;
-        }
-
-        @Override
-        public R call() throws Exception {
-            try (ActiveContextState activeState = state.begin()) {
-                return callable.call();
-            }
-        }
-    }
-
-    private static final class ContextualBiFunction<T, U, R> implements BiFunction<T, U, R>, Contextualized {
-        private final CapturedContextState state;
-        private final BiFunction<T, U, R> function;
-
-        private ContextualBiFunction(CapturedContextState state, BiFunction<T, U, R> function) {
-            this.state = state;
-            this.function = function;
-        }
-
-        @Override
-        public R apply(T t, U u) {
-            try (ActiveContextState activeState = state.begin()) {
-                return function.apply(t, u);
-            }
-        }
-    }
-
-    private static final class ContextualBiConsumer<T, U> implements BiConsumer<T, U>, Contextualized {
-        private final BiConsumer<T, U> consumer;
-        private final CapturedContextState state;
-
-        private ContextualBiConsumer(BiConsumer<T, U> consumer, CapturedContextState state) {
-            this.consumer = consumer;
-            this.state = state;
-        }
-
-        @Override
-        public void accept(T t, U u) {
-            try (ActiveContextState activeState = state.begin()) {
-                consumer.accept(t, u);
-            }
-        }
-    }
-
-    private final SmallRyeContextManager manager;
     private final ThreadContextProviderPlan plan;
     private final String injectionPointName;
     private final ExecutorService defaultExecutor;
 
     public SmallRyeThreadContext(SmallRyeContextManager manager, String[] propagated, String[] unchanged,
             String[] cleared, String injectionPointName, ExecutorService defaultExecutor) {
-        this.manager = manager;
         this.plan = manager.getProviderPlan(propagated, unchanged, cleared);
         this.injectionPointName = injectionPointName;
         this.defaultExecutor = defaultExecutor;
@@ -265,6 +195,26 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     public ExecutorService getDefaultExecutor() {
         return defaultExecutor;
+    }
+
+    /**
+     * Returns true if this thread context has no context to propagate nor clear, and so
+     * will not contextualise anything.
+     * 
+     * @return true if this thread context has no context to propagate nor clear
+     */
+    public boolean isEmpty() {
+        return plan.isEmpty();
+    }
+
+    /**
+     * Returns true if the given lambda instance is already contextualized
+     * 
+     * @param lambda the lambda to test
+     * @return true if the given lambda instance is already contextualized
+     */
+    public boolean isContextualized(Object lambda) {
+        return lambda instanceof Contextualized;
     }
 
     public static Builder builder() {
@@ -544,20 +494,49 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     @Override
     public Executor currentContextExecutor() {
-        return withContext(manager.captureContext(this));
-    }
-
-    Executor withContext(CapturedContextState state) {
-        return (runnable) -> {
-            try (ActiveContextState activeState = state.begin()) {
-                runnable.run();
+        if (plan.isEmpty())
+            return PASSTHROUGH_EXECUTOR;
+        if (plan.isFast()) {
+            ContextualExecutor ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualExecutor1();
+                    break;
+                case 2:
+                    ret = new ContextualExecutor2();
+                    break;
+                default:
+                    ret = new ContextualExecutorN(plan.size());
+                    break;
             }
-        };
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualExecutor(captureContext());
     }
 
     @Override
     public <T, U> BiConsumer<T, U> contextualConsumer(BiConsumer<T, U> consumer) {
-        return contextualConsumer(manager.captureContext(this), consumer);
+        checkPrecontextualized(consumer);
+        if (plan.isEmpty())
+            return consumer;
+        if (plan.isFast()) {
+            ContextualBiConsumer<T, U> ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualBiConsumer1<>(consumer);
+                    break;
+                case 2:
+                    ret = new ContextualBiConsumer2<>(consumer);
+                    break;
+                default:
+                    ret = new ContextualBiConsumerN<>(consumer, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualBiConsumer<>(captureContext(), consumer);
     }
 
     <T, U> BiConsumer<T, U> contextualConsumerUnlessContextualized(BiConsumer<T, U> consumer) {
@@ -566,14 +545,28 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualConsumer(consumer);
     }
 
-    <T, U> BiConsumer<T, U> contextualConsumer(CapturedContextState state, BiConsumer<T, U> consumer) {
-        checkPrecontextualized(consumer);
-        return new ContextualBiConsumer<T, U>(consumer, state);
-    }
-
     @Override
     public <T, U, R> BiFunction<T, U, R> contextualFunction(BiFunction<T, U, R> function) {
-        return contextualFunction(manager.captureContext(this), function);
+        checkPrecontextualized(function);
+        if (plan.isEmpty())
+            return function;
+        if (plan.isFast()) {
+            ContextualBiFunction<T, U, R> ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualBiFunction1<>(function);
+                    break;
+                case 2:
+                    ret = new ContextualBiFunction2<>(function);
+                    break;
+                default:
+                    ret = new ContextualBiFunctionN<>(function, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualBiFunction<>(captureContext(), function);
     }
 
     <T, U, R> BiFunction<T, U, R> contextualFunctionUnlessContextualized(BiFunction<T, U, R> function) {
@@ -582,14 +575,28 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualFunction(function);
     }
 
-    <T, U, R> BiFunction<T, U, R> contextualFunction(CapturedContextState state, BiFunction<T, U, R> function) {
-        checkPrecontextualized(function);
-        return new ContextualBiFunction<T, U, R>(state, function);
-    }
-
     @Override
     public <R> Callable<R> contextualCallable(Callable<R> callable) {
-        return contextualCallable(manager.captureContext(this), callable);
+        checkPrecontextualized(callable);
+        if (plan.isEmpty())
+            return callable;
+        if (plan.isFast()) {
+            ContextualCallable<R> ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualCallable1<>(callable);
+                    break;
+                case 2:
+                    ret = new ContextualCallable2<>(callable);
+                    break;
+                default:
+                    ret = new ContextualCallableN<>(callable, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualCallable<>(captureContext(), callable);
     }
 
     <R> Callable<R> contextualCallableUnlessContextualized(Callable<R> callable) {
@@ -598,14 +605,28 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualCallable(callable);
     }
 
-    <R> Callable<R> contextualCallable(CapturedContextState state, Callable<R> callable) {
-        checkPrecontextualized(callable);
-        return new ContextualCallable<R>(state, callable);
-    }
-
     @Override
     public <T> Consumer<T> contextualConsumer(Consumer<T> consumer) {
-        return contextualConsumer(manager.captureContext(this), consumer);
+        checkPrecontextualized(consumer);
+        if (plan.isEmpty())
+            return consumer;
+        if (plan.isFast()) {
+            ContextualConsumer<T> ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualConsumer1<>(consumer);
+                    break;
+                case 2:
+                    ret = new ContextualConsumer2<>(consumer);
+                    break;
+                default:
+                    ret = new ContextualConsumerN<>(consumer, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualConsumer<>(captureContext(), consumer);
     }
 
     <T> Consumer<T> contextualConsumerUnlessContextualized(Consumer<T> consumer) {
@@ -614,14 +635,28 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualConsumer(consumer);
     }
 
-    <T> Consumer<T> contextualConsumer(CapturedContextState state, Consumer<T> consumer) {
-        checkPrecontextualized(consumer);
-        return new ContextualConsumer<T>(state, consumer);
-    }
-
     @Override
     public <T, R> Function<T, R> contextualFunction(Function<T, R> function) {
-        return contextualFunction(manager.captureContext(this), function);
+        checkPrecontextualized(function);
+        if (plan.isEmpty())
+            return function;
+        if (plan.isFast()) {
+            ContextualFunction<T, R> ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualFunction1<>(function);
+                    break;
+                case 2:
+                    ret = new ContextualFunction2<>(function);
+                    break;
+                default:
+                    ret = new ContextualFunctionN<>(function, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualFunction<>(captureContext(), function);
     }
 
     <T, R> Function<T, R> contextualFunctionUnlessContextualized(Function<T, R> function) {
@@ -630,14 +665,28 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualFunction(function);
     }
 
-    <T, R> Function<T, R> contextualFunction(CapturedContextState state, Function<T, R> function) {
-        checkPrecontextualized(function);
-        return new ContextualFunction<T, R>(state, function);
-    }
-
     @Override
     public Runnable contextualRunnable(Runnable runnable) {
-        return contextualRunnable(manager.captureContext(this), runnable);
+        checkPrecontextualized(runnable);
+        if (plan.isEmpty())
+            return runnable;
+        if (plan.isFast()) {
+            ContextualRunnable ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualRunnable1(runnable);
+                    break;
+                case 2:
+                    ret = new ContextualRunnable2(runnable);
+                    break;
+                default:
+                    ret = new ContextualRunnableN(runnable, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualRunnable(captureContext(), runnable);
     }
 
     Runnable contextualRunnableUnlessContextualized(Runnable runnable) {
@@ -646,14 +695,28 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualRunnable(runnable);
     }
 
-    Runnable contextualRunnable(CapturedContextState state, Runnable runnable) {
-        checkPrecontextualized(runnable);
-        return new ContextualRunnable(runnable, state);
-    }
-
     @Override
     public <R> Supplier<R> contextualSupplier(Supplier<R> supplier) {
-        return contextualSupplier(manager.captureContext(this), supplier);
+        checkPrecontextualized(supplier);
+        if (plan.isEmpty())
+            return supplier;
+        if (plan.isFast()) {
+            ContextualSupplier<R> ret = null;
+            switch (plan.size()) {
+                case 1:
+                    ret = new ContextualSupplier1<>(supplier);
+                    break;
+                case 2:
+                    ret = new ContextualSupplier2<>(supplier);
+                    break;
+                default:
+                    ret = new ContextualSupplierN<>(supplier, plan.size());
+                    break;
+            }
+            plan.takeThreadContextSnapshotsFast(this, currentThreadContext, ret);
+            return ret;
+        }
+        return new SlowContextualSupplier<>(captureContext(), supplier);
     }
 
     <R> Supplier<R> contextualSupplierUnlessContextualized(Supplier<R> supplier) {
@@ -662,9 +725,8 @@ public class SmallRyeThreadContext implements ThreadContext {
         return contextualSupplier(supplier);
     }
 
-    <R> Supplier<R> contextualSupplier(CapturedContextState state, Supplier<R> supplier) {
-        checkPrecontextualized(supplier);
-        return new ContextualSupplier<R>(state, supplier);
+    private CapturedContextState captureContext() {
+        return new SlowCapturedContextState(this);
     }
 
     @Override

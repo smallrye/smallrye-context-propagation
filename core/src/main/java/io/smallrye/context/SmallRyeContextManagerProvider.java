@@ -44,9 +44,8 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
             synchronized (this) {
                 config = contextManagersForClassLoader.get(classLoader);
                 if (config == null) {
-                    config = getContextManagerBuilder().forClassLoader(classLoader)
+                    config = getContextManagerBuilder().forClassLoader(classLoader).registerOnProvider()
                             .addDiscoveredThreadContextProviders().addDiscoveredContextManagerExtensions().build();
-                    registerContextManager(config, classLoader);
                 }
             }
         }
