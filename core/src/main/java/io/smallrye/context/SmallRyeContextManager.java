@@ -40,9 +40,13 @@ public class SmallRyeContextManager implements ContextManager {
     private SmallRyeThreadContext allPropagatedThreadContext;
     private SmallRyeThreadContext allClearedThreadContext;
 
+    private boolean enableFastThreadContextProviders;
+
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
-            ExecutorService defaultExecutorService, boolean registerOnProvider, ClassLoader registrationClassLoader) {
+            ExecutorService defaultExecutorService, boolean registerOnProvider, ClassLoader registrationClassLoader,
+            boolean enableFastThreadContextProviders) {
         this.defaultExecutorService = defaultExecutorService;
+        this.enableFastThreadContextProviders = enableFastThreadContextProviders;
         List<ThreadContextProvider> providersCopy = new ArrayList<>(providers);
         providersByType = new HashMap<>();
         for (ThreadContextProvider provider : providers) {
@@ -176,7 +180,8 @@ public class SmallRyeContextManager implements ContextManager {
                 clearedProviders.add(provider);
         }
 
-        return new ThreadContextProviderPlan(propagatedProviders, unchangedProviders, clearedProviders);
+        return new ThreadContextProviderPlan(propagatedProviders, unchangedProviders, clearedProviders,
+                enableFastThreadContextProviders);
     }
 
     @Override
@@ -248,6 +253,7 @@ public class SmallRyeContextManager implements ContextManager {
         private final List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
         private ExecutorService defaultExecutorService;
         private boolean registerOnProvider;
+        private boolean enableFastThreadContextProviders;
 
         @Override
         public Builder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -312,7 +318,7 @@ public class SmallRyeContextManager implements ContextManager {
                 contextManagerExtensions.addAll(discoverContextManagerExtensions());
 
             return new SmallRyeContextManager(contextProviders, contextManagerExtensions, defaultExecutorService,
-                    registerOnProvider, classLoader);
+                    registerOnProvider, classLoader, enableFastThreadContextProviders);
         }
 
         //
@@ -345,6 +351,17 @@ public class SmallRyeContextManager implements ContextManager {
          */
         public Builder withDefaultExecutorService(ExecutorService executorService) {
             this.defaultExecutorService = executorService;
+            return this;
+        }
+
+        /**
+         * Enable or disable FastThreadContextProviders optimisations. Defaults to enabled.
+         * 
+         * @param enable set to false to disable FastThreadContextProviders.
+         * @return this builder.
+         */
+        public Builder enableFastThreadContextProviders(boolean enable) {
+            this.enableFastThreadContextProviders = enable;
             return this;
         }
     }

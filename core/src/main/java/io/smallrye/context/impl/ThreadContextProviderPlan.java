@@ -28,25 +28,30 @@ public class ThreadContextProviderPlan {
     private boolean fast;
 
     public ThreadContextProviderPlan(Set<ThreadContextProvider> propagatedSet, Set<ThreadContextProvider> unchangedSet,
-            Set<ThreadContextProvider> clearedSet) {
+            Set<ThreadContextProvider> clearedSet, boolean enableFastThreadContextProviders) {
         this.propagatedProviders = Collections.unmodifiableSet(propagatedSet);
         this.unchangedProviders = Collections.unmodifiableSet(unchangedSet);
         this.clearedProviders = Collections.unmodifiableSet(clearedSet);
         this.snapshotInitialSize = propagatedProviders.size() + clearedProviders.size();
         this.propagatedProvidersFastIterable = propagatedProviders.toArray(new ThreadContextProvider[0]);
         this.clearedProvidersFastIterable = clearedProviders.toArray(new ThreadContextProvider[0]);
-        boolean fast = true;
-        for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
-            if (provider instanceof FastThreadContextProvider == false) {
-                fast = false;
-                break;
-            }
-        }
+        // defaults to true
+        boolean fast = enableFastThreadContextProviders;
+        // allow settings to disable fast path
         if (fast) {
-            for (ThreadContextProvider provider : clearedProvidersFastIterable) {
+            // true means check that all providers support it
+            for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
                 if (provider instanceof FastThreadContextProvider == false) {
                     fast = false;
                     break;
+                }
+            }
+            if (fast) {
+                for (ThreadContextProvider provider : clearedProvidersFastIterable) {
+                    if (provider instanceof FastThreadContextProvider == false) {
+                        fast = false;
+                        break;
+                    }
                 }
             }
         }
