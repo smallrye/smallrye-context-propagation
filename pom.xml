@@ -151,8 +151,8 @@
                   <configuration>
                       <rules>
                           <requireJavaVersion>
-                              <version>9</version>
-                              <message>This project must be built with Java 9 or later.</message>
+                              <version>12</version>
+                              <message>This project must be built with Java 12 or later.</message>
                           </requireJavaVersion>
                       </rules>
                   </configuration>
