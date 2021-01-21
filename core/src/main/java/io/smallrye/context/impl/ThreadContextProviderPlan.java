@@ -25,7 +25,7 @@ public class ThreadContextProviderPlan {
     private final int snapshotInitialSize;
     private final ThreadContextProvider[] propagatedProvidersFastIterable;
     private final ThreadContextProvider[] clearedProvidersFastIterable;
-    private boolean fast;
+    private final boolean fast;
 
     public ThreadContextProviderPlan(Set<ThreadContextProvider> propagatedSet, Set<ThreadContextProvider> unchangedSet,
             Set<ThreadContextProvider> clearedSet, boolean enableFastThreadContextProviders) {
@@ -99,6 +99,7 @@ public class ThreadContextProviderPlan {
      * @param tcTl the current ThreadContext thread-local (for contextual settings)
      * @param contextHolder the contextual lambda in which we will capture context
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
             ThreadLocal<SmallRyeThreadContext> tcTl,
             ContextHolder contextHolder) {
@@ -118,7 +119,7 @@ public class ThreadContextProviderPlan {
             contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl,
                     ((FastThreadContextProvider) provider).clearedValue(props));
         }
-        contextHolder.captureThreadLocal(i++, (ThreadLocal) tcTl, threadContext);
+        contextHolder.captureThreadLocal(i, (ThreadLocal) tcTl, threadContext);
     }
 
     /**
