@@ -40,7 +40,7 @@ public class SmallRyeContextManager implements ContextManager {
     private SmallRyeThreadContext allPropagatedThreadContext;
     private SmallRyeThreadContext allClearedThreadContext;
 
-    private boolean enableFastThreadContextProviders;
+    private final boolean enableFastThreadContextProviders;
 
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
             ExecutorService defaultExecutorService, boolean registerOnProvider, ClassLoader registrationClassLoader,
