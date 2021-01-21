@@ -253,7 +253,7 @@ public class SmallRyeContextManager implements ContextManager {
         private final List<ContextManagerExtension> contextManagerExtensions = new ArrayList<>();
         private ExecutorService defaultExecutorService;
         private boolean registerOnProvider;
-        private boolean enableFastThreadContextProviders;
+        private boolean enableFastThreadContextProviders = true;
 
         @Override
         public Builder withThreadContextProviders(ThreadContextProvider... providers) {

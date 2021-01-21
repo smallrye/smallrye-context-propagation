@@ -26,7 +26,7 @@ public class ManualPropagationMultipleRequestTest {
         threadContext = (SmallRyeThreadContext) ContextManagerProvider.instance().getContextManager().newThreadContextBuilder()
                 .build();
         minimalThreadContext = SmallRyeContextManagerProvider.instance().getContextManagerBuilder()
-                .withThreadContextProviders(new MyThreadContextProvider()).enableFastThreadContextProviders(true)
+                .withThreadContextProviders(new MyThreadContextProvider())
                 .build()
                 .newThreadContextBuilder()
                 .propagated(MyThreadContextProvider.MY_CONTEXT_TYPE)
