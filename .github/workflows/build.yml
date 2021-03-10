@@ -33,18 +33,26 @@ jobs:
         with:
           java-version: 8
 
+      - name: Set JAVA_HOME_8 var
+        run: |
+          echo "JAVA_HOME_8=$JAVA_HOME" >> $GITHUB_ENV
+
       # We need to build the project with at least this JDK version
       - uses: actions/setup-java@v1.4.3
         name: set up JDK 12
         with:
           java-version: 12
 
+      - name: Set JAVA_HOME_12 var
+        run: |
+          echo "JAVA_HOME_12=$JAVA_HOME" >> $GITHUB_ENV
+
       - name: build with maven
         # The first run statement is theoretically redundant, but it's a safety latch in case multi JDK setup doesn't work
         run: |
-          JAVA_HOME=$JAVA_HOME_12_X64
+          JAVA_HOME=${{ env.JAVA_HOME_12 }}
           echo $JAVA_HOME
-          mvn -B formatter:validate verify --file pom.xml -Djava8.home=$JAVA_HOME_8_X64 javadoc:javadoc
+          mvn -B formatter:validate verify --file pom.xml -Djava8.home=${{ env.JAVA_HOME_8 }} javadoc:javadoc
 
   quality:
     needs: [build]
