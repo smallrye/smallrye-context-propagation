@@ -17,8 +17,11 @@ public final class SlowContextualConsumer<T> implements Consumer<T>, Contextuali
 
     @Override
     public void accept(T t) {
-        try (CleanAutoCloseable activeState = state.begin()) {
+        try (CleanAutoCloseable<Void> activeState = state.begin(() -> {
             consumer.accept(t);
+            return null;
+        })) {
+            activeState.callNoChecked();
         }
     }
 }

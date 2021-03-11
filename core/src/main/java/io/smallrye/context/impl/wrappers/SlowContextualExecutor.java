@@ -15,8 +15,11 @@ public class SlowContextualExecutor implements Executor {
 
     @Override
     public void execute(Runnable command) {
-        try (CleanAutoCloseable foo = state.begin()) {
+        try (CleanAutoCloseable<Void> foo = state.begin(() -> {
             command.run();
+            return null;
+        })) {
+            foo.callNoChecked();
         }
     }
 

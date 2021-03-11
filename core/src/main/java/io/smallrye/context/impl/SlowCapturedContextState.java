@@ -1,6 +1,7 @@
 package io.smallrye.context.impl;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
@@ -17,7 +18,7 @@ public class SlowCapturedContextState implements CapturedContextState {
 
     /**
      * Captures the current context according to the given ThreadContext
-     * 
+     *
      * @param threadContext the thread context
      */
     public SlowCapturedContextState(SmallRyeThreadContext threadContext) {
@@ -27,10 +28,10 @@ public class SlowCapturedContextState implements CapturedContextState {
 
     /**
      * Restores the captured context and returns an instance that can unrestore (cleanup) it.
-     * 
+     *
      * @return the captured context state
      */
-    public SlowActiveContextState begin() {
-        return new SlowActiveContextState(threadContext, threadContextSnapshots);
+    public <T> SlowActiveContextState<T> begin(Callable<T> callable) {
+        return new SlowActiveContextState<T>(threadContext, threadContextSnapshots, callable);
     }
 }

@@ -3,8 +3,10 @@ package io.smallrye.context;
 /**
  * AutoCloseable interface which doesn't throw.
  */
-@FunctionalInterface
-public interface CleanAutoCloseable extends AutoCloseable {
+public interface CleanAutoCloseable<T> extends AutoCloseable {
+
+    T callNoChecked();
+
     /**
      * Close this resource, no exception thrown.
      */

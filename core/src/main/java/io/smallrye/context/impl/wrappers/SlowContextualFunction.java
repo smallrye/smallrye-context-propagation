@@ -17,8 +17,8 @@ public final class SlowContextualFunction<T, R> implements Function<T, R>, Conte
 
     @Override
     public R apply(T t) {
-        try (CleanAutoCloseable activeState = state.begin()) {
-            return function.apply(t);
+        try (CleanAutoCloseable<R> activeState = state.begin(() -> function.apply(t))) {
+            return activeState.callNoChecked();
         }
     }
 }

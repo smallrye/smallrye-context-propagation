@@ -17,8 +17,11 @@ public final class SlowContextualBiConsumer<T, U> implements BiConsumer<T, U>, C
 
     @Override
     public void accept(T t, U u) {
-        try (CleanAutoCloseable activeState = state.begin()) {
+        try (CleanAutoCloseable<Void> activeState = state.begin(() -> {
             consumer.accept(t, u);
+            return null;
+        })) {
+            activeState.callNoChecked();
         }
     }
 }

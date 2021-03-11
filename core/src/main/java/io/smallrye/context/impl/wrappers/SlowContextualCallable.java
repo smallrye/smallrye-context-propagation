@@ -17,8 +17,8 @@ public final class SlowContextualCallable<R> implements Callable<R>, Contextuali
 
     @Override
     public R call() throws Exception {
-        try (CleanAutoCloseable activeState = state.begin()) {
-            return callable.call();
+        try (CleanAutoCloseable<R> activeState = state.begin(callable)) {
+            return activeState.callNoChecked();
         }
     }
 }
