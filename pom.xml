@@ -55,8 +55,6 @@
         <version.vertx>3.9.0</version.vertx>
         <version.hamcrest>2.2</version.hamcrest>
 
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-
         <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
     </properties>
 
@@ -136,7 +134,6 @@
         </repository>
     </repositories>
 
-  <!-- TODO - to remve once these changes are in the Parent POM -->
   <build>
     <plugins>
       <plugin>
@@ -159,35 +156,10 @@
               </execution>
           </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>${version.release.plugin}</version>
-        <configuration>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-          <tagNameFormat>@{project.version}</tagNameFormat>
-          <preparationGoals>verify</preparationGoals>
-          <pushChanges>false</pushChanges>
-          <localCheckout>true</localCheckout>
-          <remoteTagging>false</remoteTagging>
-          <arguments>-DskipTests ${release.arguments}</arguments>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>${version.gpg.plugin}</version>
-        <configuration>
-          <gpgArguments>
-            <arg>--pinentry-mode</arg>
-            <arg>loopback</arg>
-          </gpgArguments>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 
-  <profiles>
+    <profiles>
         <profile>
             <id>release</id>
             <activation>
@@ -197,6 +169,27 @@
             </activation>
             <modules>
                 <module>release</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+                <!--suppress UnresolvedMavenProperty -->
+                <sonar.coverage.jacoco.xmlReportPaths>
+                    ${maven.multiModuleProjectDirectory}/coverage/target/site/jacoco-aggregate/jacoco.xml
+                </sonar.coverage.jacoco.xmlReportPaths>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+            <modules>
+                <module>coverage</module>
             </modules>
         </profile>
     </profiles>
