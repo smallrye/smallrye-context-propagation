@@ -15,8 +15,11 @@ public final class SlowContextualRunnable implements Runnable, Contextualized {
 
     @Override
     public void run() {
-        try (CleanAutoCloseable activeState = state.begin()) {
+        try (CleanAutoCloseable<Void> activeState = state.begin(() -> {
             runnable.run();
+            return null;
+        })) {
+            activeState.callNoChecked();
         }
     }
 }

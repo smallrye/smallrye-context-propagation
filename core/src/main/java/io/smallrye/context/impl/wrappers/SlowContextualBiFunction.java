@@ -17,8 +17,8 @@ public final class SlowContextualBiFunction<T, U, R> implements BiFunction<T, U,
 
     @Override
     public R apply(T t, U u) {
-        try (CleanAutoCloseable activeState = state.begin()) {
-            return function.apply(t, u);
+        try (CleanAutoCloseable<R> activeState = state.begin(() -> function.apply(t, u))) {
+            return activeState.callNoChecked();
         }
     }
 }

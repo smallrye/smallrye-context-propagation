@@ -17,8 +17,8 @@ public final class SlowContextualSupplier<R> implements Supplier<R>, Contextuali
 
     @Override
     public R get() {
-        try (CleanAutoCloseable activeState = state.begin()) {
-            return supplier.get();
+        try (CleanAutoCloseable<R> activeState = state.begin(supplier::get)) {
+            return activeState.callNoChecked();
         }
     }
 }
