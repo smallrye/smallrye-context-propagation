@@ -50,7 +50,7 @@
         <version.smallrye.common>1.4.1</version.smallrye.common>
         <version.jnpserver>5.0.5.Final</version.jnpserver>
         <version.resteasy>4.5.3.Final</version.resteasy>
-        <version.hibernate>5.4.15.Final</version.hibernate>
+        <version.hibernate>5.5.2.Final</version.hibernate>
         <version.hsqldb>2.5.0</version.hsqldb>
         <version.vertx>3.9.0</version.vertx>
         <version.hamcrest>2.2</version.hamcrest>
