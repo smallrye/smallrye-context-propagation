@@ -117,17 +117,26 @@ public class JtaContextProvider implements ThreadContextProvider {
         if (lifecycleManagers.isResolvable()) {
             lifecycleManagers.get().setProvider(this);
         }
-        tm = CDI.current().select(TransactionManager.class).get();
-        if (tm != null) {
-            // validate it, because it can be an empty proxy
-            try {
-                tm.getStatus();
-            } catch (CreationException | SystemException x) {
-                x.printStackTrace();
-                // not really there
-                transactionManagerNotAvailable = true;
-                return null;
+        // make sure we handle the case of SR-CP-JTA being imported while Narayana is excluded somehow
+        Instance<TransactionManager> tmInstance = CDI.current().select(TransactionManager.class);
+        if (tmInstance.isResolvable()) {
+            tm = tmInstance.get();
+            // so in theory we can't get null here, but better safe than sorry
+            if (tm != null) {
+                // validate it, because it can be an empty proxy
+                // Here Matej says it can't be an empty proxy, but even though I don't have tests
+                // for this, this looks too specific to have come up by accident.
+                try {
+                    tm.getStatus();
+                } catch (CreationException | SystemException x) {
+                    // not really there
+                    transactionManagerNotAvailable = true;
+                    return null;
+                }
             }
+        } else {
+            transactionManagerNotAvailable = true;
+            return null;
         }
         // save it for later
         return this.transactionManager = tm;
