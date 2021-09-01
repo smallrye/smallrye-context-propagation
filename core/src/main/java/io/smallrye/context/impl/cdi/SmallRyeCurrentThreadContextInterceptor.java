@@ -7,6 +7,8 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import org.eclipse.microprofile.context.ThreadContext;
+
 import io.smallrye.context.CleanAutoCloseable;
 import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.api.CurrentThreadContext;
@@ -33,15 +35,25 @@ public class SmallRyeCurrentThreadContextInterceptor {
         if (config == null && ctx.getMethod() != null)
             config = ctx.getMethod().getAnnotation(CurrentThreadContext.class);
         if (config != null) {
-            SmallRyeThreadContext newTC = config.remove()
-                    ? null
-                    : SmallRyeThreadContext.builder()
-                            .cleared(config.cleared())
-                            .propagated(config.propagated())
-                            .unchanged(config.unchanged())
-                            .build();
-            try (CleanAutoCloseable ac = SmallRyeThreadContext.withThreadContext(newTC)) {
+            final String[] unchanged = config.unchanged();
+            final String[] propagated = config.propagated();
+            final String[] cleared = config.cleared();
+            if (propagated.length == 0 &&
+                    cleared.length == 0 &&
+                    unchanged.length == 1 && ThreadContext.ALL_REMAINING.equals(unchanged[0])) {
+                //Skip processing of Context Propagation in this case:
                 return ctx.proceed();
+            } else {
+                SmallRyeThreadContext newTC = config.remove()
+                        ? null
+                        : SmallRyeThreadContext.builder()
+                                .cleared(cleared)
+                                .propagated(propagated)
+                                .unchanged(unchanged)
+                                .build();
+                try (CleanAutoCloseable ac = SmallRyeThreadContext.withThreadContext(newTC)) {
+                    return ctx.proceed();
+                }
             }
         } else {
             // could not find any config, that's an error, but we can continue
