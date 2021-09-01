@@ -10,8 +10,9 @@ import org.junit.Test;
 import io.smallrye.context.CleanAutoCloseable;
 import io.smallrye.context.SmallRyeContextManagerProvider;
 import io.smallrye.context.SmallRyeThreadContext;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class CurrentThreadContextTest {
+public class CurrentThreadContextTest extends AbstractTest {
     @Test
     public void testCurrentThreadContext() throws InterruptedException, ExecutionException {
         MyContext ctx = new MyContext();

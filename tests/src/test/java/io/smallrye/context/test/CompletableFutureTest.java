@@ -18,8 +18,9 @@ import io.smallrye.context.SmallRyeManagedExecutor;
 import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.impl.Contextualized;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class CompletableFutureTest {
+public class CompletableFutureTest extends AbstractTest {
 
     private SmallRyeManagedExecutor managedExecutor;
 

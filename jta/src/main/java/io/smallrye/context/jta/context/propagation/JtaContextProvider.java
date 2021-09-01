@@ -1,6 +1,7 @@
 package io.smallrye.context.jta.context.propagation;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +25,8 @@ public class JtaContextProvider implements ThreadContextProvider {
     private volatile TransactionManager transactionManager;
     // this allows us to cache null values
     private volatile boolean transactionManagerNotAvailable;
+    // cached value indicating if CDI is not available, boolean is assigned on first call
+    private AtomicReference<Boolean> cdiNotAvailable = new AtomicReference<>(null);
 
     @Override
     public ThreadContextSnapshot currentContext(Map<String, String> props) {
@@ -176,18 +179,34 @@ public class JtaContextProvider implements ThreadContextProvider {
     /**
      * Checks if CDI is available within the application by using {@code CDI.current()}.
      * If an exception is thrown, it is suppressed and false is returns, otherwise true is returned.
+     * <p/>
+     * Uses {@code CDI.current()} in its first invocation; subsequent invocations use cached value as we presume the
+     * presence/absence state of CDI within application cannot change while the application executes. This should
+     * improve performance.
+     * <p/>
+     * NOTE: this has a potential downside if the CDI provider exists but the CDI container can change its state while user
+     * application executes. I.e. manually stopping the CDI container and then trying to use JTA context propagation
+     * will behave weirdly.
      *
      * @return true if CDI can be used, false otherwise
      */
     private boolean isCdiUnavailable() {
+        Boolean cdiUnavailable = cdiNotAvailable.get();
+        if (cdiUnavailable != null) {
+            return cdiUnavailable;
+        }
         if (transactionManager != null) {
             //we looked this up from CDI, so we know it is fine
+            cdiNotAvailable.set(false);
             return false;
         }
         try {
-            return CDI.current() == null;
+            boolean result = CDI.current() == null;
+            cdiNotAvailable.set(result);
+            return result;
         } catch (IllegalStateException e) {
             // no CDI provider found, CDI isn't available
+            cdiNotAvailable.set(true);
             return true;
         }
     }

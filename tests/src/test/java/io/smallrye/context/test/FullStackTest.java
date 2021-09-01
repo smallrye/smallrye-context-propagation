@@ -33,10 +33,11 @@ import org.junit.Test;
 import com.arjuna.ats.jta.logging.jtaLogger;
 
 import io.restassured.RestAssured;
+import io.smallrye.context.test.util.AbstractTest;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 
-public class FullStackTest {
+public class FullStackTest extends AbstractTest {
     private final class MyVertxJaxrsServer extends VertxJaxrsServer {
         public Vertx getVertx() {
             return vertx;
