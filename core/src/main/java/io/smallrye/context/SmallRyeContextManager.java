@@ -39,6 +39,7 @@ public class SmallRyeContextManager implements ContextManager {
 
     private SmallRyeThreadContext allPropagatedThreadContext;
     private SmallRyeThreadContext allClearedThreadContext;
+    private SmallRyeThreadContext defaultThreadContext;
 
     private final boolean enableFastThreadContextProviders;
 
@@ -209,6 +210,22 @@ public class SmallRyeContextManager implements ContextManager {
 
     //
     // Extras
+
+    /**
+     * Returns a {@link SmallRyeThreadContext} instance which propagates default contexts, possibly
+     * configured via MP Config.
+     * 
+     * @return a {@link SmallRyeThreadContext} instance which propagates default contexts, possibly
+     *         configured via MP Config
+     */
+    public SmallRyeThreadContext defaultThreadContext() {
+        // double parallel instantiation is not an issue
+        if (defaultThreadContext == null) {
+            defaultThreadContext = newThreadContextBuilder()
+                    .build();
+        }
+        return defaultThreadContext;
+    }
 
     /**
      * Returns a {@link SmallRyeThreadContext} instance which propagates all thread contexts.
