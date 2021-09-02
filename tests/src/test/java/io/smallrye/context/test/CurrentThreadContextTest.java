@@ -29,6 +29,15 @@ public class CurrentThreadContextTest {
             });
             executorService.submit(r).get();
 
+            // default contexts
+            SmallRyeThreadContext defaultTC = SmallRyeContextManagerProvider.getManager().defaultThreadContext();
+            Assert.assertNull(SmallRyeThreadContext.getCurrentThreadContext());
+            r = defaultTC.contextualRunnable(() -> {
+                Assert.assertEquals(ctx, MyContext.get());
+                Assert.assertEquals(defaultTC, SmallRyeThreadContext.getCurrentThreadContext());
+            });
+            executorService.submit(r).get();
+
             // all cleared contexts
             SmallRyeThreadContext noTC = SmallRyeContextManagerProvider.getManager().allClearedThreadContext();
             Assert.assertNull(SmallRyeThreadContext.getCurrentThreadContext());

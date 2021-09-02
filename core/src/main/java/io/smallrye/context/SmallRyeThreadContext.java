@@ -127,6 +127,40 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     /**
+     * Invokes the given @{link Supplier} with the current @{link SmallRyeThreadContext} updated to the given value
+     * for the current thread.
+     * 
+     * @param threadContext the @{link SmallRyeThreadContext} to use
+     * @param f the @{link Supplier} to invoke
+     * @param <T> The type of @{link Supplier} to return
+     * @return The value returned by the @{link Supplier}
+     */
+    public static <T> T withThreadContext(SmallRyeThreadContext threadContext, Supplier<T> f) {
+        final SmallRyeThreadContext oldValue = currentThreadContext.get();
+        currentThreadContext.set(threadContext);
+        try {
+            return f.get();
+        } finally {
+            if (oldValue == null) {
+                currentThreadContext.remove();
+            } else {
+                currentThreadContext.set(oldValue);
+            }
+        }
+    }
+
+    /**
+     * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
+     * with default contexts, possibly configured via MP Config.
+     * 
+     * @return the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
+     *         with default contexts, possibly configured via MP Config.
+     */
+    public static SmallRyeThreadContext getCurrentThreadContextOrDefaultContexts() {
+        return getCurrentThreadContext(SmallRyeContextManagerProvider.getManager().defaultThreadContext());
+    }
+
+    /**
      * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      * which propagates all contexts.
      * 
