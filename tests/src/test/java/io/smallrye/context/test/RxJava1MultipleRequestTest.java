@@ -9,12 +9,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.smallrye.context.SmallRyeContextManagerProvider;
+import io.smallrye.context.test.util.AbstractTest;
 import rx.Emitter.BackpressureMode;
 import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-public class RxJava1MultipleRequestTest {
+public class RxJava1MultipleRequestTest extends AbstractTest {
 
     @BeforeClass
     public static void init() {

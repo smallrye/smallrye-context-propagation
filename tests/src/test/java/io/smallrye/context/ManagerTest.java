@@ -11,8 +11,9 @@ import org.junit.Test;
 
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 import io.smallrye.context.test.DefaultThreadContextProvider;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class ManagerTest {
+public class ManagerTest extends AbstractTest {
 
     List<String> record = new ArrayList<>();
 

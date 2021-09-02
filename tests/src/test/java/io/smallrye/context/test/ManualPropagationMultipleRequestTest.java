@@ -15,8 +15,9 @@ import org.junit.Test;
 
 import io.smallrye.context.SmallRyeContextManagerProvider;
 import io.smallrye.context.SmallRyeThreadContext;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class ManualPropagationMultipleRequestTest {
+public class ManualPropagationMultipleRequestTest extends AbstractTest {
 
     private static SmallRyeThreadContext threadContext;
     private static SmallRyeThreadContext minimalThreadContext;

@@ -23,8 +23,9 @@ import org.junit.Test;
 
 import io.smallrye.context.inject.TransactionServicesImpl;
 import io.smallrye.context.test.jta.TransactionalService;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class JTATest {
+public class JTATest extends AbstractTest {
     private static Weld weld;
 
     @BeforeClass

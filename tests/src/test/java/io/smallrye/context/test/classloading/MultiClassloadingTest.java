@@ -45,8 +45,9 @@ import io.smallrye.config.SmallRyeConfigProviderResolver;
 import io.smallrye.context.SmallRyeContextManagerProvider;
 import io.smallrye.context.api.ManagedExecutorConfig;
 import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class MultiClassloadingTest {
+public class MultiClassloadingTest extends AbstractTest {
 
     public static class AThreadContextPropagator implements ContextManagerExtension {
 

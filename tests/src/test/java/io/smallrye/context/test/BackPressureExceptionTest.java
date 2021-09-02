@@ -9,9 +9,10 @@ import org.junit.Test;
 
 import io.reactivex.observers.TestObserver;
 import io.smallrye.context.SmallRyeContextManagerProvider;
+import io.smallrye.context.test.util.AbstractTest;
 import rx.observers.AssertableSubscriber;
 
-public class BackPressureExceptionTest {
+public class BackPressureExceptionTest extends AbstractTest {
 
     @BeforeClass
     public static void before() {

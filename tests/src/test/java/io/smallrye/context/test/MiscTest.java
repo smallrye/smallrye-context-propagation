@@ -14,8 +14,9 @@ import org.junit.Test;
 
 import io.smallrye.context.SmallRyeContextManager;
 import io.smallrye.context.SmallRyeContextManagerProvider;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class MiscTest {
+public class MiscTest extends AbstractTest {
 
     @Test
     public void testCFWrapping() {

@@ -16,8 +16,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.smallrye.context.test.JTAUtils;
+import io.smallrye.context.test.util.AbstractTest;
 
-public class CdiContextPropagatesTest {
+public class CdiContextPropagatesTest extends AbstractTest {
 
     private static Weld weld;
 
