@@ -44,7 +44,9 @@ import javax.enterprise.inject.spi.ProcessProducer;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.ConfigValue;
 import org.eclipse.microprofile.config.spi.ConfigSource;
+import org.eclipse.microprofile.config.spi.Converter;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 
@@ -389,6 +391,12 @@ public class SmallryeContextCdiExtension implements Extension {
         }
 
         @Override
+        public ConfigValue getConfigValue(String propertyName) {
+            initialize();
+            return delegate.getConfigValue(propertyName);
+        }
+
+        @Override
         public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
             initialize();
             return delegate.getOptionalValue(propertyName, propertyType);
@@ -404,6 +412,18 @@ public class SmallryeContextCdiExtension implements Extension {
         public Iterable<ConfigSource> getConfigSources() {
             initialize();
             return delegate.getConfigSources();
+        }
+
+        @Override
+        public <T> Optional<Converter<T>> getConverter(Class<T> aClass) {
+            initialize();
+            return delegate.getConverter(aClass);
+        }
+
+        @Override
+        public <T> T unwrap(Class<T> aClass) {
+            initialize();
+            return delegate.unwrap(aClass);
         }
     }
 }

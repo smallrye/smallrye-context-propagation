@@ -39,6 +39,7 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
 import org.junit.Test;
 
+import io.smallrye.common.classloader.ClassPathUtils;
 import io.smallrye.common.function.Functions;
 import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigProviderResolver;
@@ -121,6 +122,7 @@ public class MultiClassloadingTest extends AbstractTest {
                 .addPackages(true, ConfigProvider.class.getPackage().getName())
                 .addPackages(true, SmallRyeConfig.class.getPackage().getName())
                 .addPackages(true, Logger.class.getPackage().getName())
+                .addPackages(true, ClassPathUtils.class.getPackage().getName())
                 .addPackages(true, Functions.class.getPackage().getName())
                 .addPackage(AnnotationLiteral.class.getPackage().getName())
                 .addPackage(Priority.class.getPackage().getName())
