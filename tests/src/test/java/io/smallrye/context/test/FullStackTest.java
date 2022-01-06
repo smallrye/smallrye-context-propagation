@@ -1,7 +1,9 @@
 package io.smallrye.context.test;
 
-import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +17,11 @@ import jakarta.transaction.Transaction;
 import jakarta.transaction.TransactionManager;
 import jakarta.ws.rs.container.CompletionCallback;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
 import org.jboss.resteasy.core.ResteasyContext;
@@ -32,7 +39,6 @@ import org.junit.Test;
 
 import com.arjuna.ats.jta.logging.jtaLogger;
 
-import io.restassured.RestAssured;
 import io.smallrye.context.test.util.AbstractTest;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -176,9 +182,29 @@ public class FullStackTest extends AbstractTest {
     }
 
     @Test
-    public void fullStack() {
-        RestAssured.when().get("/test").then().statusCode(200).body(is("OK"));
-        RestAssured.when().get("/test/async").then().statusCode(500);
-        RestAssured.when().get("/test/async-working").then().statusCode(200).body(is("OK"));
+    public void fullStack() throws IOException {
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            try (CloseableHttpResponse response = client.execute(new HttpGet("http://localhost:8080/test"))) {
+                assertEquals(200, response.getStatusLine().getStatusCode());
+                String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                assertEquals("OK", body);
+            }
+
+            try (CloseableHttpResponse response = client.execute(new HttpGet("http://localhost:8080/test/async"))) {
+                assertEquals(500, response.getStatusLine().getStatusCode());
+            }
+
+            try (CloseableHttpResponse response = client.execute(new HttpGet("http://localhost:8080/test/async-working"))) {
+                assertEquals(200, response.getStatusLine().getStatusCode());
+                String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                assertEquals("OK", body);
+            }
+        }
+
+        // TODO RestAssured depends on on Jakarta EE 8 classes (JAX-B specifically)
+        //  see https://github.com/rest-assured/rest-assured/issues/1510
+        //RestAssured.when().get("/test").then().statusCode(200).body(is("OK"));
+        //RestAssured.when().get("/test/async").then().statusCode(500);
+        //RestAssured.when().get("/test/async-working").then().statusCode(200).body(is("OK"));
     }
 }
