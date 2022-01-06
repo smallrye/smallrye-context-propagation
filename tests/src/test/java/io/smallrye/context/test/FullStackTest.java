@@ -5,15 +5,15 @@ import static org.hamcrest.Matchers.is;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.inject.spi.CDI;
-import javax.persistence.EntityManager;
-import javax.transaction.InvalidTransactionException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.ws.rs.container.CompletionCallback;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.InvalidTransactionException;
+import jakarta.transaction.NotSupportedException;
+import jakarta.transaction.Status;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+import jakarta.transaction.TransactionManager;
+import jakarta.ws.rs.container.CompletionCallback;
 
 import org.jboss.resteasy.cdi.CdiInjectorFactory;
 import org.jboss.resteasy.cdi.ResteasyCdiExtension;
