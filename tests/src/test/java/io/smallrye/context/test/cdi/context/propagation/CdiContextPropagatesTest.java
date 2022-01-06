@@ -3,8 +3,8 @@ package io.smallrye.context.test.cdi.context.propagation;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.enterprise.context.control.RequestContextController;
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.context.control.RequestContextController;
+import jakarta.enterprise.inject.spi.CDI;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;

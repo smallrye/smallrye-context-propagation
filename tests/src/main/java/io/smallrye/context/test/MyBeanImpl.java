@@ -1,6 +1,6 @@
 package io.smallrye.context.test;
 
-import javax.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class MyBeanImpl implements MyBean {

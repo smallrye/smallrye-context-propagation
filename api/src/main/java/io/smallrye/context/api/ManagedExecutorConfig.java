@@ -23,7 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
@@ -82,7 +82,7 @@ import org.eclipse.microprofile.context.ThreadContext;
  *
  * <p>
  * A <code>ManagedExecutor</code> will fail to inject, raising
- * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException} on application startup,
+ * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException} on application startup,
  * if multiple injection points are annotated to create instances with the same name.
  * </p>
  *
@@ -117,7 +117,7 @@ public @interface ManagedExecutorConfig {
      *
      * <p>
      * A <code>ManagedExecutor</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #propagated} set includes one or more of the
@@ -157,7 +157,7 @@ public @interface ManagedExecutorConfig {
      *
      * <p>
      * A <code>ManagedExecutor</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #cleared} set includes one or more of the
@@ -183,7 +183,7 @@ public @interface ManagedExecutorConfig {
      *
      * <p>
      * A <code>ManagedExecutor</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup, if the
      * <code>maxAsync</code> value is 0 or less than -1.
      *
@@ -205,7 +205,7 @@ public @interface ManagedExecutorConfig {
      *
      * <p>
      * A <code>ManagedExecutor</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup, if the
      * <code>maxQueued</code> value is 0 or less than -1.
      *

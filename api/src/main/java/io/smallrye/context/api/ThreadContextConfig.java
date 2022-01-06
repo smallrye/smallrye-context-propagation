@@ -23,7 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 import org.eclipse.microprofile.context.ThreadContext;
 
@@ -74,14 +74,14 @@ import org.eclipse.microprofile.context.ThreadContext;
  *
  * <p>
  * A <code>ThreadContext</code> will fail to inject, raising
- * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+ * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
  * on application startup,
  * if multiple injection points are annotated to create instances with the same name.
  * </p>
  *
  * <p>
  * A <code>ThreadContext</code> must fail to inject, raising
- * {@link javax.enterprise.inject.spi.DeploymentException DeploymentException}
+ * {@link jakarta.enterprise.inject.spi.DeploymentException DeploymentException}
  * on application startup, if more than one provider provides the same thread context
  * {@link org.eclipse.microprofile.context.spi.ThreadContextProvider#getThreadContextType type}.
  *
@@ -116,7 +116,7 @@ public @interface ThreadContextConfig {
      *
      * <p>
      * A <code>ThreadContext</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #propagated} and/or {@link #unchanged} set
@@ -156,7 +156,7 @@ public @interface ThreadContextConfig {
      *
      * <p>
      * A <code>ThreadContext</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #cleared} and/or {@link #unchanged} set
@@ -209,7 +209,7 @@ public @interface ThreadContextConfig {
      *
      * <p>
      * A <code>ThreadContext</code> must fail to inject, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #cleared} and/or {@link #propagated} set

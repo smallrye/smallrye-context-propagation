@@ -21,8 +21,8 @@ package io.smallrye.context.test.classloading;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import javax.annotation.Priority;
-import javax.enterprise.util.AnnotationLiteral;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.util.AnnotationLiteral;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.spi.ConfigProviderResolver;

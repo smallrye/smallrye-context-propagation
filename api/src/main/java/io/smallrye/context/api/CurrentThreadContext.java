@@ -23,9 +23,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.enterprise.util.AnnotationLiteral;
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.interceptor.InterceptorBinding;
 
 import org.eclipse.microprofile.context.ThreadContext;
 
@@ -75,7 +75,7 @@ public @interface CurrentThreadContext {
      *
      * <p>
      * A <code>CurrentThreadContext</code> must fail to initialise, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #propagated} and/or {@link #unchanged} set
@@ -116,7 +116,7 @@ public @interface CurrentThreadContext {
      *
      * <p>
      * A <code>CurrentThreadContext</code> must fail to initialise, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #cleared} and/or {@link #unchanged} set
@@ -171,7 +171,7 @@ public @interface CurrentThreadContext {
      *
      * <p>
      * A <code>CurrentThreadContext</code> must fail to initialise, raising
-     * {@link javax.enterprise.inject.spi.DefinitionException DefinitionException}
+     * {@link jakarta.enterprise.inject.spi.DefinitionException DefinitionException}
      * on application startup,
      * if a context type specified within this set is unavailable
      * or if the {@link #cleared} and/or {@link #propagated} set

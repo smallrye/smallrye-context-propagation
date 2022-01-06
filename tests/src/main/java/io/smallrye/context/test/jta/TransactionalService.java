@@ -2,9 +2,9 @@ package io.smallrye.context.test.jta;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
 
