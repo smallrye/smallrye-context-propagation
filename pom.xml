@@ -52,7 +52,7 @@
         <version.resteasy>4.6.0.Final</version.resteasy>
         <version.hibernate>5.6.5.Final</version.hibernate>
         <version.hsqldb>2.5.0</version.hsqldb>
-        <version.vertx>4.2.5</version.vertx>
+        <version.vertx>4.2.6</version.vertx>
         <version.hamcrest>2.2</version.hamcrest>
 
         <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
