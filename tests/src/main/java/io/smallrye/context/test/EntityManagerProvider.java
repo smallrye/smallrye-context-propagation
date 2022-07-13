@@ -22,12 +22,10 @@ public class EntityManagerProvider {
     @Produces
     @RequestScoped
     public EntityManager start() {
-        System.err.println("Creating EM");
         return emf.createEntityManager();
     }
 
     public void close(@Disposes EntityManager em) {
-        System.err.println("Disposing EM");
-        em.close();
+        throw  new RuntimeException("Testing if dispose gets called");
     }
 }
