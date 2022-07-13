@@ -12,6 +12,8 @@ on:
       - 'NOTICE'
       - 'README*'
   pull_request:
+    branches:
+      - main
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
