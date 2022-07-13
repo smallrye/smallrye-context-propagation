@@ -26,6 +26,6 @@ public class EntityManagerProvider {
     }
 
     public void close(@Disposes EntityManager em) {
-        throw  new RuntimeException("Testing if dispose gets called");
+        throw  new RuntimeException("Testing if dispose gets called! No worries");
     }
 }
