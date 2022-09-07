@@ -28,7 +28,8 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 17
+          # https://issues.sonatype.org/browse/NEXUS-31214
+          java-version: 12
 
       - name: maven release ${{steps.metadata.outputs.current-version}}
         run: |
