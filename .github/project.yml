@@ -1,4 +1,4 @@
 name: SmallRye Context Propagation
 release:
-  current-version: 2.0.0-RC1
-  next-version: 2.0.0-SNAPSHOT
+  current-version: 2.0.0
+  next-version: 2.0.1-SNAPSHOT
