@@ -58,7 +58,7 @@
         <version.vertx>4.3.3</version.vertx>
         <version.hamcrest>2.2</version.hamcrest>
 
-        <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
+        <maven.javadoc.failOnWarnings>false</maven.javadoc.failOnWarnings>
     </properties>
 
 	<developers>
