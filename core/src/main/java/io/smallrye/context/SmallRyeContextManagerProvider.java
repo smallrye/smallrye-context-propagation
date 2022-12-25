@@ -1,5 +1,6 @@
 package io.smallrye.context;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,7 +31,11 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
         registration = null;
     }
 
-    private Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new HashMap<>();
+    // This is used to speed-up the single classloader use case: it becomes null if elements become > 1
+    // causing a fallback to contextManagersForClassLoader
+    private volatile Map<ClassLoader, SmallRyeContextManager> singleContextManager = Collections.emptyMap();
+
+    private Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = null;
 
     @Override
     public SmallRyeContextManager getContextManager() {
@@ -39,17 +44,37 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
 
     @Override
     public SmallRyeContextManager getContextManager(ClassLoader classLoader) {
-        SmallRyeContextManager config = contextManagersForClassLoader.get(classLoader);
-        if (config == null) {
-            synchronized (this) {
-                config = contextManagersForClassLoader.get(classLoader);
-                if (config == null) {
-                    config = getContextManagerBuilder().forClassLoader(classLoader).registerOnProvider()
-                            .addDiscoveredThreadContextProviders().addDiscoveredContextManagerExtensions().build();
-                }
+        final Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
+        if (singleContextManager != null) {
+            final SmallRyeContextManager config = singleContextManager.get(classLoader);
+            if (config != null) {
+                return config;
             }
+            return guardedCreateSingleContextManager(classLoader);
         }
-        return config;
+        return guardedCreateContextManager(classLoader);
+    }
+
+    private synchronized SmallRyeContextManager guardedCreateSingleContextManager(ClassLoader classLoader) {
+        final Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
+        if (singleContextManager != null) {
+            final SmallRyeContextManager config = singleContextManager.get(classLoader);
+            if (config != null) {
+                return config;
+            }
+            return getContextManagerBuilder().forClassLoader(classLoader).registerOnProvider()
+                    .addDiscoveredThreadContextProviders().addDiscoveredContextManagerExtensions().build();
+        }
+        return guardedCreateContextManager(classLoader);
+    }
+
+    private synchronized SmallRyeContextManager guardedCreateContextManager(ClassLoader classLoader) {
+        final SmallRyeContextManager config = contextManagersForClassLoader.get(classLoader);
+        if (config != null) {
+            return config;
+        }
+        return getContextManagerBuilder().forClassLoader(classLoader).registerOnProvider()
+                .addDiscoveredThreadContextProviders().addDiscoveredContextManagerExtensions().build();
     }
 
     @Override
@@ -63,20 +88,43 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
             throw new IllegalArgumentException("Only instances of SmallRyeContextManager are supported: " + manager);
         }
         synchronized (this) {
-            contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
+            final Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
+            if (singleContextManager != null) {
+                if (singleContextManager.isEmpty() || singleContextManager.containsKey(manager)) {
+                    // can replace the existing one, if any
+                    this.singleContextManager = Collections.singletonMap(classLoader, (SmallRyeContextManager) manager);
+                } else {
+                    // abandon the single ctx manager state
+                    this.singleContextManager = null;
+                    final Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new HashMap<>(
+                            singleContextManager);
+                    contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
+                    this.contextManagersForClassLoader = contextManagersForClassLoader;
+                }
+            } else {
+                contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
+            }
         }
     }
 
     @Override
     public void releaseContextManager(ContextManager manager) {
         synchronized (this) {
-            Iterator<Map.Entry<ClassLoader, SmallRyeContextManager>> iterator = contextManagersForClassLoader.entrySet()
-                    .iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<ClassLoader, SmallRyeContextManager> entry = iterator.next();
-                if (entry.getValue() == manager) {
-                    iterator.remove();
-                    return;
+            final Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
+            if (singleContextManager != null) {
+                if (!singleContextManager.isEmpty() && singleContextManager.containsValue(manager)) {
+                    this.singleContextManager = Collections.emptyMap();
+                }
+            } else {
+                Iterator<Map.Entry<ClassLoader, SmallRyeContextManager>> iterator = contextManagersForClassLoader.entrySet()
+                        .iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<ClassLoader, SmallRyeContextManager> entry = iterator.next();
+                    if (entry.getValue() == manager) {
+                        iterator.remove();
+                        // we're not compacting to singleContextManager if size is now 1
+                        return;
+                    }
                 }
             }
         }
@@ -90,7 +138,15 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
      * @return The context manager for the class loader, or {@code null} if none could be found
      */
     public ContextManager findContextManager(ClassLoader classLoader) {
-        return contextManagersForClassLoader.get(classLoader);
+        Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
+        if (singleContextManager != null) {
+            return singleContextManager.get(classLoader);
+        }
+        synchronized (this) {
+            // once singleContextManager is null, it won't EVER become not null again:
+            // see releaseContextManager's lack of compaction
+            return contextManagersForClassLoader.get(classLoader);
+        }
     }
 
     public static SmallRyeContextManager getManager() {
