@@ -1,9 +1,10 @@
 package io.smallrye.context;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerProvider;
@@ -35,7 +36,9 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
     // causing a fallback to contextManagersForClassLoader
     private volatile Map<ClassLoader, SmallRyeContextManager> singleContextManager = Collections.emptyMap();
 
-    private Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = null;
+    // no need to declare this as volatile: its access is always guarded by a load-acquire on singleContextManager,
+    // paired with a store-release (by nullying out singleContextManager *after* this map is fully constructed)
+    private ConcurrentMap<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = null;
 
     @Override
     public SmallRyeContextManager getContextManager() {
@@ -50,12 +53,17 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
             if (config != null) {
                 return config;
             }
-            return guardedCreateSingleContextManager(classLoader);
+            return guardedGetOrCreateSingleContextManager(classLoader);
         }
-        return guardedCreateContextManager(classLoader);
+        final ConcurrentMap<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = this.contextManagersForClassLoader;
+        final SmallRyeContextManager config = contextManagersForClassLoader.get(classLoader);
+        if (config != null) {
+            return config;
+        }
+        return guardedGetOrCreateContextManager(classLoader);
     }
 
-    private synchronized SmallRyeContextManager guardedCreateSingleContextManager(ClassLoader classLoader) {
+    private synchronized SmallRyeContextManager guardedGetOrCreateSingleContextManager(ClassLoader classLoader) {
         final Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
         if (singleContextManager != null) {
             final SmallRyeContextManager config = singleContextManager.get(classLoader);
@@ -65,10 +73,10 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
             return getContextManagerBuilder().forClassLoader(classLoader).registerOnProvider()
                     .addDiscoveredThreadContextProviders().addDiscoveredContextManagerExtensions().build();
         }
-        return guardedCreateContextManager(classLoader);
+        return guardedGetOrCreateContextManager(classLoader);
     }
 
-    private synchronized SmallRyeContextManager guardedCreateContextManager(ClassLoader classLoader) {
+    private synchronized SmallRyeContextManager guardedGetOrCreateContextManager(ClassLoader classLoader) {
         final SmallRyeContextManager config = contextManagersForClassLoader.get(classLoader);
         if (config != null) {
             return config;
@@ -95,11 +103,14 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
                     this.singleContextManager = Collections.singletonMap(classLoader, (SmallRyeContextManager) manager);
                 } else {
                     // abandon the single ctx manager state
-                    this.singleContextManager = null;
-                    final Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new HashMap<>(
-                            singleContextManager);
+                    // concurrencyLevel = 1 because we don't care much about concurrent writes/remove, but just gets
+                    final ConcurrentMap<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader =
+                            new ConcurrentHashMap<>(2, 0.75f, 1);
+                    contextManagersForClassLoader.putAll(singleContextManager);
                     contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
                     this.contextManagersForClassLoader = contextManagersForClassLoader;
+                    // singleContextManager's store is store-release contextManagersForClassLoader and its content
+                    this.singleContextManager = null;
                 }
             } else {
                 contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
@@ -138,15 +149,11 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
      * @return The context manager for the class loader, or {@code null} if none could be found
      */
     public ContextManager findContextManager(ClassLoader classLoader) {
-        Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
+        final Map<ClassLoader, SmallRyeContextManager> singleContextManager = this.singleContextManager;
         if (singleContextManager != null) {
             return singleContextManager.get(classLoader);
         }
-        synchronized (this) {
-            // once singleContextManager is null, it won't EVER become not null again:
-            // see releaseContextManager's lack of compaction
-            return contextManagersForClassLoader.get(classLoader);
-        }
+        return contextManagersForClassLoader.get(classLoader);
     }
 
     public static SmallRyeContextManager getManager() {
