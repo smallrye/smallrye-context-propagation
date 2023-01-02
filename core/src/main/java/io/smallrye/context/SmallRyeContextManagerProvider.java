@@ -104,8 +104,8 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
                 } else {
                     // abandon the single ctx manager state
                     // concurrencyLevel = 1 because we don't care much about concurrent writes/remove, but just gets
-                    final ConcurrentMap<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader =
-                            new ConcurrentHashMap<>(2, 0.75f, 1);
+                    final ConcurrentMap<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new ConcurrentHashMap<>(
+                            2, 0.75f, 1);
                     contextManagersForClassLoader.putAll(singleContextManager);
                     contextManagersForClassLoader.put(classLoader, (SmallRyeContextManager) manager);
                     this.contextManagersForClassLoader = contextManagersForClassLoader;
