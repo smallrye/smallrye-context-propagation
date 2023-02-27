@@ -312,7 +312,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
     /**
      * Returns a <code>ThreadContext</code> which has the same propagation settings as this <code>ManagedExecutor</code>,
      * which uses this <code>ManagedExecutor</code> as its default executor.
-     * 
+     *
      * @return a ThreadContext with the same propagation settings as this ManagedExecutor.
      */
     public SmallRyeThreadContext getThreadContext() {
@@ -399,7 +399,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
          * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)}. Set to <code>null</code> to
          * disable delegation
          * and force creating a new executor service.
-         * 
+         *
          * @param executorService the executor service to delegate to, or <code>null</code> to force creating a new executor
          *        service.
          * @return this builder
@@ -415,7 +415,7 @@ public class SmallRyeManagedExecutor implements ManagedExecutor {
          * Forces the creation of a new executor service. This is has the same effect as calling
          * {@link #withExecutorService(ExecutorService)} with
          * <code>null</code>.
-         * 
+         *
          * @return this builder
          * @see #withExecutorService(ExecutorService)
          * @see SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)

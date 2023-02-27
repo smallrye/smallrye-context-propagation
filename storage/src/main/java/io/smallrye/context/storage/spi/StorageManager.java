@@ -7,7 +7,7 @@ public interface StorageManager {
 
     /**
      * Returns the currently registered StorageManager
-     * 
+     *
      * @return the currently registered StorageManager
      */
     public static StorageManager instance() {
@@ -19,7 +19,7 @@ public interface StorageManager {
      * may be a regular ThreadLocal, or one that this StorageManager manufactured for special dedicated
      * storage. The returned ThreadLocal is cached and all subsequent calls to this method with the same
      * storage declaration will always return the same ThreadLocal instance.
-     * 
+     *
      * @param storageDeclarationClass the declaration class which defines the type of item we want to store in the
      *        required ThreadLocal
      * @return the ThreadLocal, memoized
@@ -33,7 +33,7 @@ public interface StorageManager {
      * may be a regular ThreadLocal, or one that this StorageManager manufactured for special dedicated
      * storage. The returned ThreadLocal is cached and all subsequent calls to this method with the same
      * storage declaration will always return the same ThreadLocal instance.
-     * 
+     *
      * @param storageDeclarationClass the declaration class which defines the type of item we want to store in the
      *        required ThreadLocal
      * @return the ThreadLocal, memoized

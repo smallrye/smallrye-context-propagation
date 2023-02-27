@@ -62,7 +62,7 @@ public class ThreadContextProviderPlan {
      * This helps to optimise construction of CapturedContextState
      * without exposing too many implementation details.
      * Only useful for snapshots with an empty property set.
-     * 
+     *
      * @return a list of snapshots
      */
     public List<ThreadContextSnapshot> takeThreadContextSnapshots() {
@@ -94,7 +94,7 @@ public class ThreadContextProviderPlan {
      * Use this if @{link {@link #isFast()} is true (it will throw otherwise) when you want to capture the current context
      * using the fast-path, and feed the captured context in the given @{link ContextHolder}, which must have a size compatible
      * with @{link {@link #size()}.
-     * 
+     *
      * @param threadContext The thread context settings
      * @param tcTl the current ThreadContext thread-local (for contextual settings)
      * @param contextHolder the contextual lambda in which we will capture context

@@ -214,7 +214,7 @@ public class SmallRyeContextManager implements ContextManager {
     /**
      * Returns a {@link SmallRyeThreadContext} instance which propagates default contexts, possibly
      * configured via MP Config.
-     * 
+     *
      * @return a {@link SmallRyeThreadContext} instance which propagates default contexts, possibly
      *         configured via MP Config
      */
@@ -229,7 +229,7 @@ public class SmallRyeContextManager implements ContextManager {
 
     /**
      * Returns a {@link SmallRyeThreadContext} instance which propagates all thread contexts.
-     * 
+     *
      * @return a {@link SmallRyeThreadContext} instance which propagates all thread contexts.
      */
     public SmallRyeThreadContext allPropagatedThreadContext() {
@@ -246,7 +246,7 @@ public class SmallRyeContextManager implements ContextManager {
 
     /**
      * Returns a {@link SmallRyeThreadContext} instance which clears all thread contexts.
-     * 
+     *
      * @return a {@link SmallRyeThreadContext} instance which clears all thread contexts.
      */
     public SmallRyeThreadContext allClearedThreadContext() {
@@ -345,7 +345,7 @@ public class SmallRyeContextManager implements ContextManager {
          * Registers the built instance to the current {@link SmallRyeContextManagerProvider} before any extensions
          * are loaded. This is useful because the extensions might require the built {@link SmallRyeContextManager}
          * to be registered on the current class loader in order to use it, so this prevents building two.
-         * 
+         *
          * @return this builder
          */
         public Builder registerOnProvider() {
@@ -359,7 +359,7 @@ public class SmallRyeContextManager implements ContextManager {
          * {@link SmallRyeManagedExecutor.Builder#withExecutorService(ExecutorService)} and
          * {@link SmallRyeManagedExecutor.Builder#withNewExecutorService()}. Also serves as the default executor to use
          * by all {@link CompletionStage} and {@link CompletableFuture} wrapped by {@link ThreadContext}.
-         * 
+         *
          * @param executorService the executor service to delegate to. If <code>null</code>, all created {@link ManagedExecutor}
          *        will create new backing executor services, and all <code>*Async</code> methods of the
          *        {@link CompletionStage} and {@link CompletableFuture} wrapped by {@link ThreadContext} will throw due to a
@@ -373,7 +373,7 @@ public class SmallRyeContextManager implements ContextManager {
 
         /**
          * Enable or disable FastThreadContextProviders optimisations. Defaults to enabled.
-         * 
+         *
          * @param enable set to false to disable FastThreadContextProviders.
          * @return this builder.
          */

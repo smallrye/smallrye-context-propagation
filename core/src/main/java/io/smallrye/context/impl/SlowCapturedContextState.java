@@ -17,7 +17,7 @@ public class SlowCapturedContextState implements CapturedContextState {
 
     /**
      * Captures the current context according to the given ThreadContext
-     * 
+     *
      * @param threadContext the thread context
      */
     public SlowCapturedContextState(SmallRyeThreadContext threadContext) {
@@ -27,7 +27,7 @@ public class SlowCapturedContextState implements CapturedContextState {
 
     /**
      * Restores the captured context and returns an instance that can unrestore (cleanup) it.
-     * 
+     *
      * @return the captured context state
      */
     public SlowActiveContextState begin() {

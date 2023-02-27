@@ -84,7 +84,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Updates the current @{link SmallRyeThreadContext} in use by the current thread, and returns an
      * object suitable for use in try-with-resource to restore the previous value.
-     * 
+     *
      * @param threadContext the @{link SmallRyeThreadContext} to use
      * @return an object suitable for use in try-with-resource to restore the previous value.
      */
@@ -108,7 +108,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Invokes the given @{link Runnable} with the current @{link SmallRyeThreadContext} updated to the given value
      * for the current thread.
-     * 
+     *
      * @param threadContext the @{link SmallRyeThreadContext} to use
      * @param f the @{link Runnable} to invoke
      */
@@ -129,7 +129,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Invokes the given @{link Supplier} with the current @{link SmallRyeThreadContext} updated to the given value
      * for the current thread.
-     * 
+     *
      * @param threadContext the @{link SmallRyeThreadContext} to use
      * @param f the @{link Supplier} to invoke
      * @param <T> The type of @{link Supplier} to return
@@ -152,7 +152,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      * with default contexts, possibly configured via MP Config.
-     * 
+     *
      * @return the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      *         with default contexts, possibly configured via MP Config.
      */
@@ -163,7 +163,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      * which propagates all contexts.
-     * 
+     *
      * @return the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      *         which propagates all contexts.
      */
@@ -174,7 +174,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Returns the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      * which clears all contexts.
-     * 
+     *
      * @return the current thread's @{link SmallRyeThreadContext} if set, or a @{link SmallRyeThreadContext}
      *         which clears all contexts.
      */
@@ -185,7 +185,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Returns the current thread's @{link SmallRyeThreadContext} if set, or the given @{link SmallRyeThreadContext}
      * default value.
-     * 
+     *
      * @param defaultValue the default value to use
      * @return the current thread's @{link SmallRyeThreadContext} if set, or the given @{link SmallRyeThreadContext}
      *         default value.
@@ -197,7 +197,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     /**
      * Returns the current thread's @{link SmallRyeThreadContext} if set, or null.
-     * 
+     *
      * @return the current thread's @{link SmallRyeThreadContext} if set, or null.
      */
     public static SmallRyeThreadContext getCurrentThreadContext() {
@@ -234,7 +234,7 @@ public class SmallRyeThreadContext implements ThreadContext {
     /**
      * Returns true if this thread context has no context to propagate nor clear, and so
      * will not contextualise anything.
-     * 
+     *
      * @return true if this thread context has no context to propagate nor clear
      */
     public boolean isEmpty() {
@@ -243,7 +243,7 @@ public class SmallRyeThreadContext implements ThreadContext {
 
     /**
      * Returns true if the given lambda instance is already contextualized
-     * 
+     *
      * @param lambda the lambda to test
      * @return true if the given lambda instance is already contextualized
      */
@@ -270,7 +270,7 @@ public class SmallRyeThreadContext implements ThreadContext {
      * or the default executor service as set by
      * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
      * or otherwise have no default executor.
-     * 
+     *
      * If this thread context has no default executor, the new stage and all dependent stages created from it, and so forth,
      * have no default asynchronous execution facility and must raise {@link java.lang.UnsupportedOperationException}
      * for all <code>*Async</code> methods that do not specify an executor. For example,
@@ -318,7 +318,7 @@ public class SmallRyeThreadContext implements ThreadContext {
      * or the default executor service as set by
      * {@link SmallRyeContextManager.Builder#withDefaultExecutorService(ExecutorService)},
      * or otherwise have no default executor.
-     * 
+     *
      * If this thread context has no default executor, the new stage and all dependent stages created from it, and so forth,
      * and/or cleared as described in the documentation of the {@link ManagedExecutor} class, except that
      * this ThreadContext instance takes the place of the default asynchronous execution facility in

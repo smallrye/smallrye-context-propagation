@@ -15,7 +15,7 @@ public interface FastThreadContextProvider extends ThreadContextProvider {
     /**
      * Designates the ThreadLocal that we should capture/restore. Must always be
      * the same returned ThreadLocal.
-     * 
+     *
      * @param props properties
      * @return the ThreadLocal to capture/restore
      */
@@ -24,7 +24,7 @@ public interface FastThreadContextProvider extends ThreadContextProvider {
     /**
      * The cleared value. Defaults to null. Override this if your cleared value
      * is not null.
-     * 
+     *
      * @param props properties
      * @return the cleared value for the ThreadLocal
      */
