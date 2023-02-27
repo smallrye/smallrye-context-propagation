@@ -6,21 +6,15 @@
         <artifactId>smallrye-context-propagation-parent</artifactId>
         <version>2.0.1-SNAPSHOT</version>
     </parent>
+
     <artifactId>smallrye-context-propagation-propagators-rxjava2</artifactId>
-    <name>smallrye-context-propagation-propagators-rxjava2</name>
+    <name>SmallRye Context Propagation: Propagators RxJava 2</name>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.eclipse.microprofile.context-propagation</groupId>
             <artifactId>microprofile-context-propagation-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>

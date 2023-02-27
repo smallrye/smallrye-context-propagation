@@ -190,7 +190,7 @@ public @interface ThreadContextConfig {
      * For example, to run as the current application, but under the
      * transaction of the thread where the task executes:
      * </p>
-     * 
+     *
      * <pre>
      * <code> {@literal @}Inject {@literal @}ThreadContextConfig(unchanged = ThreadContext.TRANSACTION,
      *                              propagated = ThreadContext.APPLICATION,

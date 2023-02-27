@@ -43,7 +43,7 @@ public @interface CurrentThreadContext {
     /**
      * Defines that the current thread context should be removed. This is mutually exclusive
      * with the other settings.
-     * 
+     *
      * @return a boolean indicating if the current thread context should be removed. Defaults to false.
      */
     @Nonbinding
@@ -151,7 +151,7 @@ public @interface CurrentThreadContext {
      * For example, to run as the current application, but under the
      * transaction of the thread where the task executes:
      * </p>
-     * 
+     *
      * <pre>
      * <code> {@literal @}WithThreadContext(unchanged = ThreadContext.TRANSACTION,
      *                              propagated = ThreadContext.APPLICATION,

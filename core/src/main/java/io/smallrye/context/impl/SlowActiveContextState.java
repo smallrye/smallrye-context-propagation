@@ -18,7 +18,7 @@ public class SlowActiveContextState implements CleanAutoCloseable {
 
     /**
      * Restores a previously captured context.
-     * 
+     *
      * @param threadContext the thread context
      * @param threadContextSnapshots the captured snapshots
      */

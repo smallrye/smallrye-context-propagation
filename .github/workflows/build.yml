@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - jakarta
     paths-ignore:
       - '.gitignore'
       - 'CODEOWNERS'
