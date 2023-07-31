@@ -41,7 +41,7 @@
         <version.microprofile.config>3.0.2</version.microprofile.config>
 
         <version.weld-api>5.0.SP3</version.weld-api>
-        <version.jboss.threads>3.4.2.Final</version.jboss.threads>
+        <version.jboss.threads>3.5.0.Final</version.jboss.threads>
         <version.jta>2.0.1</version.jta>
         <version.narayana>6.0.0.Final</version.narayana>
         <version.rxjava2>2.2.21</version.rxjava2>
