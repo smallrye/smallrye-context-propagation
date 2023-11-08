@@ -1,6 +1,6 @@
 package io.smallrye.context.storage.impl;
 
-public class UnsfafeThreadLocalScope<T> extends ThreadLocalScope<T> {
+public class UnsafeThreadLocalScope<T> extends ThreadLocalScope<T> {
 
     public UnsfafeThreadLocalScope() {
         super(new ThreadLocal<>());
