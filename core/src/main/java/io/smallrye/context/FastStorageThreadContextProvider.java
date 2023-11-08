@@ -4,6 +4,7 @@ import java.util.Map;
 
 import io.smallrye.context.storage.spi.StorageDeclaration;
 import io.smallrye.context.storage.spi.StorageManager;
+import io.smallrye.context.storage.spi.ThreadScope;
 
 /**
  * Special implementation of a {@link FastThreadContextProvider} if your context is using {@link StorageManager} to obtain its
@@ -15,8 +16,8 @@ public interface FastStorageThreadContextProvider<Declaration extends StorageDec
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public default ThreadLocal<?> threadLocal(Map<String, String> props) {
-        return StorageManager.threadLocal((Class) getStorageDeclaration());
+    default ThreadScope<?> threadScope(Map<String, String> props) {
+        return StorageManager.threadScope((Class) getStorageDeclaration());
     }
 
     /**

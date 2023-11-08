@@ -1,14 +1,16 @@
 package io.smallrye.context.impl.wrappers;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public final class ContextualRunnableN implements ContextualRunnable {
-    private ThreadLocal<Object>[] tl;
+    private ThreadScope<Object>[] tl;
     private Object[] state;
 
     private final Runnable runnable;
 
     public ContextualRunnableN(Runnable runnable, int n) {
         this.runnable = runnable;
-        this.tl = new ThreadLocal[n];
+        this.tl = new ThreadScope[n];
         this.state = new Object[n];
     }
 
@@ -29,10 +31,10 @@ public final class ContextualRunnableN implements ContextualRunnable {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         if (index < 0 || index >= state.length)
             throw new IllegalArgumentException("Illegal index " + index);
-        tl[index] = threadLocal;
+        tl[index] = ThreadScope;
         state[index] = value;
     }
 }

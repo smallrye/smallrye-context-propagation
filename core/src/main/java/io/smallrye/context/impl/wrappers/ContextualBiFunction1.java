@@ -2,8 +2,10 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.function.BiFunction;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualBiFunction1<T, U, R> implements ContextualBiFunction<T, U, R> {
-    private ThreadLocal<Object> tl0;
+    private ThreadScope<Object> tl0;
     private Object state0;
 
     private final BiFunction<T, U, R> biFunction;
@@ -24,10 +26,10 @@ public class ContextualBiFunction1<T, U, R> implements ContextualBiFunction<T, U
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         switch (index) {
             case 0:
-                tl0 = threadLocal;
+                tl0 = ThreadScope;
                 state0 = value;
                 break;
             default:

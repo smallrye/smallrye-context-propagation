@@ -10,7 +10,7 @@ public interface StorageManager {
      *
      * @return the currently registered StorageManager
      */
-    public static StorageManager instance() {
+    static StorageManager instance() {
         return StorageManagerProvider.instance().getStorageManager();
     }
 
@@ -26,7 +26,7 @@ public interface StorageManager {
      * @param <T> The StorageDeclaration type
      * @param <X> The type of data we store in that ThreadLocal
      */
-    public <T extends StorageDeclaration<X>, X> ThreadLocal<X> getThreadLocal(Class<T> storageDeclarationClass);
+    <T extends StorageDeclaration<X>, X> ThreadScope<X> getThreadScope(Class<T> storageDeclarationClass);
 
     /**
      * Obtains a ThreadLocal suitable for the given registered StorageDeclaration. The ThreadLocal
@@ -40,7 +40,7 @@ public interface StorageManager {
      * @param <T> The StorageDeclaration type
      * @param <X> The type of data we store in that ThreadLocal
      */
-    public static <T extends StorageDeclaration<X>, X> ThreadLocal<X> threadLocal(Class<T> storageDeclarationClass) {
-        return instance().getThreadLocal(storageDeclarationClass);
+    static <T extends StorageDeclaration<X>, X> ThreadScope<X> threadScope(Class<T> storageDeclarationClass) {
+        return instance().getThreadScope(storageDeclarationClass);
     }
 }

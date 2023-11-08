@@ -11,6 +11,7 @@ import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 import io.smallrye.context.FastThreadContextProvider;
 import io.smallrye.context.SmallRyeThreadContext;
+import io.smallrye.context.storage.spi.ThreadScope;
 
 public class ThreadContextProviderPlan {
 
@@ -101,7 +102,7 @@ public class ThreadContextProviderPlan {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void takeThreadContextSnapshotsFast(SmallRyeThreadContext threadContext,
-            ThreadLocal<SmallRyeThreadContext> tcTl,
+            ThreadScope<SmallRyeThreadContext> tcTl,
             ContextHolder contextHolder) {
         if (!fast)
             throw new IllegalStateException("This ThreadContext includes non-fast providers: " + this.clearedProviders + " and "
@@ -111,15 +112,15 @@ public class ThreadContextProviderPlan {
         final Map<String, String> props = Collections.emptyMap();
         int i = 0;
         for (ThreadContextProvider provider : propagatedProvidersFastIterable) {
-            ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
-            contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl, tl.get());
+            ThreadScope<?> tl = ((FastThreadContextProvider) provider).threadScope(props);
+            contextHolder.captureThreadScope(i++, (ThreadScope<Object>) tl, tl.get());
         }
         for (ThreadContextProvider provider : clearedProvidersFastIterable) {
-            ThreadLocal<?> tl = ((FastThreadContextProvider) provider).threadLocal(props);
-            contextHolder.captureThreadLocal(i++, (ThreadLocal<Object>) tl,
+            ThreadScope<?> tl = ((FastThreadContextProvider) provider).threadScope(props);
+            contextHolder.captureThreadScope(i++, (ThreadScope<Object>) tl,
                     ((FastThreadContextProvider) provider).clearedValue(props));
         }
-        contextHolder.captureThreadLocal(i, (ThreadLocal) tcTl, threadContext);
+        contextHolder.captureThreadScope(i, (ThreadScope) tcTl, threadContext);
     }
 
     /**

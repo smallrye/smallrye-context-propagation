@@ -2,15 +2,17 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.function.Consumer;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualConsumerN<T> implements ContextualConsumer<T> {
-    private ThreadLocal<Object>[] tl;
+    private ThreadScope<Object>[] tl;
     private Object[] state;
 
     private final Consumer<T> consumer;
 
     public ContextualConsumerN(Consumer<T> consumer, int n) {
         this.consumer = consumer;
-        this.tl = new ThreadLocal[n];
+        this.tl = new ThreadScope[n];
         this.state = new Object[n];
     }
 
@@ -31,10 +33,10 @@ public class ContextualConsumerN<T> implements ContextualConsumer<T> {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         if (index < 0 || index >= state.length)
             throw new IllegalArgumentException("Illegal index " + index);
-        tl[index] = threadLocal;
+        tl[index] = ThreadScope;
         state[index] = value;
     }
 

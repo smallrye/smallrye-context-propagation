@@ -9,11 +9,12 @@ import org.eclipse.microprofile.context.spi.ThreadContextController;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
 import io.smallrye.context.FastThreadContextProvider;
+import io.smallrye.context.storage.spi.ThreadScope;
 
 public class ApplicationContextProvider implements FastThreadContextProvider {
 
     static final ClassLoader SYSTEM_CL;
-    static final ThreadLocal<ClassLoader> PRETEND_TL = new ThreadLocal<ClassLoader>() {
+    static final ThreadScope<ClassLoader> PRETEND_TL = new ThreadScope<>() {
         @Override
         public ClassLoader get() {
             return Thread.currentThread().getContextClassLoader();
@@ -96,7 +97,7 @@ public class ApplicationContextProvider implements FastThreadContextProvider {
     }
 
     @Override
-    public ThreadLocal<?> threadLocal(Map<String, String> props) {
+    public ThreadScope<?> threadScope(Map<String, String> props) {
         return PRETEND_TL;
     }
 

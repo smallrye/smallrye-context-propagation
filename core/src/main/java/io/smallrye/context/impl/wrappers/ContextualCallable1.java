@@ -2,8 +2,10 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.concurrent.Callable;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualCallable1<T> implements ContextualCallable<T> {
-    private ThreadLocal<Object> tl0;
+    private ThreadScope<Object> tl0;
     private Object state0;
 
     private final Callable<T> callable;
@@ -24,10 +26,10 @@ public class ContextualCallable1<T> implements ContextualCallable<T> {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         switch (index) {
             case 0:
-                tl0 = threadLocal;
+                tl0 = ThreadScope;
                 state0 = value;
                 break;
             default:

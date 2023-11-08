@@ -5,6 +5,8 @@ import java.util.Map;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 import org.eclipse.microprofile.context.spi.ThreadContextSnapshot;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 /**
  * Subtype of ThreadContextProvider which bypasses all the {@link #currentContext(Map)} and
  * {@link #clearedContext(Map)} and {@link ThreadContextSnapshot} and just works on the
@@ -19,7 +21,7 @@ public interface FastThreadContextProvider extends ThreadContextProvider {
      * @param props properties
      * @return the ThreadLocal to capture/restore
      */
-    ThreadLocal<?> threadLocal(Map<String, String> props);
+    ThreadScope<?> threadScope(Map<String, String> props);
 
     /**
      * The cleared value. Defaults to null. Override this if your cleared value

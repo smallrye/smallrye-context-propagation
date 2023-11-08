@@ -61,11 +61,12 @@ import io.smallrye.context.impl.wrappers.SlowContextualFunction;
 import io.smallrye.context.impl.wrappers.SlowContextualRunnable;
 import io.smallrye.context.impl.wrappers.SlowContextualSupplier;
 import io.smallrye.context.storage.spi.StorageManager;
+import io.smallrye.context.storage.spi.ThreadScope;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
-    final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = StorageManager
-            .threadLocal(SmallRyeThreadContextStorageDeclaration.class);
+    private final static ThreadScope<SmallRyeThreadContext> currentThreadContext = StorageManager
+            .threadScope(SmallRyeThreadContextStorageDeclaration.class);
 
     private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
         @Override

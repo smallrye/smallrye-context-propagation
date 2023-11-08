@@ -12,7 +12,7 @@ import io.smallrye.context.storage.impl.DefaultStorageManagerProvider;
  */
 public interface StorageManagerProvider {
 
-    static AtomicReference<StorageManagerProvider> INSTANCE = new AtomicReference<StorageManagerProvider>();
+    AtomicReference<StorageManagerProvider> INSTANCE = new AtomicReference<StorageManagerProvider>();
 
     /**
      * Returns the currently registered StorageManagerProvider. Will attempt to instantiate one based on
@@ -21,7 +21,7 @@ public interface StorageManagerProvider {
      *
      * @return the currently registered StorageManagerProvider, lazily created.
      */
-    public static StorageManagerProvider instance() {
+    static StorageManagerProvider instance() {
         StorageManagerProvider provider = INSTANCE.get();
         if (provider == null) {
             for (StorageManagerProvider serviceProvider : ServiceLoader.load(StorageManagerProvider.class)) {
@@ -45,7 +45,7 @@ public interface StorageManagerProvider {
      * @return a registration object allowing you to unregister it
      * @throws IllegalStateException when there already is a registered provider
      */
-    public static StorageManagerProviderRegistration register(StorageManagerProvider provider) throws IllegalStateException {
+    static StorageManagerProviderRegistration register(StorageManagerProvider provider) throws IllegalStateException {
         if (INSTANCE.compareAndSet(null, provider)) {
             return new StorageManagerProviderRegistration(provider);
         } else {
@@ -56,7 +56,7 @@ public interface StorageManagerProvider {
     /**
      * @return the current StorageManager, for the current TCCL
      */
-    public default StorageManager getStorageManager() {
+    default StorageManager getStorageManager() {
         ClassLoader loader = System.getSecurityManager() == null
                 ? Thread.currentThread().getContextClassLoader()
                 : AccessController
@@ -70,5 +70,5 @@ public interface StorageManagerProvider {
      * @param classloader the classloader to use for looking up the StorageManager
      * @return the StorageManager registered for the given ClassLoader
      */
-    public StorageManager getStorageManager(ClassLoader classloader);
+    StorageManager getStorageManager(ClassLoader classloader);
 }

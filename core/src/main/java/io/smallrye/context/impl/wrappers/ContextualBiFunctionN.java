@@ -2,15 +2,17 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.function.BiFunction;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualBiFunctionN<T, U, R> implements ContextualBiFunction<T, U, R> {
-    private ThreadLocal<Object>[] tl;
+    private ThreadScope<Object>[] tl;
     private Object[] state;
 
     private final BiFunction<T, U, R> biFunction;
 
     public ContextualBiFunctionN(BiFunction<T, U, R> biFunction, int n) {
         this.biFunction = biFunction;
-        this.tl = new ThreadLocal[n];
+        this.tl = new ThreadScope[n];
         this.state = new Object[n];
     }
 
@@ -31,10 +33,10 @@ public class ContextualBiFunctionN<T, U, R> implements ContextualBiFunction<T, U
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         if (index < 0 || index >= state.length)
             throw new IllegalArgumentException("Illegal index " + index);
-        tl[index] = threadLocal;
+        tl[index] = ThreadScope;
         state[index] = value;
     }
 

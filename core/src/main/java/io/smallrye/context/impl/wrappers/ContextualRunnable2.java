@@ -1,9 +1,11 @@
 package io.smallrye.context.impl.wrappers;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public final class ContextualRunnable2 implements ContextualRunnable {
-    private ThreadLocal<Object> tl0;
+    private ThreadScope<Object> tl0;
     private Object state0;
-    private ThreadLocal<Object> tl1;
+    private ThreadScope<Object> tl1;
     private Object state1;
 
     private final Runnable runnable;
@@ -27,14 +29,14 @@ public final class ContextualRunnable2 implements ContextualRunnable {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         switch (index) {
             case 0:
-                tl0 = threadLocal;
+                tl0 = ThreadScope;
                 state0 = value;
                 break;
             case 1:
-                tl1 = threadLocal;
+                tl1 = ThreadScope;
                 state1 = value;
                 break;
             default:

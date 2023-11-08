@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.smallrye.context.storage.spi.StorageManager;
+import io.smallrye.context.storage.spi.ThreadScope;
 
 /**
  * This is a fake version of ResteasyContext from RESTEasy, where it stores its ThreadLocal Stack of Map contexts.
@@ -13,8 +14,8 @@ import io.smallrye.context.storage.spi.StorageManager;
  */
 class RESTEasyContext {
 
-    static final ThreadLocal<List<Map<Class<?>, Object>>> context = StorageManager
-            .threadLocal(RESTEasyStorageDeclaration.class);
+    static final ThreadScope<List<Map<Class<?>, Object>>> context = StorageManager
+            .threadScope(RESTEasyStorageDeclaration.class);
 
     static <T> T getContext(Class<T> klass) {
         Map<Class<?>, Object> context = getContext();

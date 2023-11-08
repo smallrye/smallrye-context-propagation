@@ -2,13 +2,14 @@ package io.smallrye.context.test;
 
 import io.smallrye.context.storage.spi.StorageDeclaration;
 import io.smallrye.context.storage.spi.StorageManager;
+import io.smallrye.context.storage.spi.ThreadScope;
 
 public class MyContext {
 
     static class Declaration implements StorageDeclaration<MyContext> {
     }
 
-    static ThreadLocal<MyContext> context = StorageManager.threadLocal(Declaration.class);
+    static ThreadScope<MyContext> context = StorageManager.threadScope(Declaration.class);
 
     public static void init() {
         context.set(new MyContext());

@@ -2,15 +2,17 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.concurrent.Callable;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualCallableN<T> implements ContextualCallable<T> {
-    private ThreadLocal<Object>[] tl;
+    private ThreadScope<Object>[] tl;
     private Object[] state;
 
     private final Callable<T> callable;
 
     public ContextualCallableN(Callable<T> callable, int n) {
         this.callable = callable;
-        this.tl = new ThreadLocal[n];
+        this.tl = new ThreadScope[n];
         this.state = new Object[n];
     }
 
@@ -31,10 +33,10 @@ public class ContextualCallableN<T> implements ContextualCallable<T> {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         if (index < 0 || index >= state.length)
             throw new IllegalArgumentException("Illegal index " + index);
-        tl[index] = threadLocal;
+        tl[index] = ThreadScope;
         state[index] = value;
     }
 

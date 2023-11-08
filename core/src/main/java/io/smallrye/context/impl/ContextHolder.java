@@ -1,5 +1,7 @@
 package io.smallrye.context.impl;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 /**
  * Interface to be implemented by contextual wrappers so the plan can feed them thread locals.
  */
@@ -13,6 +15,6 @@ public interface ContextHolder {
      * @param threadLocal the context provider's threadLocal
      * @param value the current or cleared value of the threadLocal (depending on ThreadContext settings)
      */
-    void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value);
+    void captureThreadScope(int index, ThreadScope<Object> threadLocal, Object value);
 
 }

@@ -2,8 +2,10 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.function.Supplier;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public final class ContextualSupplier1<R> implements ContextualSupplier<R> {
-    private ThreadLocal<Object> tl0;
+    private ThreadScope<Object> tl0;
     private Object state0;
 
     private final Supplier<R> supplier;
@@ -24,10 +26,10 @@ public final class ContextualSupplier1<R> implements ContextualSupplier<R> {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         switch (index) {
             case 0:
-                tl0 = threadLocal;
+                tl0 = ThreadScope;
                 state0 = value;
                 break;
             default:

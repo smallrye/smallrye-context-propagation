@@ -2,8 +2,10 @@ package io.smallrye.context.impl.wrappers;
 
 import java.util.function.Function;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualFunction1<T, R> implements ContextualFunction<T, R> {
-    private ThreadLocal<Object> tl0;
+    private ThreadScope<Object> tl0;
     private Object state0;
 
     private final Function<T, R> function;
@@ -24,10 +26,10 @@ public class ContextualFunction1<T, R> implements ContextualFunction<T, R> {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         switch (index) {
             case 0:
-                tl0 = threadLocal;
+                tl0 = ThreadScope;
                 state0 = value;
                 break;
             default:

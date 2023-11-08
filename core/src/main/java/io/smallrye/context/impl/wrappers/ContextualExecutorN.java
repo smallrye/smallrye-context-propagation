@@ -1,11 +1,13 @@
 package io.smallrye.context.impl.wrappers;
 
+import io.smallrye.context.storage.spi.ThreadScope;
+
 public class ContextualExecutorN implements ContextualExecutor {
-    private ThreadLocal<Object>[] tl;
+    private ThreadScope<Object>[] tl;
     private Object[] state;
 
     public ContextualExecutorN(int n) {
-        this.tl = new ThreadLocal[n];
+        this.tl = new ThreadScope[n];
         this.state = new Object[n];
     }
 
@@ -26,10 +28,10 @@ public class ContextualExecutorN implements ContextualExecutor {
     }
 
     @Override
-    public void captureThreadLocal(int index, ThreadLocal<Object> threadLocal, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
         if (index < 0 || index >= state.length)
             throw new IllegalArgumentException("Illegal index " + index);
-        tl[index] = threadLocal;
+        tl[index] = ThreadScope;
         state[index] = value;
     }
 
