@@ -31,7 +31,7 @@ public final class ContextualSupplier2<R> implements ContextualSupplier<R> {
     }
 
     @Override
-    public void captureThreadScope(int index, ThreadScope<Object> ThreadScope, Object value) {
+    public void captureThreadScope(int index, ThreadScope<Object> threadScope, Object value) {
         switch (index) {
             case 0:
                 tl0 = ThreadScope;
