@@ -1,9 +1,5 @@
 package io.smallrye.context;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.eclipse.microprofile.context.spi.ContextManager;
 import org.eclipse.microprofile.context.spi.ContextManagerProvider;
 import org.eclipse.microprofile.context.spi.ContextManagerProviderRegistration;
@@ -30,7 +26,7 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
         registration = null;
     }
 
-    private Map<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new HashMap<>();
+    private final SingleWriterCopyOnWriteArrayIdentityMap<ClassLoader, SmallRyeContextManager> contextManagersForClassLoader = new SingleWriterCopyOnWriteArrayIdentityMap<>();
 
     @Override
     public SmallRyeContextManager getContextManager() {
@@ -69,16 +65,12 @@ public class SmallRyeContextManagerProvider implements ContextManagerProvider {
 
     @Override
     public void releaseContextManager(ContextManager manager) {
+        if (manager instanceof SmallRyeContextManager == false) {
+            // this shouldn't happen, really, but no need to picky about it
+            return;
+        }
         synchronized (this) {
-            Iterator<Map.Entry<ClassLoader, SmallRyeContextManager>> iterator = contextManagersForClassLoader.entrySet()
-                    .iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<ClassLoader, SmallRyeContextManager> entry = iterator.next();
-                if (entry.getValue() == manager) {
-                    iterator.remove();
-                    return;
-                }
-            }
+            contextManagersForClassLoader.removeEntriesWithValue((SmallRyeContextManager) manager);
         }
     }
 
