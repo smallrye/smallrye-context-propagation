@@ -19,6 +19,7 @@ final class SingleWriterCopyOnWriteArrayIdentityMap<K, V> {
     private volatile Object[] entries;
 
     public SingleWriterCopyOnWriteArrayIdentityMap() {
+        // lazySet is enough, as we don't expect multiple writers: it is semantically the same as VarHandle::setRelease
         ENTRIES_UPDATER.lazySet(this, EMPTY_ARRAY);
     }
 
