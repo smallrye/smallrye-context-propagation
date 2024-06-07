@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.context.SmallRyeContextManager;
 import io.smallrye.context.SmallRyeContextManagerProvider;
+import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.context.test.util.AbstractTest;
 
 class MiscTest extends AbstractTest {
@@ -71,4 +72,26 @@ class MiscTest extends AbstractTest {
         executorService.shutdown();
     }
 
+    @Test
+    public void issue444() {
+        CompletableFuture<String> cs = new CompletableFuture<String>();
+
+        CompletableFuture<String> waitFor1 = cs.whenComplete((result, error) -> {
+            assertEquals(true, cs.isDone());
+        });
+
+        cs.complete("something");
+        waitFor1.join();
+
+        CompletableFuture<String> cs2 = new CompletableFuture<String>();
+        CompletableFuture<String> csw = SmallRyeThreadContext.getCurrentThreadContextOrDefaultContexts()
+                .withContextCapture(cs2);
+
+        CompletableFuture<String> waitFor2 = csw.whenComplete((result, error) -> {
+            assertEquals(true, csw.isDone());
+        });
+
+        cs2.complete("something");
+        waitFor2.join();
+    }
 }

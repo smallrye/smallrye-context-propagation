@@ -29,8 +29,7 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> implements
 
     public CompletableFutureWrapper(SmallRyeThreadContext context, CompletableFuture<T> f, Executor executor, int flags) {
         this.context = context;
-        this.f = f;
-        f.whenComplete((r, t) -> {
+        CompletableFuture<T> whenComplete = f.whenComplete((r, t) -> {
             if (t != null) {
                 if (t instanceof CompletionException)
                     t = t.getCause();
@@ -40,6 +39,11 @@ public class CompletableFutureWrapper<T> extends CompletableFuture<T> implements
         });
         this.executor = executor;
         this.flags = flags;
+        if (!isDependent()) {
+            this.f = f;
+        } else {
+            this.f = whenComplete;
+        }
     }
 
     protected void checkDefaultExecutor() {
