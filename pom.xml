@@ -161,8 +161,8 @@
                   <configuration>
                       <rules>
                           <requireJavaVersion>
-                              <version>17</version>
-                              <message>This project must be built with Java 12 or later.</message>
+                              <version>11</version>
+                              <message>This project must be built with Java 11 or later.</message>
                           </requireJavaVersion>
                       </rules>
                   </configuration>
@@ -173,7 +173,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-                <release>17</release>
+                <release>11</release>
             </configuration>
         </plugin>
         <plugin>
