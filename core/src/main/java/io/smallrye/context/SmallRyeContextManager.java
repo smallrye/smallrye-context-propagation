@@ -20,6 +20,7 @@ import org.eclipse.microprofile.context.spi.ContextManagerExtension;
 import org.eclipse.microprofile.context.spi.ThreadContextProvider;
 
 import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.impl.DefaultValuesFromConfig;
 import io.smallrye.context.impl.ThreadContextProviderPlan;
 
 public class SmallRyeContextManager implements ContextManager {
@@ -45,7 +46,7 @@ public class SmallRyeContextManager implements ContextManager {
 
     SmallRyeContextManager(List<ThreadContextProvider> providers, List<ContextManagerExtension> extensions,
             ExecutorService defaultExecutorService, boolean registerOnProvider, ClassLoader registrationClassLoader,
-            boolean enableFastThreadContextProviders) {
+            boolean enableFastThreadContextProviders, DefaultValues defaultValues) {
         this.defaultExecutorService = defaultExecutorService;
         this.enableFastThreadContextProviders = enableFastThreadContextProviders;
         List<ThreadContextProvider> providersCopy = new ArrayList<>(providers);
@@ -60,7 +61,7 @@ public class SmallRyeContextManager implements ContextManager {
         }
         allProviderTypes = providersByType.keySet().toArray(new String[providersCopy.size()]);
         this.extensions = new ArrayList<>(extensions);
-        this.defaultValues = new DefaultValues();
+        this.defaultValues = defaultValues != null ? defaultValues : new DefaultValuesFromConfig();
         // if our intention is to register on the provider, let's do it before we setup the extensions which may need us to be registered
         if (registerOnProvider) {
             SmallRyeContextManagerProvider.instance().registerContextManager(this, registrationClassLoader);
@@ -271,6 +272,7 @@ public class SmallRyeContextManager implements ContextManager {
         private ExecutorService defaultExecutorService;
         private boolean registerOnProvider;
         private boolean enableFastThreadContextProviders = true;
+        private DefaultValues defaultValues = null;
 
         @Override
         public Builder withThreadContextProviders(ThreadContextProvider... providers) {
@@ -327,6 +329,11 @@ public class SmallRyeContextManager implements ContextManager {
             return this;
         }
 
+        public Builder withDefaultValues(DefaultValues defaultValues) {
+            this.defaultValues = defaultValues;
+            return this;
+        }
+
         @Override
         public SmallRyeContextManager build() {
             if (addDiscoveredThreadContextProviders)
@@ -335,7 +342,7 @@ public class SmallRyeContextManager implements ContextManager {
                 contextManagerExtensions.addAll(discoverContextManagerExtensions());
 
             return new SmallRyeContextManager(contextProviders, contextManagerExtensions, defaultExecutorService,
-                    registerOnProvider, classLoader, enableFastThreadContextProviders);
+                    registerOnProvider, classLoader, enableFastThreadContextProviders, defaultValues);
         }
 
         //

@@ -46,7 +46,7 @@ import io.smallrye.config.SmallRyeConfig;
 import io.smallrye.config.SmallRyeConfigProviderResolver;
 import io.smallrye.context.SmallRyeContextManagerProvider;
 import io.smallrye.context.api.ManagedExecutorConfig;
-import io.smallrye.context.impl.DefaultValues;
+import io.smallrye.context.impl.DefaultValuesFromConfig;
 import io.smallrye.context.test.util.AbstractTest;
 
 class MultiClassloadingTest extends AbstractTest {
@@ -132,7 +132,7 @@ class MultiClassloadingTest extends AbstractTest {
                 // dont use addPackages for Smallrye-Context because it
                 // would include test packages
                 .addPackage(SmallRyeContextManagerProvider.class.getPackage().getName())
-                .addPackage(DefaultValues.class.getPackage().getName())
+                .addPackage(DefaultValuesFromConfig.class.getPackage().getName())
                 .addPackage(ContextManagerExtension.class.getPackage().getName())
                 .addPackage(ManagedExecutorConfig.class.getPackage().getName())
                 .addAsServiceProvider(ConfigProviderResolver.class, SmallRyeConfigProviderResolver.class)
