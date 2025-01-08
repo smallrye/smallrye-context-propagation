@@ -142,7 +142,6 @@
         <module>propagators-rxjava1</module>
         <module>propagators-rxjava2</module>
         <module>storage</module>
-        <module>testsuite</module>
     </modules>
 
   <build>
@@ -178,6 +177,18 @@
   </build>
 
     <profiles>
+        <profile>
+            <id>unpublished</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <modules>
+                <module>testsuite</module>
+            </modules>
+        </profile>
         <profile>
             <id>release</id>
             <activation>
