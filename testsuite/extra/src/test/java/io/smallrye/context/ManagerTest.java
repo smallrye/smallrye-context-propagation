@@ -26,7 +26,7 @@ class ManagerTest extends AbstractTest {
     @Test
     void testContext() {
         SmallRyeContextManager manager = new SmallRyeContextManager(Arrays.asList(A, B), Collections.emptyList(), null, false,
-                null, true);
+                null, true, null);
 
         // all providers
         ThreadContextProviderPlan providers = manager.getProviderPlan();
