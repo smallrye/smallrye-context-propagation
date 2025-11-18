@@ -12,15 +12,15 @@ import io.smallrye.context.SmallRyeThreadContext;
 public class JdkSpecificImpl implements JdkSpecific.Contract {
 
     @Override
-    public <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
-            CompletionStage<T> future, Executor executor) {
-        return new Jdk12CompletionStageWrapper<>(threadContext, future, executor);
+    public <T> CompletionStage<T> newCompletionStage(SmallRyeThreadContext threadContext,
+            Executor executor) {
+        return new Jdk12ContextualCompletableFuture<>(threadContext, executor, true);
     }
 
     @Override
-    public <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
-            CompletableFuture<T> future, Executor executor, int flags) {
-        return new Jdk12CompletableFutureWrapper<>(threadContext, future, executor, flags);
+    public <T> CompletableFuture<T> newCompletableFuture(SmallRyeThreadContext threadContext,
+            Executor executor) {
+        return new Jdk12ContextualCompletableFuture<>(threadContext, executor, false);
     }
 
 }

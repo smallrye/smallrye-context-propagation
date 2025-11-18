@@ -299,11 +299,19 @@ public class SmallRyeThreadContext implements ThreadContext {
      */
     @Override
     public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future) {
-        return withContextCapture(future, defaultExecutor, CompletableFutureWrapper.FLAG_DEPENDENT);
+        return withContextCapture(future, defaultExecutor);
     }
 
-    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor, int flags) {
-        return JdkSpecific.newCompletableFutureWrapper(this, future, executor, flags);
+    public <T> CompletableFuture<T> withContextCapture(CompletableFuture<T> future, Executor executor) {
+        CompletableFuture<T> ret = JdkSpecific.newCompletableFuture(this, executor);
+        future.whenComplete((val, x) -> {
+            if (x != null) {
+                ret.completeExceptionally(x);
+            } else {
+                ret.complete(val);
+            }
+        });
+        return ret;
     }
 
     /**
@@ -344,11 +352,16 @@ public class SmallRyeThreadContext implements ThreadContext {
     }
 
     public <T> CompletionStage<T> withContextCapture(CompletionStage<T> stage, Executor executor) {
-        if (stage instanceof CompletableFuture)
-            // the MP-CP TCK insists we cannot complete instances returned by this API
-            return JdkSpecific.newCompletableFutureWrapper(this, (CompletableFuture<T>) stage, executor,
-                    CompletableFutureWrapper.FLAG_MINIMAL | CompletableFutureWrapper.FLAG_DEPENDENT);
-        return JdkSpecific.newCompletionStageWrapper(this, stage, executor);
+        // the MP-CP TCK insists we cannot complete instances returned by this API
+        ContextualCompletableFuture<T> ret = (ContextualCompletableFuture<T>) JdkSpecific.newCompletionStage(this, executor);
+        stage.whenComplete((val, x) -> {
+            if (x != null) {
+                ret.superCompleteExceptionally(x);
+            } else {
+                ret.superComplete(val);
+            }
+        });
+        return ret;
     }
 
     /**
@@ -369,7 +382,9 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @return the new completable future.
      */
     public <U> CompletableFuture<U> completedFuture(U value) {
-        return withContextCapture(CompletableFuture.completedFuture(value), defaultExecutor, 0);
+        CompletableFuture<U> ret = newIncompleteFuture();
+        ret.complete(value);
+        return ret;
     }
 
     /**
@@ -411,9 +426,9 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @return the new completable future.
      */
     public <U> CompletableFuture<U> failedFuture(Throwable ex) {
-        CompletableFuture<U> ret = new CompletableFuture<>();
+        CompletableFuture<U> ret = newIncompleteFuture();
         ret.completeExceptionally(ex);
-        return withContextCapture(ret, defaultExecutor, 0);
+        return ret;
     }
 
     /**
@@ -454,8 +469,7 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @return the new completion stage.
      */
     public <U> CompletableFuture<U> newIncompleteFuture() {
-        CompletableFuture<U> ret = new CompletableFuture<>();
-        return withContextCapture(ret, defaultExecutor, 0);
+        return JdkSpecific.newCompletableFuture(this, defaultExecutor);
     }
 
     /**
@@ -489,7 +503,7 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @return the new completable future.
      */
     public <T> CompletableFuture<T> copy(CompletableFuture<T> stage) {
-        return withContextCapture(stage, defaultExecutor, 0);
+        return withContextCapture(stage);
     }
 
     /**
@@ -523,7 +537,7 @@ public class SmallRyeThreadContext implements ThreadContext {
      * @return the new completion stage.
      */
     public <T> CompletionStage<T> copy(CompletionStage<T> stage) {
-        return withContextCapture(stage, defaultExecutor);
+        return withContextCapture(stage);
     }
 
     @Override
