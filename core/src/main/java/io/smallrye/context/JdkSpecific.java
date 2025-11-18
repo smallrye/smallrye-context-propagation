@@ -11,20 +11,20 @@ public class JdkSpecific {
     private final static JdkSpecificImpl impl = new JdkSpecificImpl();
 
     public interface Contract {
-        public <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
-                CompletionStage<T> future, Executor executor);
+        public <T> CompletionStage<T> newCompletionStage(SmallRyeThreadContext threadContext,
+                Executor executor);
 
-        public <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
-                CompletableFuture<T> future, Executor executor, int flags);
+        public <T> CompletableFuture<T> newCompletableFuture(SmallRyeThreadContext threadContext,
+                Executor executor);
     }
 
-    public static <T> CompletionStage<T> newCompletionStageWrapper(SmallRyeThreadContext threadContext,
-            CompletionStage<T> future, Executor executor) {
-        return impl.newCompletionStageWrapper(threadContext, future, executor);
+    public static <T> CompletionStage<T> newCompletionStage(SmallRyeThreadContext threadContext,
+            Executor executor) {
+        return impl.newCompletionStage(threadContext, executor);
     }
 
-    public static <T> CompletableFuture<T> newCompletableFutureWrapper(SmallRyeThreadContext threadContext,
-            CompletableFuture<T> future, Executor executor, int flags) {
-        return impl.newCompletableFutureWrapper(threadContext, future, executor, flags);
+    public static <T> CompletableFuture<T> newCompletableFuture(SmallRyeThreadContext threadContext,
+            Executor executor) {
+        return impl.newCompletableFuture(threadContext, executor);
     }
 }
