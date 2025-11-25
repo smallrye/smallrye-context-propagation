@@ -39,7 +39,7 @@
         <version.resteasy>6.2.4.Final</version.resteasy>
         <version.resteasy-microprofile>2.1.2.Final</version.resteasy-microprofile>
         <version.hibernate>6.2.0.CR2</version.hibernate>
-        <version.vertx>4.4.4</version.vertx>
+        <version.vertx>5.0.4</version.vertx>
         <version.hsqldb>2.5.0</version.hsqldb>
         <version.jnpserver>5.0.5.Final</version.jnpserver>
         <version.hamcrest>2.2</version.hamcrest>
