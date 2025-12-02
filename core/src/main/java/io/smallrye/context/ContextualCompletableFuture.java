@@ -343,4 +343,35 @@ public class ContextualCompletableFuture<T> extends CompletableFuture<T> impleme
     void superComplete(T val) {
         super.complete(val);
     }
+
+    // Java 12
+
+    @Override
+    public CompletableFuture<T> exceptionallyAsync(Function<Throwable, ? extends T> fn) {
+        checkDefaultExecutor();
+        return super.exceptionallyAsync(context.contextualFunctionUnlessContextualized(fn), executor);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyAsync(Function<Throwable, ? extends T> fn, Executor executor) {
+        return super.exceptionallyAsync(context.contextualFunctionUnlessContextualized(fn), executor);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyCompose(Function<Throwable, ? extends CompletionStage<T>> fn) {
+        return super.exceptionallyCompose(context.contextualFunctionUnlessContextualized(fn));
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyComposeAsync(Function<Throwable, ? extends CompletionStage<T>> fn) {
+        checkDefaultExecutor();
+        return super.exceptionallyComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor);
+    }
+
+    @Override
+    public CompletableFuture<T> exceptionallyComposeAsync(Function<Throwable, ? extends CompletionStage<T>> fn,
+            Executor executor) {
+        return super.exceptionallyComposeAsync(context.contextualFunctionUnlessContextualized(fn), executor);
+    }
+
 }
