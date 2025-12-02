@@ -24,10 +24,9 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '11', 'opts': '' },
           { 'version': '17', 'opts': '' },
           { 'version': '21', 'opts': '' },
-          { 'version': '22', 'opts': '' }
+          { 'version': '25', 'opts': '' }
         ]
     name: build with jdk ${{matrix.java.version}}
 
@@ -66,17 +65,11 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 11
+          java-version: 17
           cache: 'maven'
           cache-dependency-path: '**/pom.xml'
 
       - name: build with docs and coverage
-        run: mvn verify -Pcoverage javadoc:javadoc
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
-      - name: sonar
-        run: mvn sonar:sonar -Psonar -Dsonar.token=${{secrets.SONAR_TOKEN}}
+        run: |
+          mvn verify -Pcoverage javadoc:javadoc
+          mvn sonar:sonar -Psonar -Dsonar.token=${{secrets.SONAR_TOKEN}}

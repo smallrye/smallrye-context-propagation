@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>47</version>
+        <version>48</version>
     </parent>
 
 	<artifactId>smallrye-context-propagation-parent</artifactId>
@@ -143,38 +143,6 @@
         <module>propagators-rxjava2</module>
         <module>storage</module>
     </modules>
-
-  <build>
-    <plugins>
-      <plugin>
-          <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.6.2</version>
-          <executions>
-              <execution>
-                  <id>enforce-versions</id>
-                  <goals>
-                      <goal>enforce</goal>
-                  </goals>
-                  <configuration>
-                      <rules>
-                          <requireJavaVersion>
-                              <version>11</version>
-                              <message>This project must be built with Java 11 or later.</message>
-                          </requireJavaVersion>
-                      </rules>
-                  </configuration>
-              </execution>
-          </executions>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <release>11</release>
-            </configuration>
-        </plugin>
-    </plugins>
-  </build>
 
     <profiles>
         <profile>
