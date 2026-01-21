@@ -64,13 +64,19 @@ import io.smallrye.context.storage.spi.StorageManager;
 
 public class SmallRyeThreadContext implements ThreadContext {
 
+    private static final String CLOSE_SETTING_NULL_PROP_NAME = "io.smallrye.context.storage.CLOSE_SETTING_NULL";
+    private static final boolean CLOSE_SETTING_NULL = Boolean.getBoolean(CLOSE_SETTING_NULL_PROP_NAME);
     final static ThreadLocal<SmallRyeThreadContext> currentThreadContext = StorageManager
             .threadLocal(SmallRyeThreadContextStorageDeclaration.class);
 
     private final static CleanAutoCloseable NULL_THREAD_STATE = new CleanAutoCloseable() {
         @Override
         public void close() {
-            currentThreadContext.remove();
+            if (!CLOSE_SETTING_NULL) {
+                currentThreadContext.remove();
+            } else {
+                currentThreadContext.set(null);
+            }
         }
     };
 
@@ -118,7 +124,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         try {
             f.run();
         } finally {
-            if (oldValue == null) {
+            if (!CLOSE_SETTING_NULL && oldValue == null)
                 currentThreadContext.remove();
             } else {
                 currentThreadContext.set(oldValue);
@@ -141,7 +147,7 @@ public class SmallRyeThreadContext implements ThreadContext {
         try {
             return f.get();
         } finally {
-            if (oldValue == null) {
+            if (!CLOSE_SETTING_NULL && oldValue == null) {
                 currentThreadContext.remove();
             } else {
                 currentThreadContext.set(oldValue);
