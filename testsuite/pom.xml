@@ -42,7 +42,7 @@
         <version.vertx>4.4.4</version.vertx>
         <version.hsqldb>2.5.0</version.hsqldb>
         <version.jnpserver>5.0.5.Final</version.jnpserver>
-        <version.hamcrest>2.2</version.hamcrest>
+        <version.hamcrest>3.0</version.hamcrest>
     </properties>
 
     <modules>
