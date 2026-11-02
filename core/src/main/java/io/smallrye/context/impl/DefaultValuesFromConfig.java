@@ -1,8 +1,6 @@
 package io.smallrye.context.impl;
 
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.Optional;
 
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -39,34 +37,29 @@ public class DefaultValuesFromConfig implements DefaultValues {
     public DefaultValuesFromConfig() {
         // NOTE: we do not perform sanity check here, that's done in SmallRyeContextManager
         Config config = ConfigProvider.getConfig();
-        Set<String> allkeys = new HashSet<>();
-        config.getPropertyNames().forEach(item -> allkeys.add(item));
         this.executorAsync = config.getOptionalValue(EXEC_ASYNC, Integer.class)
                 .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxAsync());
         this.executorQueue = config.getOptionalValue(EXEC_QUEUE, Integer.class)
                 .orElse(ManagedExecutorConfig.Literal.DEFAULT_INSTANCE.maxQueued());
-        // remaining values have to be done via try-catch block because SmallRye Config
-        // considers key with empty value as non-existent
-        // https://github.com/smallrye/smallrye-config/issues/83
-        this.executorPropagated = resolveConfiguration(config, EXEC_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY,
-                allkeys);
-        this.executorCleared = resolveConfiguration(config, EXEC_CLEARED, SmallRyeContextManager.NO_STRING, allkeys);
-        this.threadCleared = resolveConfiguration(config, THREAD_CLEARED, SmallRyeContextManager.NO_STRING, allkeys);
-        this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY,
-                allkeys);
-        this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeContextManager.NO_STRING, allkeys);
+        this.executorPropagated = resolveConfiguration(config, EXEC_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY);
+        this.executorCleared = resolveConfiguration(config, EXEC_CLEARED, SmallRyeContextManager.NO_STRING);
+        this.threadCleared = resolveConfiguration(config, THREAD_CLEARED, SmallRyeContextManager.NO_STRING);
+        this.threadPropagated = resolveConfiguration(config, THREAD_PROPAGATED, SmallRyeContextManager.ALL_REMAINING_ARRAY);
+        this.threadUnchanged = resolveConfiguration(config, THREAD_UNCHANGED, SmallRyeContextManager.NO_STRING);
     }
 
-    private String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue, Set<String> allKeys) {
-        try {
-            return mpConfig.getValue(key, String[].class);
-        } catch (NoSuchElementException e) {
-            // check keys, there still might be a key with no value assigned
-            if (allKeys.contains(key)) {
-                return new String[] {};
-            }
-            return originalValue;
+    private String[] resolveConfiguration(Config mpConfig, String key, String[] originalValue) {
+        Optional<String[]> value = mpConfig.getOptionalValue(key, String[].class);
+        if (value.isPresent()) {
+            return value.get();
         }
+        // SmallRye Config considers a key with an empty value as non-existent
+        // (https://github.com/smallrye/smallrye-config/issues/83), and such a key means "nothing" rather than the
+        // default: the raw value tells whether the key is defined without an exception or a scan of all the names
+        if (mpConfig.getConfigValue(key).getValue() != null) {
+            return new String[] {};
+        }
+        return originalValue;
     }
 
     @Override
